@@ -14,14 +14,7 @@ INSERT INTO bathrooms VALUES (
 );
 
 INSERT INTO bathrooms VALUES (
-  'a9b42c58-1a56-4a6b-a923-34f3c93c4a7c',
-  'E2 Second Floor Bathroom',
-  '{"lat": 37.00089593913641, "lng": -122.06296383018844}',
-  'more details'
-);
-
-INSERT INTO bathrooms VALUES (
-  'da9b42c58-1a56-4a6b-a923-34f3c93c4a7c',
+  '6d6a6a5f-217d-4fea-9ab4-1f21ea2c1b0a',
   'McDonald`s Ocean St Bathroom',
   '{"lat": 36.967136756404564, "lng": -122.03905636700443}',
   'more details'
