@@ -1,0 +1,57 @@
+openapi: 3.0.3
+info:
+  title: Bathroom Locator API
+  description: API documentation for the Bathroom Locator backend
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+paths:
+  /bathroom:
+    get:
+      description: Get list of all bathrooms
+      responses:
+        200:
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Bathroom'
+
+components:
+  schemas:
+    Bathroom:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        position:
+          type: object
+          properties:
+            lat:
+              type: number
+              format: double
+              description: Latitude in decimal degrees
+              example: 37.00076576303953
+            lng:
+              type: number
+              format: double
+              description: Longitude in decimal degrees
+              example: -122.05719563060227
+          required:
+            - lat
+            - lng
+        details:
+          type: string
+      required:
+        - id
+        - name
+        - position
+        - details
