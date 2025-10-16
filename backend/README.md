@@ -17,3 +17,5 @@ Run the following command in the backend directory:
 ```
 npm start
 ```
+
+swagger: http://localhost:3000/docs/
