@@ -18,7 +18,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Bathroom'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Bathroom'
 
 components:
   schemas:

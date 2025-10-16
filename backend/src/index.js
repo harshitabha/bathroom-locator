@@ -16,8 +16,8 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(
     OpenApiValidator.middleware({
       apiSpec: './docs/openapi.yaml',
-      validateRequests: false,
-      validateResponses: false,
+      validateRequests: true,
+      validateResponses: true,
     }),
 );
 

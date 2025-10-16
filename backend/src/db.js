@@ -2,7 +2,6 @@ import pg from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
-console.log(process.env.DB_PASSWORD)
 const pool = new pg.Pool({
   host: 'localhost',
   port: 5432,
@@ -19,9 +18,13 @@ const pool = new pg.Pool({
  */
 export async function getBathrooms() {
   const {rows} = await pool.query({
-    text: `SELECT b FROM bathrooms b`,
+    text: `SELECT b.id, b.data->>'name' AS name, ` +
+    `b.data->>'details' AS details, b.data->>'position' AS position ` +
+    `FROM bathrooms b`,
     values: [],
   });
-  console.log(rows);
+  rows.forEach((bathroom) => {
+    bathroom.position = JSON.parse(bathroom.position);
+  });
   return rows;
 }
