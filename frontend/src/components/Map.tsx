@@ -6,6 +6,8 @@ import {
   useLoadScript,
 } from "@react-google-maps/api";
 import "./Map.css";
+import { openWalkingDirections } from '../utils/navigation';
+
 
 type Place = {
   id: number; // id
@@ -150,6 +152,25 @@ export default function Map() {
               <strong>{selected.name}</strong>
               {selected.details && <p>{selected.details}</p>}
               {/* TODO: add genders, amenenities, and navigate button here */}
+              <button // navigate button
+                onClick={() =>
+                  openWalkingDirections(
+                    selected.position.lat,
+                    selected.position.lng
+                  )
+                }
+                style={{
+                  backgroundColor: "#007bff",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "8px 12px",
+                  cursor: "pointer",
+                  marginTop: "8px",
+                }}
+              >
+                Get Directions
+              </button>
             </div>
           </InfoWindow>
         )}
