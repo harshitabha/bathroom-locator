@@ -1,8 +1,8 @@
 # Dependencies
-/node_modules
+node_modules
 
 # Local Vars
 .env
 
 # Tests
-/coverage
+coverage
