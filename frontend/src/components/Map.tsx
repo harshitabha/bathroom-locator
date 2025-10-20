@@ -60,7 +60,7 @@ export default function Map() {
     libraries: ["places"], // TODO: use this to look up places
   });
 
-  // default center coords when user doesnt provide location (somewhere in santa cruz)
+  // default center coords when user doesn't provide location (somewhere in santa cruz)
   const defaultCenter = useMemo(
     () => ({ lat: 36.99034408117155, lng: -122.05891223939057 }),
     []
@@ -119,7 +119,7 @@ export default function Map() {
           disableDoubleClickZoom: true, // prevents accidental zoom
           mapTypeControl: false, // prevents going to satellite mode
           mapTypeId: google.maps.MapTypeId.ROADMAP, // locks map type to simple map
-          streetViewControl: false, // prevents going to streetview
+          streetViewControl: false, // prevents going to street view
           zoomControl: true, // allows zooming buttons
         }}
       >
@@ -140,7 +140,31 @@ export default function Map() {
             <div>
               <strong>{selected.name}</strong>
               {selected.details && <p>{selected.details}</p>}
-              {/* TODO: add genders, amenenities, and navigate button here */}
+              {/* TODO: add genders and amenities*/}
+
+              {/*Navigate button*/}
+              <button
+                onClick={() => {
+                  const origin = userLocation
+                    ? `${userLocation.lat},${userLocation.lng}`
+                    : "Current+Location";
+                  const { lat, lng } = selected.position;
+                  const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${lat},${lng}&travelmode=walking`;
+                  window.open(url, "_blank");
+                }}
+                style={{
+                  marginTop: "6px",
+                  backgroundColor: "#1a73e8",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "8px 12px",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                Navigate
+              </button>
             </div>
           </InfoWindow>
         )}
