@@ -2,11 +2,18 @@ import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import OpenApiValidator from 'express-openapi-validator';
+import cors from 'cors';
 
 import * as bathroom from './bathroom.js';
 
 const port = 3000;
 const app = express();
+
+// enable CORS for frontend origin
+app.use(cors({
+  origin: 'http://localhost:5173',
+}));
+
 const swaggerDocument = YAML.load("./docs/openapi.yaml");
 
 app.use(express.json());

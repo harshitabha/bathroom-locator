@@ -17,14 +17,19 @@ const pool = new pg.Pool({
  * @returns {object} array of bathroom objects
  */
 export async function getBathrooms() {
-  const {rows} = await pool.query({
-    text: `SELECT b.id, b.data->>'name' AS name, ` +
-    `b.data->>'details' AS details, b.data->>'position' AS position ` +
-    `FROM bathrooms b`,
-    values: [],
-  });
-  rows.forEach((bathroom) => {
-    bathroom.position = JSON.parse(bathroom.position);
-  });
-  return rows;
+  try {
+    const {rows} = await pool.query({
+      text: `SELECT b.id, b.data->>'name' AS name, ` +
+      `b.data->>'details' AS details, b.data->>'position' AS position ` +
+      `FROM bathrooms b`,
+      values: [],
+    });
+    rows.forEach((bathroom) => {
+      bathroom.position = JSON.parse(bathroom.position);
+    });
+    return rows;
+  } catch (error) {
+    console.error('Database query error:', error);
+    throw error;
+  }
 }

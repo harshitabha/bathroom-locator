@@ -14,42 +14,51 @@ type Place = {
   details?: string; // description if needed
 };
 
-// using array of positions for now
-// TODO: replace with backend stuff
-const places: Place[] = [
-  {
-    id: 1,
-    name: "Place 1",
-    position: { lat: 36.98748976644447, lng: -122.05266989826008 },
-    details: "details for place 1",
-  },
-  {
-    id: 2,
-    name: "Place 2",
-    position: { lat: 36.983699950790374, lng: -122.06109301687917 },
-    details: "details for place 2",
-  },
-  {
-    id: 3,
-    name: "Place 3",
-    position: { lat: 36.999252674980575, lng: -122.06119631097208 },
-    details: "details for place 3",
-  },
-  {
-    id: 4,
-    name: "Place 4",
-    position: { lat: 36.97333960932408, lng: -122.04776108433727 },
-    details: "details for place 4",
-  },
-  {
-    id: 5,
-    name: "Place 5",
-    position: { lat: 36.97603698082977, lng: -122.0287297471338 },
-    details: "details for place 5",
-  },
-];
+/**
+ * gets all bathroom data from database
+ * @returns {Place} array of Place objects
+ */
+function GetBathroomList() {
+  const [bathrooms, setBathrooms] = useState<Place[]>([]);
+
+  useEffect(() => {
+    async function fetchBathroomData () {
+      try {
+        const res = await fetch('http://localhost:3000/bathroom');
+        if (res.ok) {
+          const bathroomData = await res.json();
+
+          // ensure data is of correct type
+          const parsedBathroomData = (bathroomData as Place[]).map(bathroom => ({
+            id: bathroom.id,
+            name: bathroom.name,
+            position: bathroom.position,
+            details: bathroom.details
+          }));
+
+          setBathrooms(parsedBathroomData);
+        }
+        else if (res.status === 404) {
+          setBathrooms([]); // handle empty response
+        }
+        else {
+          console.error('Error fetching bathrooms:', res.status);
+        }
+      } catch (error) {
+        console.error('Error fetching bathrooms:', error);
+      }
+    }    
+
+    fetchBathroomData();
+  }, []);
+
+  return bathrooms;
+}
 
 export default function Map() {
+  // get bathroom info
+  const places: Place[] = GetBathroomList();
+
   // get api key
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string;
   if (!apiKey) return <p>Missing VITE_GOOGLE_MAPS_API_KEY</p>;
