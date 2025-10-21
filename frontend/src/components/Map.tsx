@@ -143,7 +143,7 @@ export default function Map() {
               <strong>{selected.name}</strong>
               {selected.details && <p>{selected.details}</p>}
               {/* TODO: add genders, amenenities, and navigate button here */}
-              <button // navigate button default placeholder
+              <button // navigate button
                 onClick={() =>
                   openWalkingDirections(
                     selected.position.lat,
