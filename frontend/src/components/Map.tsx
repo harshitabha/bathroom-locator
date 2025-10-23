@@ -7,6 +7,7 @@ import {
 } from "@react-google-maps/api";
 import "./Map.css";
 import { openWalkingDirections } from '../utils/navigation';
+import Button from '@mui/material/Button';
 
 
 type Place = {
@@ -143,25 +144,17 @@ export default function Map() {
               <strong>{selected.name}</strong>
               {selected.details && <p>{selected.details}</p>}
               {/* TODO: add genders, amenenities, and navigate button here */}
-              <button // navigate button
-                onClick={() =>
-                  openWalkingDirections(
-                    selected.position.lat,
-                    selected.position.lng
-                  )
-                }
-                style={{
-                  backgroundColor: "#007bff",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "8px 12px",
-                  cursor: "pointer",
-                  marginTop: "8px",
-                }}
+              <Button // Get Directions button
+                variant="contained"
+                color="primary" // default blue unless we manually change it
+                size="small"
+                onClick={() => openWalkingDirections(
+                  selected.position.lat,
+                  selected.position.lng
+                )}
               >
                 Get Directions
-              </button>
+              </Button>
             </div>
           </InfoWindow>
         )}
