@@ -5,7 +5,7 @@
   "description": "Run the following command in the backend directory: \r ```\r docker compose up -d\r ```",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run --no-file-parallelism --testTimeout=2000",
     "start": "nodemon src/index.js"
   },
   "keywords": [],
@@ -21,6 +21,7 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "vitest": "^4.0.2"
   }
 }
