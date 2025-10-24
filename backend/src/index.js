@@ -29,6 +29,7 @@ app.use(
 );
 
 app.get('/bathroom', bathroom.getBathrooms);
+app.post('/bathroom', bathroom.createBathroom);
 
 app.listen(port, () => {
   console.log(`App running on port ${port}.`)

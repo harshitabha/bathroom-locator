@@ -33,3 +33,23 @@ export async function getBathrooms() {
     throw error;
   }
 }
+
+export async function createBathroom(bathroom) {
+  try {
+    const {rows} = await pool.query({
+      text: `INSERT INTO bathrooms(data) ` +
+      `VALUES ($1) RETURNING id`,
+      values: [bathroom],
+    });
+
+    const newBathroom = {
+      ...bathroom,
+      id: rows[0].id
+    }
+
+    return newBathroom;
+  } catch (error) {
+    console.error('Database query error:', error);
+    throw error;
+  }
+}

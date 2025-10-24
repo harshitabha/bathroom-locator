@@ -13,3 +13,10 @@ export async function getBathrooms(req, res) {
     res.status(404).send();
   }
 }
+
+export async function createBathroom(req, res) {
+  const bathroom = await db.createBathroom(req.body);
+  if (bathroom) {
+    res.status(201).send(bathroom);
+  }
+}
