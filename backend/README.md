@@ -8,7 +8,6 @@ npm install
 ## Setting Up Docker Container
 Run the following command in the backend directory: 
 ```
-docker-compose down -v
 docker compose up -d
 ```
 
@@ -24,3 +23,8 @@ npm start
 ```
 
 swagger: http://localhost:3000/docs/
+
+To run backend tests:
+```
+npm test
+```
