@@ -29,7 +29,7 @@ describe('GET Bathroom Endpoint', () => {
     await request.get(`/bathroom`)
         .then((data) => {
           expect(200);
-          expect(data.body.length).toBe(3);
+          expect(data.body.length).toBe(9);
         });
   });
 });
