@@ -19,9 +19,13 @@ const pool = new pg.Pool({
 export async function getBathrooms() {
   try {
     const {rows} = await pool.query({
-      text: `SELECT b.id, b.data->>'name' AS name, ` +
-      `b.data->>'details' AS details, b.data->>'position' AS position ` +
-      `FROM bathrooms b`,
+      text: `
+        SELECT
+          b.id, b.data->>'name' AS name, 
+          b.data->>'details' AS details, 
+          b.data->>'position' AS position
+        FROM bathrooms b
+      `,
       values: [],
     });
     rows.forEach((bathroom) => {
@@ -37,8 +41,11 @@ export async function getBathrooms() {
 export async function createBathroom(bathroom) {
   try {
     const {rows} = await pool.query({
-      text: `INSERT INTO bathrooms(data) ` +
-      `VALUES ($1) RETURNING id`,
+      text: `
+        INSERT INTO bathrooms(data) 
+        VALUES ($1)
+        RETURNING id
+      `,
       values: [bathroom],
     });
 
