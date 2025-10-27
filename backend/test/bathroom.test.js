@@ -34,7 +34,6 @@ describe('GET Bathroom Endpoint', () => {
   });
 });
 
-
 describe('GET bathroom with bounds', () => {
   it('should get bathrooms within the bounds', async () => {
     await request
