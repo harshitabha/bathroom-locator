@@ -5,7 +5,8 @@
   "description": "Run the following command in the backend directory: \r ```\r docker compose up -d\r ```",
   "main": "src/index.js",
   "scripts": {
-    "test": "vitest run --no-file-parallelism --testTimeout=2000",
+    "lint": "eslint src test --no-inline-config --max-warnings 0",
+    "test": "vitest run --no-file-parallelism --testTimeout=2000 --coverage",
     "start": "nodemon src/index.js"
   },
   "keywords": [],
@@ -22,7 +23,12 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "*",
+    "eslint": "*",
+    "eslint-config-google": "*",
+    "eslint-plugin-jsdoc": "*", 
     "nodemon": "^3.1.10",
-    "vitest": "^4.0.2"
+    "vitest": "*",
+    "vite-plugin-eslint": "*"
   }
 }
