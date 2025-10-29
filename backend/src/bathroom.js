@@ -2,8 +2,8 @@ import * as db from './db.js';
 
 /**
  * returns all the bathrooms in the database
- * @param {*} req request object
- * @param {*} res response object
+ * @param {object} req request object
+ * @param {object} res response object
  */
 export async function getBathrooms(req, res) {
   const bathrooms = await db.getBathrooms();

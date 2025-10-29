@@ -6,7 +6,7 @@ import * as db from './db.js';
 import app from '../src/index.js';
 
 test('adds two numbers correctly', () => {
-    expect(1+2).toBe(3);
+  expect(1+2).toBe(3);
 });
 
 let server;
