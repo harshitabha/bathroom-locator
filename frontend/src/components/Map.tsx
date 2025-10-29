@@ -114,8 +114,6 @@ function MapInner({ apiKey }: { apiKey: string }) {
           details: bathroom.details,
         }));
 
-        console.log(`Fetched ${parsedBathroomData.length} pins`);
-
         setPlaces(parsedBathroomData);
       } else if (res.status === 404) {
         setPlaces([]); // handle empty response

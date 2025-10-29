@@ -44,7 +44,7 @@ export async function getBathroomsInBounds(req, res) {
         if (bathrooms.length > 0) {
           return res.status(200).json(bathrooms);
         } else {
-          return res.status(404).send();
+          return res.status(200).json([]);
         }
       }
 
@@ -55,7 +55,7 @@ export async function getBathroomsInBounds(req, res) {
       if (bathrooms.length > 0) {
         return res.status(200).json(bathrooms);
       } else {
-        return res.status(404).send();
+        return res.status(200).json([]);
       }
     } catch (e) {
       console.error(e);
