@@ -14,7 +14,7 @@ app.use(cors({
   origin: 'http://localhost:5173',
 }));
 
-const swaggerDocument = YAML.load("./docs/openapi.yaml");
+const swaggerDocument = YAML.load('./docs/openapi.yaml');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
@@ -31,7 +31,7 @@ app.use(
 app.get('/bathroom', bathroom.getBathrooms);
 
 app.listen(port, () => {
-  console.log(`App running on port ${port}.`)
+  console.log(`App running on port ${port}.`);
 });
 
 export default app;
