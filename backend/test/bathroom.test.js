@@ -7,6 +7,7 @@ import app from '../src/index.js';
 
 test('adds two numbers correctly', () => {
   expect(1+2).toBe(3);
+  expect(1+2).toBe(3);
 });
 
 let server;
@@ -72,3 +73,4 @@ describe('GET bathroom with bounds', () => {
         });
   });
 });
+
