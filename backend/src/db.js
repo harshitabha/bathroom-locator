@@ -36,11 +36,18 @@ export async function getBathrooms() {
 
 /**
  * returns list of bathrooms in database within bounds
+ * @param {number} minLng minimum longitute of the bounds
+ * @param {number} minLat minimum latitute of the bounds
+ * @param {number} maxLng max longitute of the bounds
+ * @param {number} maxLat max latitute of the bounds
+ * @param {number} limit limit of bathrooms to fetch
  * @returns {object} array of bathroom objects
  */
-export async function getBathroomsInBounds(minLng, minLat, maxLng, maxLat, limit = 200) {
+export async function getBathroomsInBounds(
+    minLng, minLat, maxLng, maxLat, limit = 200,
+) {
   try {
-    const { rows } = await pool.query({
+    const {rows} = await pool.query({
       text: `
         SELECT
           b.id,
