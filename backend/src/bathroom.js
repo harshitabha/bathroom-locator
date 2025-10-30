@@ -19,9 +19,10 @@ export async function getBathrooms(req, res) {
  * returns bathrooms in the database within bounds
  * @param {object} req request object
  * @param {object} res response object
+ * @returns {Array} array of bathrooms in the bounds
  */
 export async function getBathroomsInBounds(req, res) {
-  const { minLng, minLat, maxLng, maxLat, limit } = req.query;
+  const {minLng, minLat, maxLng, maxLat, limit} = req.query;
 
   const hasBounds =
     minLng !== undefined && minLat !== undefined &&
@@ -32,10 +33,12 @@ export async function getBathroomsInBounds(req, res) {
     const b = parseFloat(minLat);
     const c = parseFloat(maxLng);
     const d = parseFloat(maxLat);
-    const lim = limit ? Math.max(1, Math.min(parseInt(limit, 10), 200)) : 200; // limit # of bathrooms fetched, up to 200
+    // limit # of bathrooms fetched, up to 200
+    const lim = limit ?
+      Math.max(1, Math.min(parseInt(limit, 10), 200)) : 200;
 
     if ([a, b, c, d].some(Number.isNaN)) {
-      return res.status(400).json({ error: 'Invalid bounds' });
+      return res.status(400).json({error: 'Invalid bounds'});
     }
 
     try {
@@ -60,7 +63,7 @@ export async function getBathroomsInBounds(req, res) {
       }
     } catch (e) {
       console.error(e);
-      return res.status(500).json({ error: 'Server error' });
+      return res.status(500).json({error: 'Server error'});
     }
   }
 }

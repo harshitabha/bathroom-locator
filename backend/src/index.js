@@ -29,7 +29,7 @@ app.use(
 );
 
 app.get('/bathroom', (req, res) => {
-  const { minLng, minLat, maxLng, maxLat } = req.query;
+  const {minLng, minLat, maxLng, maxLat} = req.query;
   const hasBound =
     minLng !== undefined && minLat !== undefined &&
     maxLng !== undefined && maxLat !== undefined;
