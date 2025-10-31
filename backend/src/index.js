@@ -30,6 +30,8 @@ app.use(
 
 app.get('/bathroom', bathroom.getBathrooms);
 
+app.get('/updates', bathroom.getUpdates);
+
 app.listen(port, () => {
   console.log(`App running on port ${port}.`)
 });
