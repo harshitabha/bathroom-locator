@@ -38,6 +38,10 @@ export async function getBathrooms() {
   }
 }
 
+/**
+ * creates a new bathroom in the database
+ * @returns the newly created bathroom object
+ */
 export async function createBathroom(bathroom) {
   try {
     const {rows} = await pool.query({
@@ -55,8 +59,42 @@ export async function createBathroom(bathroom) {
     }
 
     return newBathroom;
+	} catch (error) {
+    console.error('Database query error:', error);
+    throw error;
+  }
+}
+
+/**
+ * returns list of bathrooms in database within bounds
+ * @returns {object} array of bathroom objects
+ */
+export async function getBathroomsInBounds(minLng, minLat, maxLng, maxLat, limit = 200) {
+  try {
+    const { rows } = await pool.query({
+      text: `
+        SELECT
+          b.id,
+          b.data->>'name' AS name,
+          b.data->>'details' AS details,
+          b.data->>'position' AS position
+        FROM bathrooms b
+        WHERE
+          ((b.data->'position'->>'lng')::double precision BETWEEN $1 AND $3)
+          AND
+          ((b.data->'position'->>'lat')::double precision BETWEEN $2 AND $4)
+        LIMIT $5
+      `,
+      values: [minLng, minLat, maxLng, maxLat, limit],
+    });
+
+    rows.forEach((bathroom) => {
+      bathroom.position = JSON.parse(bathroom.position);
+    });
+    return rows;
   } catch (error) {
     console.error('Database query error:', error);
     throw error;
   }
 }
+
