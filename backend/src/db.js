@@ -34,7 +34,6 @@ export async function getBathrooms() {
   }
 }
 
-
 /**
  * returns list of bathrooms in database within bounds
  * @param {number} minLng minimum longitute of the bounds

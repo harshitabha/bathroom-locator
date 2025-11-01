@@ -14,7 +14,6 @@ export async function getBathrooms(req, res) {
   }
 }
 
-
 /**
  * returns bathrooms in the database within bounds
  * @param {object} req request object
