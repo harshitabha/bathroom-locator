@@ -8,6 +8,7 @@ import {
 import "./Map.css";
 import { openWalkingDirections } from '../utils/navigation';
 import Button from '@mui/material/Button';
+import AddBathroomPage from "./AddBathroomPage";
 
 
 type Place = {
@@ -26,6 +27,8 @@ export default function Map() {
 function MapInner({ apiKey }: { apiKey: string }) {
   const [places, setPlaces] = useState<Place[]>([]); // bathroom info
   const [selected, setSelected] = useState<Place | null>(null); // tracks which pin is selected (which info window to show)
+  const [addOpen, setAddOpen] = useState(false); // tracks whether add bathroom dialog is open
+  const [draftPosition, setDraftPosition] = useState<google.maps.LatLngLiteral | null>(null); // tracks position of new bathroom being added
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -41,7 +44,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
     googleMapsApiKey: apiKey,
   });
 
-  // default center coords when user doesnt provide location (somewhere in santa cruz)
+  // default center coords when user doesn't provide location (somewhere in santa cruz)
   const defaultCenter = useMemo<google.maps.LatLngLiteral>(
     () => ({ lat: 36.99034408117155, lng: -122.05891223939057 }),
     []
@@ -79,7 +82,13 @@ function MapInner({ apiKey }: { apiKey: string }) {
   const center = userLocation ?? defaultCenter;
 
   // close info window when clicking off
-  const handleMapClick = useCallback(() => setSelected(null), []);
+  const handleMapClick = useCallback((e?: google.maps.MapMouseEvent) => {
+    setSelected(null);
+    if (e?.latLng) {
+      setDraftPosition({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+      setAddOpen(true);
+    }
+  }, []);
 
   // fetch bathroom pins within the current map view + some padding
   const fetchVisiblePins = useCallback(async () => {
@@ -92,7 +101,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
     const ne = bounds.getNorthEast();
     const sw = bounds.getSouthWest();
 
-    // small padding so tiny movements dont refetch
+    // small padding so tiny movements don't refetch
     const pad = 0.1; // about 5 to 7 miles
     const minLng = sw.lng() - pad;
     const minLat = sw.lat() - pad;
@@ -167,7 +176,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
           disableDoubleClickZoom: true, // prevents accidental zoom
           mapTypeControl: false, // prevents going to satellite mode
           mapTypeId: google.maps.MapTypeId.ROADMAP, // locks map type to simple map
-          streetViewControl: false, // prevents going to streetview
+          streetViewControl: false, // prevents going to street view
           zoomControl: true, // allows zooming buttons
         }}
       >
@@ -188,7 +197,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
             <div>
               <strong>{selected.name}</strong>
               {selected.details && <p>{selected.details}</p>}
-              {/* TODO: add genders, amenenities, and navigate button here */}
+              {/* TODO: add genders, amenities, and navigate button here */}
               <Button // Get Directions button
                 variant="contained"
                 color="primary" // default blue unless we manually change it
@@ -204,6 +213,31 @@ function MapInner({ apiKey }: { apiKey: string }) {
           </InfoWindow>
         )}
       </GoogleMap>
+      <AddBathroomPage
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        position={draftPosition}
+        onSubmit={async (data) => {
+
+        //Add locally so your PR is testable without POST:
+        setPlaces(prev => [
+          ...prev,
+          {
+            id: Date.now(), // temporary local id
+            name: data.name,
+            position: data.position,
+            details: data.details,
+          },
+        ]);
+
+          // Things to implement later when backend is ready:
+          // 1. Send new bathroom data to backend
+          // 2. After successful POST, fetch visible pins again to refresh map with new bathroom data from backend (instead of just adding it locally)
+          // 3. Handle errors from POST request (e.g. show error message if bathroom couldn't be added)
+          // await createBathroom(data);
+          // await fetchVisiblePins(); // refresh from server
+        }}
+      />
     </div>
   );
 }
