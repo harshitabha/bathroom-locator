@@ -32,6 +32,7 @@ export default function Map() {
 function MapInner({ apiKey }: { apiKey: string }) {
   // bathrooms & selection
   const [places, setPlaces] = useState<Place[]>([]);
+
   const [selected, setSelected] = useState<Place | null>(null);
 
   // add flow
@@ -102,6 +103,24 @@ function MapInner({ apiKey }: { apiKey: string }) {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: apiKey,
   });
+
+  const pinIcon = React.useMemo(() => {
+  if (!isLoaded || !window.google) return null;
+  const g = window.google; // type-safe alias
+
+  return {
+    url:
+      "data:image/svg+xml;charset=UTF-8," +
+      encodeURIComponent(`
+        <svg width="30" height="45" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 0C7 0 0 7 0 15c0 11.25 15 30 15 30s15-18.75 15-30C30 7 23 0 15 0z" fill="#845416"/>
+          <circle cx="15" cy="15" r="6" fill="white"/>
+        </svg>
+      `),
+      scaledSize: new g.maps.Size(20, 30),
+      anchor: new g.maps.Point(10, 30),
+    } as google.maps.Icon;
+  }, [isLoaded]);
 
   // default center coords when user doesn't provide location (somewhere in santa cruz)
   const defaultCenter = useMemo<google.maps.LatLngLiteral>(
@@ -255,30 +274,49 @@ function MapInner({ apiKey }: { apiKey: string }) {
             key={p.id}
             position={p.position}
             title={p.name}
+            icon={pinIcon ?? undefined}
             onClick={() => setSelected(p)}
           />
         ))}
-
+        {addMode && draftPosition && (
+          <Marker
+            position={draftPosition}
+            icon={pinIcon ?? undefined}
+          />
+        )}
         {selected && (
-          <InfoWindow
-            position={selected.position}
-            onCloseClick={() => setSelected(null)}
-          >
-            <div>
-              <strong>{selected.name}</strong>
-              {selected.details && <p>{selected.details}</p>}
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() =>
-                  openWalkingDirections(selected.position.lat, selected.position.lng)
-                }
-              >
-                Get Directions
-              </Button>
-            </div>
-          </InfoWindow>
+        <InfoWindow
+          position={selected.position}
+          onCloseClick={() => setSelected(null)}
+          options={{
+            pixelOffset: new google.maps.Size(0, -10),
+            disableAutoPan: false,
+          }}
+        >
+        <div className="infowin">
+          <strong className="infowin-title">{selected.name}</strong>
+          {selected.details && <p className="infowin-text">{selected.details}</p>}
+          <div style={{ display: "flex", justifyContent: "center", marginTop: "6px" }}>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() =>
+                openWalkingDirections(selected.position.lat, selected.position.lng)
+              }
+              sx={{
+                backgroundColor: "#576421",
+                color: "white",
+                fontWeight: 500,
+                textTransform: "none",
+                borderRadius: "8px",
+                "&:hover": { backgroundColor: "#6B7A29" },
+              }}
+            >
+              Get Directions
+            </Button>
+          </div>
+        </div>
+        </InfoWindow>
         )}
       </GoogleMap>
 
@@ -332,17 +370,14 @@ function MapInner({ apiKey }: { apiKey: string }) {
         action={
           <Button
             size="small"
-            onClick={() => {
-              setAddMode(false);
-              setBannerOpen(false);
-            }}
+            onClick={cancelAddFlow}
             sx={{
               color: "#1B1C15",
               border: "1px solid #845416",
               borderRadius: "8px",
-              fontWeight: 500,
-              ml: 0.3,
-              px: 1.5,
+              fontWeight: 600,
+              ml: 0.1,
+              px: 1.6,
               textTransform: "none",
               "&:hover": {
                 backgroundColor: "rgba(132, 84, 22, 0.05)",
@@ -393,7 +428,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
             />
             <Typography
               variant="h6"
-              fontWeight={500}
+              fontWeight={600}
               color="#1B1C15"
               sx={{ alignSelf: "flex-start" }}
             >
@@ -410,6 +445,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
         onClose={() => {
           setAddOpen(false);
           setBannerOpen(true);
+          setDraftPosition(null);
         }}
         onCancelFull={cancelAddFlow}
         position={draftPosition}

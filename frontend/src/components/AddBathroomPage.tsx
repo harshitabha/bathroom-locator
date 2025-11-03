@@ -92,7 +92,7 @@ export default function AddBathroomPage({
 
         <Box sx={{ px: 2, pb: 2 }}>
           <Box sx={{ p: 2, bgcolor: "#FBFAED", borderRadius: 2 }}>
-            <Typography variant="h5" fontWeight={500} sx={{ mb: 1 }}>
+            <Typography variant="h5" fontWeight={600} sx={{ mb: 1 }}>
               New Bathroom
             </Typography>
 
@@ -132,7 +132,7 @@ export default function AddBathroomPage({
                 }}
                 sx={{
                   color: "#1B1C15",
-                  fontWeight: 500,
+                  fontWeight: 550,
                   border: "1px solid #845416",
                   borderRadius: "8px",
                   "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.04)" },
@@ -205,7 +205,7 @@ export default function AddBathroomPage({
           }}
           sx={{
             color: "#1B1C15",
-            fontWeight: 500,
+            fontWeight: 550,
             border: "1px solid #845416",
             borderRadius: "8px",
             "&:hover": { backgroundColor: "rgba(0,0,0,0.04)" },
