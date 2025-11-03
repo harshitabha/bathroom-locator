@@ -10,7 +10,6 @@ const pool = new pg.Pool({
   password: process.env.DB_PASSWORD,
 });
 
-// write db functions here
 
 /**
  * returns list of all bathrooms in database
@@ -40,7 +39,8 @@ export async function getBathrooms() {
 
 /**
  * creates a new bathroom in the database
- * @returns the newly created bathroom object
+ * @param {object} bathroom bathroom object
+ * @returns {object} the newly created bathroom
  */
 export async function createBathroom(bathroom) {
   try {
@@ -55,11 +55,11 @@ export async function createBathroom(bathroom) {
 
     const newBathroom = {
       ...bathroom,
-      id: rows[0].id
-    }
+      id: rows[0].id,
+    };
 
     return newBathroom;
-	} catch (error) {
+  } catch (error) {
     console.error('Database query error:', error);
     throw error;
   }

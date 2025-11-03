@@ -1,4 +1,4 @@
-import {describe, it, test, beforeAll, afterAll, expect} from 'vitest';
+import {describe, it, beforeAll, afterAll, expect} from 'vitest';
 import supertest from 'supertest';
 import http from 'http';
 
@@ -85,10 +85,10 @@ describe('POST Bathroom Endpoint', () => {
     'name': 'New Bathroom',
     'position': {
       'lat': 36.996621249644626,
-      'lng': -122.0626488260964
+      'lng': -122.0626488260964,
     },
-    'details': 'next to media theater, very large'
-  }
+    'details': 'next to media theater, very large',
+  };
   it('should create a new bathroom and return it', async () => {
     await request.post(`/bathroom`)
         .send(bathroom)
