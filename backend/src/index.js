@@ -14,7 +14,7 @@ app.use(cors({
   origin: 'http://localhost:5173',
 }));
 
-const swaggerDocument = YAML.load("./docs/openapi.yaml");
+const swaggerDocument = YAML.load('./docs/openapi.yaml');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
@@ -30,7 +30,7 @@ app.use(
 
 
 app.get('/bathroom', (req, res) => {
-  const { minLng, minLat, maxLng, maxLat } = req.query;
+  const {minLng, minLat, maxLng, maxLat} = req.query;
   const hasBound =
     minLng !== undefined && minLat !== undefined &&
     maxLng !== undefined && maxLat !== undefined;
@@ -44,7 +44,7 @@ app.post('/bathroom', bathroom.createBathroom);
 
 
 app.listen(port, () => {
-  console.log(`App running on port ${port}.`)
+  console.log(`App running on port ${port}.`);
 });
 
 export default app;
