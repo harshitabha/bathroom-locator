@@ -24,6 +24,10 @@ jobs:
       - name: Install Frontend Dependencies
         working-directory: ./frontend
         run: npm ci
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v1
+        with:
+          version: latest
       - name: Start Docker container
         run: docker compose up -d
       - name: Run tests

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint src test --no-inline-config --max-warnings 0",
+    "lint": "eslint --no-inline-config --report-unused-disable-directives --max-warnings 0",
+    "lint-fix": "eslint --no-inline-config --report-unused-disable-directives --max-warnings 0 --fix",
     "test": "vitest run --coverage",
     "preview": "vite preview"
   },
@@ -17,6 +18,7 @@
     "react-dom": "^19.1.1"
   },
   "devDependencies": {
+    "@eslint/compat": "^1.4.0",
     "@eslint/js": "^9.36.0",
     "@testing-library/jest-dom": "*",
     "@testing-library/react": "*",
@@ -27,9 +29,9 @@
     "@vitest/coverage-v8": "*",
     "babel-plugin-react-compiler": "^19.1.0-rc.3",
     "eslint": "^9.36.0",
-    "eslint-config-google": "*",
-    "eslint-plugin-jsdoc": "*", 
-    "eslint-plugin-react": "*",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-jsdoc": "^61.1.10",
+    "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
