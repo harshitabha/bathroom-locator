@@ -39,14 +39,12 @@ jobs:
         working-directory: ./frontend
         run: npm ci
       - name: Connect to PostgreSQL
-        run: node backend\test\db.js
+        run: node ./backend/test/db.js
         env:
           # The hostname used to communicate with the PostgreSQL service container
           POSTGRES_HOST: postgres
           # The default PostgreSQL port
           POSTGRES_PORT: 5432
-      - name: Start Docker container
-        run: docker compose up -d
       - name: Run tests
         run: npm test
       - name: Close Docker container
