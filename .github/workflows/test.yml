@@ -39,7 +39,7 @@ jobs:
         working-directory: ./frontend
         run: npm ci
       - name: Connect to PostgreSQL
-        run: node backend\test\db.js
+        run: node ./backend/test/db.js
         env:
           # The hostname used to communicate with the PostgreSQL service container
           POSTGRES_HOST: postgres
