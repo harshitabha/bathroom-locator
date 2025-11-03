@@ -147,6 +147,52 @@ function MapInner({ apiKey }: { apiKey: string }) {
     clearIdleTimer();
   }, [clearIdleTimer]);
 
+  // for long polling to get real-time updates
+  useEffect((  ) => {
+    let cancelled = false;
+
+    async function pollNewBathrooms() {
+      if (cancelled) return;
+
+      try {
+        const res = await fetch('http://localhost:3000/bathroom/updates');
+        if (!res.ok) { 
+          console.error("Polling error:", res.status);
+        }
+
+        const newBathrooms: Place[] = await res.json();
+
+        if (newBathrooms.length > 0 && mapRef.current) {
+          const bounds = mapRef.current.getBounds();
+          if (bounds) {
+            // filter new bathrooms to only those within current map bounds
+            const visibleNewBathrooms = newBathrooms.filter((bathroom) => {
+              const pos = new google.maps.LatLng(
+                bathroom.position.lat,
+                bathroom.position.lng
+              );
+              return bounds.contains(pos);
+            });
+            if (visibleNewBathrooms.length > 0) {
+              setPlaces((prevPlaces) => [...prevPlaces, ...visibleNewBathrooms]);
+            }
+          }
+        }
+      }
+      catch (err){
+        console.error("Polling error:", err);
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // wait before retrying
+      }
+      finally {
+        if (!cancelled) pollNewBathrooms();
+      }
+    }
+    pollNewBathrooms();
+    return () => {
+      cancelled = true;
+    };
+  }, [])
+
   // map loading errors
   if (loadError) return <p>Failed to load Google Maps.</p>;
   if (!isLoaded) return <p>Loading map…</p>;

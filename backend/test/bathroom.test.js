@@ -4,6 +4,7 @@ import http from 'http';
 
 import * as db from './db.js';
 import app from '../src/index.js';
+import {getUpdates, notifyNewBathroom} from '../src/bathroom.js';
 
 test('adds two numbers correctly', () => {
     expect(1+2).toBe(3);
@@ -71,3 +72,9 @@ describe('GET bathroom with bounds', () => {
       });
   });
 });
+
+describe('GET /updates endpoint', () => {
+  it('should wait and receive new bathroom updates', async () => {
+    // to be completed
+    });
+  });
