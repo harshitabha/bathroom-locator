@@ -28,6 +28,7 @@ app.use(
     }),
 );
 
+
 app.get('/bathroom', (req, res) => {
   const {minLng, minLat, maxLng, maxLat} = req.query;
   const hasBound =
@@ -39,6 +40,8 @@ app.get('/bathroom', (req, res) => {
   }
   return bathroom.getBathrooms(req, res);
 });
+app.post('/bathroom', bathroom.createBathroom);
+
 
 app.listen(port, () => {
   console.log(`App running on port ${port}.`);
