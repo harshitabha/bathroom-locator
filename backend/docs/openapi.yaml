@@ -51,15 +51,29 @@ paths:
           description: Invalid parameters
         404:
           description: No results
+    
+    post:
+      description: Add a new bathroom
+      requestBody:
+        description: Details of new bathroom
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewBathroom'
+      responses:
+        201:
+          description: Bathroom successfully added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bathroom'
 
 components:
   schemas:
-    Bathroom:
+    BathroomBase:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
         name:
           type: string
         position:
@@ -81,7 +95,23 @@ components:
         details:
           type: string
       required:
-        - id
         - name
         - position
         - details
+   
+    NewBathroom:
+      allOf:
+        - $ref: '#/components/schemas/BathroomBase'
+      description: "Schema for creating a new bathroom (no id)."
+
+    Bathroom:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+          required:
+            - id
+        - $ref: '#/components/schemas/BathroomBase'
+      description: "Full bathroom resource returned by the API."

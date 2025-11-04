@@ -66,3 +66,15 @@ export async function getBathroomsInBounds(req, res) {
     }
   }
 }
+
+/**
+ * creates a new bathroom in the database
+ * @param {object} req request object
+ * @param {object} res response object
+ */
+export async function createBathroom(req, res) {
+  const bathroom = await db.createBathroom(req.body);
+  if (bathroom) {
+    res.status(201).send(bathroom);
+  }
+}
