@@ -174,7 +174,10 @@ function MapInner({ apiKey }: { apiKey: string }) {
               return bounds.contains(pos);
             });
             if (visibleNewBathrooms.length > 0) {
-              setPlaces((prevPlaces) => [...prevPlaces, ...visibleNewBathrooms]);
+              setPlaces((prevPlaces) => [
+                ...prevPlaces,
+                ...visibleNewBathrooms.filter(nb => !prevPlaces.some(p => p.id === nb.id)),
+              ]);
             }
           }
         }

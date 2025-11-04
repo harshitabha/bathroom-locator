@@ -2,8 +2,8 @@ import * as db from './db.js';
 
 /**
  * returns all the bathrooms in the database
- * @param {*} req request object
- * @param {*} res response object
+ * @param {object} req request object
+ * @param {object} res response object
  */
 export async function getBathrooms(req, res) {
   const bathrooms = await db.getBathrooms();
@@ -15,36 +15,67 @@ export async function getBathrooms(req, res) {
 }
 
 let clients = [];
+// use shorter timeout for tests
+const LONG_POLL_TIMEOUT = process.env.NODE_ENV === 'test' ? 1000 : 30000;
 /**
- * 
+ * @param {object} req request object
+ * @param {object} res response object
+ * @returns {Array} array of bathrooms in the bounds
  */
 export async function getUpdates(req, res) {
-  req.setTimeout(0);
+  try {
+    req.setTimeout(0);
+    let sent = false;
 
-  clients.push(res);
+    clients.push(res);
+    console.log('getUpdates called, clients waiting:', clients.length);
 
-  // remove after 30 seconds (no new data)
-  setTimeout(() => {
-    clients = clients.filter(c => c !== res);
-    res.json([]); // no updates, send empty
-  }, 30000);
+    const timer = setTimeout(() => {
+      if (!sent) {
+        sent = true;
+        clients = clients.filter((c) => c !== res);
+        res.json([]); // no updates, send empty
+      }
+    }, LONG_POLL_TIMEOUT);
+
+    res.on('close', () => {
+      if (!sent) {
+        sent = true;
+        clearTimeout(timer);
+        clients = clients.filter((c) => c !== res);
+        console.log('Client disconnected');
+      }
+    });
+  } catch (err) {
+    console.error('Error in getUpdates:', err);
+    if (!res.headersSent) {
+      res.status(500).json({error: 'Internal Server Error'});
+    }
+  }
 }
 
 /**
  * Called when a new bathroom is added to notify waiting clients
+ * @param {object} newBathroom - The new bathroom that was added.
  */
 export async function notifyNewBathroom(newBathroom) {
-  clients.forEach(c => c.json([newBathroom]));
-  clients = []; // clear all waiting clients
+  clients.forEach((client) => {
+    if (!client.sent) {
+      client.sent = true;
+      client.res.json([newBathroom]);
+    }
+  });
+  clients = [];
 }
 
 /**
  * returns bathrooms in the database within bounds
- * @param {*} req request object
- * @param {*} res response object
+ * @param {object} req request object
+ * @param {object} res response object
+ * @returns {Array} array of bathrooms in the bounds
  */
 export async function getBathroomsInBounds(req, res) {
-  const { minLng, minLat, maxLng, maxLat, limit } = req.query;
+  const {minLng, minLat, maxLng, maxLat, limit} = req.query;
 
   const hasBounds =
     minLng !== undefined && minLat !== undefined &&
@@ -55,10 +86,12 @@ export async function getBathroomsInBounds(req, res) {
     const b = parseFloat(minLat);
     const c = parseFloat(maxLng);
     const d = parseFloat(maxLat);
-    const lim = limit ? Math.max(1, Math.min(parseInt(limit, 10), 200)) : 200; // limit # of bathrooms fetched, up to 200
+    // limit # of bathrooms fetched, up to 200
+    const lim = limit ?
+      Math.max(1, Math.min(parseInt(limit, 10), 200)) : 200;
 
     if ([a, b, c, d].some(Number.isNaN)) {
-      return res.status(400).json({ error: 'Invalid bounds' });
+      return res.status(400).json({error: 'Invalid bounds'});
     }
 
     try {
@@ -83,7 +116,21 @@ export async function getBathroomsInBounds(req, res) {
       }
     } catch (e) {
       console.error(e);
-      return res.status(500).json({ error: 'Server error' });
+      return res.status(500).json({error: 'Server error'});
     }
+  }
+}
+
+/**
+ * creates a new bathroom in the database
+ * @param {object} req request object
+ * @param {object} res response object
+ */
+export async function createBathroom(req, res) {
+  const bathroom = await db.createBathroom(req.body);
+  // Notify long-poll clients
+  notifyNewBathroom(bathroom);
+  if (bathroom) {
+    res.status(201).send(bathroom);
   }
 }
