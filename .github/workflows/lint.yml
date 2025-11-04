@@ -1,4 +1,4 @@
-name: Lint
+name: PR Jobs
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
     - master
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,3 +21,4 @@ jobs:
       - run: cd frontend && npm ci
       - name: Run ESLint
         run: npm run lint
+  
