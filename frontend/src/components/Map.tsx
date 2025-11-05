@@ -7,7 +7,7 @@ import {
 } from "@react-google-maps/api";
 import "./Map.css";
 import { openWalkingDirections } from '../utils/navigation';
-import Button from '@mui/material/Button';
+import {Button} from '@mui/material';
 
 
 type Place = {
@@ -57,7 +57,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
       console.error("Geolocation not supported by this browser.");
       return;
     }
-    navigator.geolocation.getCurrentPosition(
+    const watchId = navigator.geolocation.watchPosition(
       (pos) => {
         setUserLocation({
           lat: pos.coords.latitude,
@@ -70,9 +70,12 @@ function MapInner({ apiKey }: { apiKey: string }) {
       {
         enableHighAccuracy: true,
         timeout: 10_000, // times out after 10s
-        maximumAge: 60_000, // saves location for 60s in browser cache
+        maximumAge: 10_000, // saves location for 10s in browser cache
       }
     );
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
   }, []);
 
   // center map on user if location is given, else default on santa cruz
@@ -180,6 +183,20 @@ function MapInner({ apiKey }: { apiKey: string }) {
           />
         ))}
 
+        {userLocation && (
+          <Marker
+            position={userLocation}
+            icon={{
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 8,
+              fillColor: "#4285F4",
+              fillOpacity: 1,
+              strokeColor: "white",
+              strokeWeight: 2,
+            }}
+          />
+      )}
+
         {selected && (
           <InfoWindow
             position={selected.position}
@@ -194,6 +211,8 @@ function MapInner({ apiKey }: { apiKey: string }) {
                 color="primary" // default blue unless we manually change it
                 size="small"
                 onClick={() => openWalkingDirections(
+                  userLocation ? userLocation.lat : center.lat,
+                  userLocation ? userLocation.lng : center.lng,
                   selected.position.lat,
                   selected.position.lng
                 )}
