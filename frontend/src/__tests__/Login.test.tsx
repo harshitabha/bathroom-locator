@@ -50,7 +50,6 @@ vi.mock('react-router-dom', async () => {
 });
 
 beforeEach(() => {
-  vi.clearAllMocks();
   render (
     <MemoryRouter>
       <Login/>
@@ -60,6 +59,7 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  vi.resetAllMocks();
 });
 
 describe('Login component', () => {
@@ -144,9 +144,8 @@ describe('Login component', () => {
     });
 
     // check for error message to appear
-    await waitFor(() => {
-      expect(screen.getByText(error));
-    });
+    const errorMessage = screen.queryByRole('alert');
+    expect(errorMessage?.textContent).toBe(error);
     
     // ensure navigation was not called
     expect(mockNavigate).not.toHaveBeenCalled();

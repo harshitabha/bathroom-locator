@@ -51,7 +51,7 @@ export default function SignUp () {
                         </div>
                         <Stack spacing={4}>
                             <TextField 
-                                id="outlined-basic"
+                                variant="outlined"
                                 label="Email"
                                 className='input-box'
                                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +77,7 @@ export default function SignUp () {
                         </Stack>
                     </Stack>
                     <Stack spacing={2}>
-                        <Button disabled={email === '' || password === '' || confirmPassword === ''}variant="contained" data-testid="signup-button" className='button' onClick={signUpNewUser}>
+                        <Button disabled={email === '' || password === '' || confirmPassword === ''} variant="contained" data-testid="signup-button" className='button' onClick={signUpNewUser}>
                             Sign Up
                         </Button>
                         <Button variant="outlined" data-testid="login-button" className='button' onClick={() => navigate("/login")}>
