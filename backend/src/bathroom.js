@@ -14,7 +14,7 @@ export async function getBathrooms(req, res) {
   }
 }
 
-let clients = [];
+export let clients = [];
 // use shorter timeout for tests
 const LONG_POLL_TIMEOUT = process.env.NODE_ENV === 'test' ? 1000 : 30000;
 /**
@@ -25,25 +25,26 @@ const LONG_POLL_TIMEOUT = process.env.NODE_ENV === 'test' ? 1000 : 30000;
 export async function getUpdates(req, res) {
   try {
     req.setTimeout(0);
-    let sent = false;
+    const client = {res, sent: false};
+    clients.push(client);
 
-    clients.push(res);
-    console.log('getUpdates called, clients waiting:', clients.length);
+    if (typeof global.clientRegistered === 'function') {
+      global.clientRegistered();
+    }
 
     const timer = setTimeout(() => {
-      if (!sent) {
-        sent = true;
-        clients = clients.filter((c) => c !== res);
+      if (!client.sent) {
+        client.sent = true;
+        clients = clients.filter((c) => c !== client);
         res.json([]); // no updates, send empty
       }
     }, LONG_POLL_TIMEOUT);
 
     res.on('close', () => {
-      if (!sent) {
-        sent = true;
+      if (!client.sent) {
+        client.sent = true;
         clearTimeout(timer);
-        clients = clients.filter((c) => c !== res);
-        console.log('Client disconnected');
+        clients = clients.filter((c) => c !== client);
       }
     });
   } catch (err) {
@@ -65,7 +66,7 @@ export async function notifyNewBathroom(newBathroom) {
       client.res.json([newBathroom]);
     }
   });
-  clients = [];
+  clients = clients.filter((client) => client.sent === false);
 }
 
 /**
