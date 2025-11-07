@@ -37,7 +37,7 @@ describe('GET Bathroom Endpoint', () => {
           expect(first.name).toBe('Namaste Lounge Bathroom');
           expect(first.position.lat).toBe(37.00076576303953);
           expect(first.position.lng).toBe(-122.05719563060227);
-          expect(first.details).toBe('more details');
+          expect(first.description).toBe('more details');
         });
   });
 });
@@ -87,7 +87,7 @@ describe('POST Bathroom Endpoint', () => {
       'lat': 36.996621249644626,
       'lng': -122.0626488260964,
     },
-    'details': 'next to media theater, very large',
+    'description': 'next to media theater, very large',
   };
   it('should create a new bathroom and return it', async () => {
     await request.post(`/bathroom`)
@@ -98,7 +98,7 @@ describe('POST Bathroom Endpoint', () => {
           expect(newBathroom).toHaveProperty('id');
           expect(newBathroom.name).toBe(bathroom.name);
           expect(newBathroom.position.lat).toBe(bathroom.position.lat);
-          expect(newBathroom.details).toBe(bathroom.details);
+          expect(newBathroom.description).toBe(bathroom.description);
         });
   });
   it('should then exist in the database', async () => {

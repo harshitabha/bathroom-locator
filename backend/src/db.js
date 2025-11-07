@@ -21,7 +21,7 @@ export async function getBathrooms() {
       text: `
         SELECT
           b.id, b.data->>'name' AS name, 
-          b.data->>'details' AS details, 
+          b.data->>'description' AS description, 
           b.data->>'position' AS position
         FROM bathrooms b
       `,
@@ -83,7 +83,7 @@ export async function getBathroomsInBounds(
         SELECT
           b.id,
           b.data->>'name' AS name,
-          b.data->>'details' AS details,
+          b.data->>'description' AS description,
           b.data->>'position' AS position
         FROM bathrooms b
         WHERE

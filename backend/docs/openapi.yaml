@@ -92,12 +92,12 @@ components:
           required:
             - lat
             - lng
-        details:
+        description:
           type: string
       required:
         - name
         - position
-        - details
+        - description
    
     NewBathroom:
       allOf:
