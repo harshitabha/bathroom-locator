@@ -10,7 +10,6 @@ const pool = new pg.Pool({
   password: process.env.DB_PASSWORD,
 });
 
-// write db functions here
 
 /**
  * returns list of all bathrooms in database
@@ -19,9 +18,13 @@ const pool = new pg.Pool({
 export async function getBathrooms() {
   try {
     const {rows} = await pool.query({
-      text: `SELECT b.id, b.data->>'name' AS name, ` +
-      `b.data->>'details' AS details, b.data->>'position' AS position ` +
-      `FROM bathrooms b`,
+      text: `
+        SELECT
+          b.id, b.data->>'name' AS name, 
+          b.data->>'details' AS details, 
+          b.data->>'position' AS position
+        FROM bathrooms b
+      `,
       values: [],
     });
     rows.forEach((bathroom) => {
@@ -35,12 +38,47 @@ export async function getBathrooms() {
 }
 
 /**
+ * creates a new bathroom in the database
+ * @param {object} bathroom bathroom object
+ * @returns {object} the newly created bathroom
+ */
+export async function createBathroom(bathroom) {
+  try {
+    const {rows} = await pool.query({
+      text: `
+        INSERT INTO bathrooms(data) 
+        VALUES ($1)
+        RETURNING id
+      `,
+      values: [bathroom],
+    });
+
+    const newBathroom = {
+      ...bathroom,
+      id: rows[0].id,
+    };
+
+    return newBathroom;
+  } catch (error) {
+    console.error('Database query error:', error);
+    throw error;
+  }
+}
+
+/**
  * returns list of bathrooms in database within bounds
+ * @param {number} minLng minimum longitute of the bounds
+ * @param {number} minLat minimum latitute of the bounds
+ * @param {number} maxLng max longitute of the bounds
+ * @param {number} maxLat max latitute of the bounds
+ * @param {number} limit limit of bathrooms to fetch
  * @returns {object} array of bathroom objects
  */
-export async function getBathroomsInBounds(minLng, minLat, maxLng, maxLat, limit = 200) {
+export async function getBathroomsInBounds(
+    minLng, minLat, maxLng, maxLat, limit = 200,
+) {
   try {
-    const { rows } = await pool.query({
+    const {rows} = await pool.query({
       text: `
         SELECT
           b.id,
@@ -66,3 +104,4 @@ export async function getBathroomsInBounds(minLng, minLat, maxLng, maxLat, limit
     throw error;
   }
 }
+

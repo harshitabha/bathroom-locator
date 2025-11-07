@@ -1,0 +1,50 @@
+name: Run tests
+
+on:
+  pull_request:
+    branches: ['master']
+
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    container:
+      image: node:24
+    # services:
+    #   # Label used to access the service container
+    #   postgres:
+    #     # Docker Hub image
+    #     image: postgres
+    #     # Provide the password for postgres
+    #     env:
+    #       POSTGRES_PASSWORD: findBL
+    #     # Set health checks to wait until postgres has started
+    #     options: >-
+    #       --health-cmd pg_isready
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: npm ci
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: npm ci
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+      # - name: Connect to PostgreSQL
+      #   run: node ./backend/test/db.js
+      #   env:
+      #     # The hostname used to communicate with the PostgreSQL service container
+      #     POSTGRES_HOST: localhost
+      #     # The default PostgreSQL port
+      #     POSTGRES_PORT: 5432
+      - name: Run tests
+        # temp workaround only running frontend tests remotely
+        run: npm run test-frontend
