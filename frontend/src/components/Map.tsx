@@ -473,8 +473,6 @@ function MapInner({ apiKey }: { apiKey: string }) {
           // Reset form text after a successful "place":
           setFormName("");
           setFormDetails("");
-
-          // Also clear the draft pin if you want:
           setDraftPosition(null);
           setResetToken((t) => t + 1);
         }}
