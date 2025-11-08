@@ -122,16 +122,13 @@ describe('Login component', () => {
     const email = 'test@example.com';
     const password = 'password123';
     const error = '';
-    const mockLogin = mockUserLogin(email, password, error);
-
-    // wait for login attempt
-    await waitFor(() => {
-      mockLogin
-    });
+    mockUserLogin(email, password, error);
 
     // check that there is no error message
     const errorMessage = screen.queryByRole('alert');
-    expect(errorMessage).toBeNull();
+    await waitFor(() => {
+      expect(errorMessage).toBeNull();
+    });
   });
 
   it('redirects to home/map page when valid credentials are provided', async () => {
@@ -139,15 +136,12 @@ describe('Login component', () => {
     const email = 'test@example.com';
     const password = 'password123';
     const error = '';
-    const mockLogin = mockUserLogin(email, password, error);
+    mockUserLogin(email, password, error);
 
-    // wait for login attempt
     await waitFor(() => {
-      mockLogin
+      // expect redirect to map page due to successful login
+      expect(mockNavigate).toHaveBeenCalledWith('/');
     });
-
-    // expect redirect to map page due to successful login
-    expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 
   it ('shows an error message when login fails with invalid credentials', async () => {
@@ -155,16 +149,14 @@ describe('Login component', () => {
     const email = 'test@example.com';
     const password = 'password123';
     const error = 'Invalid credentials';
-    const mockLogin = mockUserLogin(email, password, error);
+    mockUserLogin(email, password, error);
 
-    // wait for login attempt
+
     await waitFor(() => {
-      mockLogin
+      // check for error message to appear
+      const errorMessage = screen.queryByRole('alert');
+      expect(errorMessage?.textContent).toBe(error);
     });
-
-    // check for error message to appear
-    const errorMessage = screen.queryByRole('alert');
-    expect(errorMessage?.textContent).toBe(error);
   });
 
   it ('stays on login screen when login fails with invalid credentials', async () => {
@@ -172,15 +164,12 @@ describe('Login component', () => {
     const email = 'test@example.com';
     const password = 'password123';
     const error = 'Invalid credentials';
-    const mockLogin = mockUserLogin(email, password, error);
+    mockUserLogin(email, password, error);
 
-    // wait for login attempt
     await waitFor(() => {
-      mockLogin
+      // ensure navigation was not called
+      expect(mockNavigate).not.toHaveBeenCalled();
     });
-    
-    // ensure navigation was not called
-    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it ('disables login button when no input is provided', async () => {
@@ -192,7 +181,9 @@ describe('Login component', () => {
 
     // check that login button is disabled
     const loginButton = screen.getByRole('button', {name: 'Login'}) as HTMLButtonElement;
-    expect(loginButton).toBeDisabled();
+    await waitFor(() => {
+      expect(loginButton).toBeDisabled();
+    });
   });
 
   it ('doesn\'t call sign in function when no input is provided', async () => {
@@ -213,15 +204,12 @@ describe('Login component', () => {
     const email = '';
     const password = '';
     const error = '';
-    const mockLogin = mockUserLogin(email, password, error);
+    mockUserLogin(email, password, error);
 
-    // wait for login attempt
     await waitFor(() => {
-      mockLogin
+      // ensure navigation was not called
+      expect(mockNavigate).not.toHaveBeenCalled();
     });
-    
-    // ensure navigation was not called
-    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it ('disables login button when only email is provided', async () => {
@@ -233,7 +221,9 @@ describe('Login component', () => {
 
     // check that login button is disabled
     const loginButton = screen.getByRole('button', {name: 'Login'}) as HTMLButtonElement;
-    expect(loginButton).toBeDisabled();
+    await waitFor(() => {
+      expect(loginButton).toBeDisabled();
+    });
   });
 
   it ('doesn\'t call sign in function when only email is provided', async () => {
@@ -254,15 +244,12 @@ describe('Login component', () => {
     const email = 'test@example.com';
     const password = '';
     const error = '';
-    const mockLogin = mockUserLogin(email, password, error);
+    mockUserLogin(email, password, error);
 
-    // wait for login attempt
     await waitFor(() => {
-      mockLogin
+      // ensure navigation was not called
+      expect(mockNavigate).not.toHaveBeenCalled();
     });
-    
-    // ensure navigation was not called
-    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it ('disables login button when only password is provided', async () => {
@@ -270,16 +257,13 @@ describe('Login component', () => {
     const email = '';
     const password = 'password123';
     const error = '';
-    const mockLogin = mockUserLogin(email, password, error);
-
-    // wait for login attempt
-    await waitFor(() => {
-      mockLogin
-    });
+    mockUserLogin(email, password, error);
 
     // check that login button is disabled
     const loginButton = screen.getByRole('button', {name: 'Login'}) as HTMLButtonElement;
-    expect(loginButton).toBeDisabled();
+    await waitFor(() => {
+      expect(loginButton).toBeDisabled();
+    });
   });
 
   it ('doesn\'t call sign in function when only password is provided', async () => {
@@ -300,14 +284,11 @@ describe('Login component', () => {
     const email = '';
     const password = 'password123';
     const error = '';
-    const mockLogin = mockUserLogin(email, password, error);
+    mockUserLogin(email, password, error);
     
-    // wait for login attempt
     await waitFor(() => {
-      mockLogin
+      // ensure navigation was not called
+      expect(mockNavigate).not.toHaveBeenCalled();
     });
-
-    // ensure navigation was not called
-    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });
