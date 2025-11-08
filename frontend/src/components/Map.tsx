@@ -298,6 +298,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
           {selected.details && <p className="infowin-text">{selected.details}</p>}
           <div style={{ display: "flex", justifyContent: "center", marginTop: "6px" }}>
             <Button
+              data-testid="get-directions"
               variant="contained"
               size="small"
               onClick={() =>

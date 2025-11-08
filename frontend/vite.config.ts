@@ -1,15 +1,19 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import path from "node:path";
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+import path from 'node:path';
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react({
-      babel: {
-        plugins: [["babel-plugin-react-compiler"]],
-      },
+      babel: { plugins: [['babel-plugin-react-compiler']] },
     }),
   ],
-  envDir: path.resolve(__dirname, ".."),
+  envDir: path.resolve(__dirname, '..'),
+  test: {
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.ts',
+    globals: true,
+    css: true,
+    include: ['src/**/__tests__/**/*.ts?(x)', 'src/**/*.test.ts?(x)'],
+  },
 });
