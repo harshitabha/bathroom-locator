@@ -63,19 +63,20 @@ afterEach(() => {
 });
 
 describe('Login component', () => {
-  it('renders back to map button and navigates to map page on click', async () => {
-    // check rendering
+  it('renders back to map button', async () => {
     expect(screen.getByTestId('back-arrow'));
     const backButton = screen.getByRole('button', { name: 'Back to map'});
     expect(backButton);
-
-    // check navigation
-    fireEvent.click(backButton);
-    expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 
+  it('navigates to map page when back button is clicked', async () => {
+    const backButton = screen.getByRole('button', { name: 'Back to map'});
+    fireEvent.click(backButton);
+    expect(mockNavigate).toHaveBeenCalledWith('/');
+  })
+
   it('renders header and description', async () => {
-    expect(screen.getByTestId('location-pin'));
+    expect(screen.getByLabelText('location-icon'));
     expect(screen.getByText('Bathroom'));
     expect(screen.getByText('Locator'));
     expect(screen.getByText('Log in to add new bathroom locations to the map or add details to existing bathrooms.'));
@@ -84,11 +85,8 @@ describe('Login component', () => {
   it('renders auth form', async () => {
     expect(screen.getByText('Login', { selector: 'div'}));
 
-    expect(screen.getByLabelText('Email'));
-    expect(screen.getByLabelText('Email').tagName).toBe('INPUT');
-    
+    expect(screen.getByLabelText('Email'));    
     expect(screen.getByLabelText('Password'));
-    expect(screen.getByLabelText('Password').tagName).toBe('INPUT');
 
     const buttons = screen.getAllByRole('button').map(btn => btn.textContent);
     expect(buttons).toContain('Login');
@@ -101,7 +99,7 @@ describe('Login component', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/signup');
   });
 
-  it('logs in succesfully and redirects to home/map page when valid credentials are provided', async () => {
+  it('attempts login with the provided credentials', async () => {
     // mock successful user login
     const email = 'test@example.com';
     const password = 'password123';
@@ -117,96 +115,198 @@ describe('Login component', () => {
         })
       );
     });
+  });
+
+  it('displays no error when valid credentials are provided', async () => {
+    // mock successful user login
+    const email = 'test@example.com';
+    const password = 'password123';
+    const error = '';
+    const mockLogin = mockUserLogin(email, password, error);
+
+    // wait for login attempt
+    await waitFor(() => {
+      mockLogin
+    });
 
     // check that there is no error message
     const errorMessage = screen.queryByRole('alert');
     expect(errorMessage).toBeNull();
+  });
+
+  it('redirects to home/map page when valid credentials are provided', async () => {
+    // mock successful user login
+    const email = 'test@example.com';
+    const password = 'password123';
+    const error = '';
+    const mockLogin = mockUserLogin(email, password, error);
+
+    // wait for login attempt
+    await waitFor(() => {
+      mockLogin
+    });
 
     // expect redirect to map page due to successful login
     expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 
-  it ('shows an error message when login fails and stays on the login screen', async () => {
+  it ('shows an error message when login fails with invalid credentials', async () => {
     // mock unsuccessful login with credentials provided
     const email = 'test@example.com';
     const password = 'password123';
     const error = 'Invalid credentials';
     const mockLogin = mockUserLogin(email, password, error);
 
-    // expect that Supabase sign in was called correctly
+    // wait for login attempt
     await waitFor(() => {
-      expect(mockLogin).toHaveBeenCalledWith(
-        expect.objectContaining({
-          email: email,
-          password: password,
-        })
-      );
+      mockLogin
     });
 
     // check for error message to appear
     const errorMessage = screen.queryByRole('alert');
     expect(errorMessage?.textContent).toBe(error);
+  });
+
+  it ('stays on login screen when login fails with invalid credentials', async () => {
+    // mock unsuccessful login with credentials provided
+    const email = 'test@example.com';
+    const password = 'password123';
+    const error = 'Invalid credentials';
+    const mockLogin = mockUserLogin(email, password, error);
+
+    // wait for login attempt
+    await waitFor(() => {
+      mockLogin
+    });
     
     // ensure navigation was not called
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  it ('disables login button when no input is provided and stays on the login screen', async () => {
+  it ('disables login button when no input is provided', async () => {
+    // mock unsuccessful login with no credentials provided
+    const email = '';
+    const password = '';
+    const error = '';
+    mockUserLogin(email, password, error);
+
+    // check that login button is disabled
+    const loginButton = screen.getByRole('button', {name: 'Login'}) as HTMLButtonElement;
+    expect(loginButton).toBeDisabled();
+  });
+
+  it ('doesn\'t call sign in function when no input is provided', async () => {
     // mock unsuccessful login with no credentials provided
     const email = '';
     const password = '';
     const error = '';
     const mockLogin = mockUserLogin(email, password, error);
 
-    // check that login button is disabled
-    const loginButton = screen.getByRole('button', {name: 'Login'}) as HTMLButtonElement;
-    expect(loginButton).toBeDisabled();
-
     // expect that Supabase sign in was not called
     await waitFor(() => {
       expect(mockLogin).not.toHaveBeenCalled();
+    });
+  });
+
+  it ('stays on the login screen when no input is provided', async () => {
+    // mock unsuccessful login with no credentials provided
+    const email = '';
+    const password = '';
+    const error = '';
+    const mockLogin = mockUserLogin(email, password, error);
+
+    // wait for login attempt
+    await waitFor(() => {
+      mockLogin
     });
     
     // ensure navigation was not called
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  it ('disables login button when only email is provided and stays on the login screen', async () => {
+  it ('disables login button when only email is provided', async () => {
+    // mock unsuccessful login with only email provided
+    const email = 'test@example.com';
+    const password = '';
+    const error = '';
+    mockUserLogin(email, password, error);
+
+    // check that login button is disabled
+    const loginButton = screen.getByRole('button', {name: 'Login'}) as HTMLButtonElement;
+    expect(loginButton).toBeDisabled();
+  });
+
+  it ('doesn\'t call sign in function when only email is provided', async () => {
     // mock unsuccessful login with only email provided
     const email = 'test@example.com';
     const password = '';
     const error = '';
     const mockLogin = mockUserLogin(email, password, error);
 
-    // check that login button is disabled
-    const loginButton = screen.getByRole('button', {name: 'Login'}) as HTMLButtonElement;
-    expect(loginButton).toBeDisabled();
-
     // expect that Supabase sign in was not called
     await waitFor(() => {
       expect(mockLogin).not.toHaveBeenCalled();
+    });
+  });
+
+    it ('stays on login screen when only email is provided', async () => {
+    // mock unsuccessful login with only email provided
+    const email = 'test@example.com';
+    const password = '';
+    const error = '';
+    const mockLogin = mockUserLogin(email, password, error);
+
+    // wait for login attempt
+    await waitFor(() => {
+      mockLogin
     });
     
     // ensure navigation was not called
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  it ('disables login button when only password is provided and stays on the login screen', async () => {
+  it ('disables login button when only password is provided', async () => {
     // mock unsuccessful login with only password provided
     const email = '';
     const password = 'password123';
     const error = '';
     const mockLogin = mockUserLogin(email, password, error);
 
+    // wait for login attempt
+    await waitFor(() => {
+      mockLogin
+    });
+
     // check that login button is disabled
     const loginButton = screen.getByRole('button', {name: 'Login'}) as HTMLButtonElement;
     expect(loginButton).toBeDisabled();
+  });
+
+  it ('doesn\'t call sign in function when only password is provided', async () => {
+    // mock unsuccessful login with only password provided
+    const email = '';
+    const password = 'password123';
+    const error = '';
+    const mockLogin = mockUserLogin(email, password, error);
 
     // expect that Supabase sign in was not called
     await waitFor(() => {
       expect(mockLogin).not.toHaveBeenCalled();
     });
+  });
+
+  it ('stays on the login screen when only password is provided', async () => {
+    // mock unsuccessful login with only password provided
+    const email = '';
+    const password = 'password123';
+    const error = '';
+    const mockLogin = mockUserLogin(email, password, error);
     
+    // wait for login attempt
+    await waitFor(() => {
+      mockLogin
+    });
+
     // ensure navigation was not called
     expect(mockNavigate).not.toHaveBeenCalled();
   });

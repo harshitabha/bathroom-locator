@@ -25,7 +25,7 @@ export default function Login () {
         }
     }
 
-    const description = "Log in to add new bathroom locations to the map or add details to existing bathrooms.";
+    const description = "Log in ";
     
     return (
         <div className='auth-screen'>
@@ -47,7 +47,6 @@ export default function Login () {
                             <TextField 
                                 variant="outlined"
                                 label="Email"
-                                value={email}
                                 className='input-box'
                                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                     setEmail(event.target.value);
@@ -56,7 +55,7 @@ export default function Login () {
                             <TextField 
                                 variant="outlined"
                                 label="Password"
-                                value={password}
+                                type="password"
                                 className='input-box'
                                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                     setPassword(event.target.value);

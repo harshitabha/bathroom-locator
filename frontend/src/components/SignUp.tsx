@@ -31,7 +31,7 @@ export default function SignUp () {
         }
     }
 
-    const description = "Create an account to add new bathroom locations to the map or add details to existing bathrooms.";
+    const description = "Create an account ";
 
     return (
         <div className='auth-screen'>
@@ -61,6 +61,7 @@ export default function SignUp () {
                             <TextField 
                                 variant="outlined" 
                                 label="Password"
+                                type="password"
                                 className='input-box'
                                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                     setPassword(event.target.value);
@@ -69,6 +70,7 @@ export default function SignUp () {
                             <TextField 
                                 variant="outlined" 
                                 label="Confirm Password"
+                                type="password"
                                 className='input-box'
                                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                     setConfirmPassword(event.target.value);

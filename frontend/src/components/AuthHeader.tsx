@@ -21,15 +21,15 @@ const AuthHeader : React.FC<AuthHeaderProps> = ({ description }) => {
             </Button>
             <div className='auth-header'>
                 <div className='app-logo'>
-                    <LocationPinIcon data-testid="location-pin" className='location-icon' sx={{color: theme.palette.secondary.main}}/>
+                    <LocationPinIcon aria-label="location-icon" className='location-icon' sx={{color: theme.palette.secondary.main}}/>
                     <span>
                         <strong>Bathroom</strong>
-                        <br />
+                        <br/>
                         Locator
                     </span>
                 </div>
                 <div className='description'>
-                    {description}
+                    {description} to add new bathroom locations to the map or add details to existing bathrooms.
                 </div>
             </div>
         </div>
