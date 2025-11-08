@@ -128,19 +128,13 @@ describe('Sign Up component', () => {
     const password = 'password123';
     const confirmPassword = 'password123';
     const error = '';
-    const mockSignUp = mockUserSignUp(email, password, confirmPassword, error);
+    mockUserSignUp(email, password, confirmPassword, error);
 
-    // wait for sign up attempt
     await waitFor(() => {
-      mockSignUp
+      // check that there is no error message
+      const errorMessage = screen.queryByRole('alert');
+      expect(errorMessage).toBeNull();
     });
-    
-    // check that there is no error message
-    const errorMessage = screen.queryByRole('alert');
-    expect(errorMessage).toBeNull();
-    
-    // expect redirect to map page due to successful sign up
-    expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 
   it('redirects to home/map page when valid email is provided and passwords match', async () => {
@@ -149,15 +143,12 @@ describe('Sign Up component', () => {
     const password = 'password123';
     const confirmPassword = 'password123';
     const error = '';
-    const mockSignUp = mockUserSignUp(email, password, confirmPassword, error);
+    mockUserSignUp(email, password, confirmPassword, error);
 
-    // wait for sign up attempt
     await waitFor(() => {
-      mockSignUp
+      // expect redirect to map page due to successful sign up
+      expect(mockNavigate).toHaveBeenCalledWith('/');
     });
-    
-    // expect redirect to map page due to successful sign up
-    expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 
   it('doesn\'t call sign up when passwords don\'t match', async () => {
@@ -180,16 +171,13 @@ describe('Sign Up component', () => {
     const password = 'password123';
     const confirmPassword = 'notpassword123';
     const error = 'Passwords do not match';
-    const mockSignUp = mockUserSignUp(email, password, confirmPassword, error);
+    mockUserSignUp(email, password, confirmPassword, error);
 
-    // wait for sign up attempt
     await waitFor(() => {
-      mockSignUp
+      // check for error message to appear
+      const errorMessage = screen.queryByRole('alert');
+      expect(errorMessage?.textContent).toBe(error);
     });
-    
-    // check for error message to appear
-    const errorMessage = screen.queryByRole('alert');
-    expect(errorMessage?.textContent).toBe(error);
   });
 
   it('stays on sign up screen when passwords don\'t match', async () => {
@@ -198,15 +186,12 @@ describe('Sign Up component', () => {
     const password = 'password123';
     const confirmPassword = 'notpassword123';
     const error = 'Passwords do not match';
-    const mockSignUp = mockUserSignUp(email, password, confirmPassword, error);
+    mockUserSignUp(email, password, confirmPassword, error);
 
-    // wait for sign up attempt
     await waitFor(() => {
-      mockSignUp
+      // ensure navigation was not called
+      expect(mockNavigate).not.toHaveBeenCalled();
     });
-
-    // ensure navigation was not called
-    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it('disables sign up button when no input is provided', async () => {
@@ -215,16 +200,13 @@ describe('Sign Up component', () => {
     const password = '';
     const confirmPassword = '';
     const error = '';
-    const mockSignUp = mockUserSignUp(email, password, confirmPassword, error);
+    mockUserSignUp(email, password, confirmPassword, error);
 
-    // wait for sign up attempt
     await waitFor(() => {
-      mockSignUp
+      // check that sign up button is disabled
+      const signUpButton = screen.getByRole('button', {name: 'Sign Up'}) as HTMLButtonElement;
+      expect(signUpButton).toBeDisabled();
     });
-
-    // check that sign up button is disabled
-    const signUpButton = screen.getByRole('button', {name: 'Sign Up'}) as HTMLButtonElement;
-    expect(signUpButton).toBeDisabled();
   });
 
   it('doesn\'t call sign up when no input is provided', async () => {
@@ -247,15 +229,12 @@ describe('Sign Up component', () => {
     const password = '';
     const confirmPassword = '';
     const error = '';
-    const mockSignUp = mockUserSignUp(email, password, confirmPassword, error);
+    mockUserSignUp(email, password, confirmPassword, error);
 
-    // wait for sign up attempt
     await waitFor(() => {
-      mockSignUp
+      // ensure navigation was not called
+      expect(mockNavigate).not.toHaveBeenCalled();
     });
-    
-    // ensure navigation was not called
-    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it('disables sign up button when only email is provided', async () => {
@@ -264,16 +243,13 @@ describe('Sign Up component', () => {
     const password = '';
     const confirmPassword = '';
     const error = '';
-    const mockSignUp = mockUserSignUp(email, password, confirmPassword, error);
+    mockUserSignUp(email, password, confirmPassword, error);
 
-    // wait for sign up attempt
     await waitFor(() => {
-      mockSignUp
+      // check that sign up button is disabled
+      const signUpButton = screen.getByRole('button', {name: 'Sign Up'}) as HTMLButtonElement;
+      expect(signUpButton).toBeDisabled();
     });
-
-    // check that sign up button is disabled
-    const signUpButton = screen.getByRole('button', {name: 'Sign Up'}) as HTMLButtonElement;
-    expect(signUpButton).toBeDisabled();
   });
 
   it('doesn\'t call sign up when only email is provided', async () => {
@@ -296,15 +272,12 @@ describe('Sign Up component', () => {
     const password = '';
     const confirmPassword = '';
     const error = '';
-    const mockSignUp = mockUserSignUp(email, password, confirmPassword, error);
+    mockUserSignUp(email, password, confirmPassword, error);
 
-    // wait for sign up attempt
     await waitFor(() => {
-      mockSignUp
+      // ensure navigation was not called
+      expect(mockNavigate).not.toHaveBeenCalled();
     });
-    
-    // ensure navigation was not called
-    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it('disables sign up button when only password is provided', async () => {
@@ -313,16 +286,13 @@ describe('Sign Up component', () => {
     const password = 'password123';
     const confirmPassword = '';
     const error = '';
-    const mockSignUp = mockUserSignUp(email, password, confirmPassword, error);
+    mockUserSignUp(email, password, confirmPassword, error);
 
-    // wait for sign up attempt
     await waitFor(() => {
-      mockSignUp
+      // check that sign up button is disabled
+      const signUpButton = screen.getByRole('button', {name: 'Sign Up'}) as HTMLButtonElement;
+      expect(signUpButton).toBeDisabled();
     });
-
-    // check that sign up button is disabled
-    const signUpButton = screen.getByRole('button', {name: 'Sign Up'}) as HTMLButtonElement;
-    expect(signUpButton).toBeDisabled();
   });
 
   it('doesn\'t call sign up when only password is provided', async () => {
@@ -337,9 +307,6 @@ describe('Sign Up component', () => {
     await waitFor(() => {
       expect(mockSignUp).not.toHaveBeenCalled();
     });
-    
-    // ensure navigation was not called
-    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it('stays on the sign up screen when only password is provided', async () => {
@@ -348,15 +315,12 @@ describe('Sign Up component', () => {
     const password = 'password123';
     const confirmPassword = '';
     const error = '';
-    const mockSignUp = mockUserSignUp(email, password, confirmPassword, error);
+    mockUserSignUp(email, password, confirmPassword, error);
 
-    // wait for sign up attempt
     await waitFor(() => {
-      mockSignUp
+      // ensure navigation was not called
+      expect(mockNavigate).not.toHaveBeenCalled();
     });
-    
-    // ensure navigation was not called
-    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it('disables sign up button when confirm password is not provided', async () => {
@@ -365,16 +329,13 @@ describe('Sign Up component', () => {
     const password = 'password123';
     const confirmPassword = '';
     const error = '';
-    const mockSignUp = mockUserSignUp(email, password, confirmPassword, error);
+    mockUserSignUp(email, password, confirmPassword, error);
     
-    // wait for sign up attempt
     await waitFor(() => {
-      mockSignUp
+      // check that sign up button is disabled
+      const signUpButton = screen.getByRole('button', {name: 'Sign Up'}) as HTMLButtonElement;
+      expect(signUpButton).toBeDisabled();
     });
-    
-    // check that sign up button is disabled
-    const signUpButton = screen.getByRole('button', {name: 'Sign Up'}) as HTMLButtonElement;
-    expect(signUpButton).toBeDisabled();
   });
 
   it('doesn\'t call sign up when confirm password is not provided', async () => {
@@ -413,9 +374,9 @@ describe('Sign Up component', () => {
     const error = '';
     mockUserSignUp(email, password, confirmPassword, error);
 
-    // check that sign up button is disabled
-    const signUpButton = screen.getByRole('button', {name: 'Sign Up'}) as HTMLButtonElement;
     await waitFor(() => {
+      // check that sign up button is disabled
+      const signUpButton = screen.getByRole('button', {name: 'Sign Up'}) as HTMLButtonElement;
       expect(signUpButton).toBeDisabled();
     });
   });
@@ -456,9 +417,9 @@ describe('Sign Up component', () => {
     const error = '';
     mockUserSignUp(email, password, confirmPassword, error);
 
-    // check that sign up button is disabled
-    const signUpButton = screen.getByRole('button', {name: 'Sign Up'}) as HTMLButtonElement;
     await waitFor(() => {
+      // check that sign up button is disabled
+      const signUpButton = screen.getByRole('button', {name: 'Sign Up'}) as HTMLButtonElement;
       expect(signUpButton).toBeDisabled();
     });
   });
@@ -499,9 +460,9 @@ describe('Sign Up component', () => {
     const error = '';
     mockUserSignUp(email, password, confirmPassword, error);
 
-    // check that sign up button is disabled
-    const signUpButton = screen.getByRole('button', {name: 'Sign Up'}) as HTMLButtonElement;
     await waitFor(() => {
+      // check that sign up button is disabled
+      const signUpButton = screen.getByRole('button', {name: 'Sign Up'}) as HTMLButtonElement;
       expect(signUpButton).toBeDisabled();
     });
   });
