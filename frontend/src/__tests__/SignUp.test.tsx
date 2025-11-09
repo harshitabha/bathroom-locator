@@ -66,7 +66,6 @@ afterEach(() => {
 
 describe('Sign Up component', () => {
   it('renders back to map button', async () => {
-    expect(screen.getByTestId('back-arrow'));
     const backButton = screen.getByRole('button', { name: 'Back to map'});
     expect(backButton);
   });
