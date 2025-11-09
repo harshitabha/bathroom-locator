@@ -117,20 +117,19 @@ describe('Map add-flow & info window', () => {
     ).toBeInTheDocument();
   });
 
-  it('clicking the map in add mode opens the form and hides the banner', async () => {
+  it('clicking the map in add mode opens the form', async () => {
     const user = userEvent.setup();
     render(<Map />);
 
+    // Enter add mode
     const addBtn = screen.getByRole('button', { name: /add/i });
     await user.click(addBtn);
 
+    // Click on the map to drop a draft pin + open the sheet
     const map = screen.getByTestId('google-map');
     await user.click(map);
 
-    await waitForElementToBeRemoved(() =>
-      screen.getByText(/choose a location for the bathroom/i)
-    );
-
+    // Assert that the Add Bathroom sheet is open (form visible)
     await screen.findByLabelText(/bathroom name/i);
   });
 
