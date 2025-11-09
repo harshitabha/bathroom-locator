@@ -1,25 +1,28 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import {Stack, TextField, Button, Alert} from '@mui/material';
-import LocationPinIcon from '@mui/icons-material/LocationPin';
+import AuthHeader from './AuthHeader';
 import { useNavigate } from "react-router-dom";
 import './Auth.css';
 
 export default function SignUp () {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
     
     // use this for registering a new user
     async function signUpNewUser() {
         if (password != confirmPassword) {
-            setErrorMessage("Passwords do not match.");
+            setErrorMessage("Passwords do not match");
             return;
         }
         const { error } = await supabase.auth.signUp({ email, password })
         if (error) {
+            if (error.message === "Unable to validate email address: invalid format") {
+                error.message = "Invalid email format";
+            }
             setErrorMessage(error.message);
         }
         else {
@@ -28,30 +31,15 @@ export default function SignUp () {
         }
     }
 
+    const description = "Create an account ";
+
     return (
-        <div style={{display: 'flex', flexDirection: 'column', minHeight: '100vh'}}>
-            <div style={{marginTop: '10px'}}>
-               <Button variant="contained" onClick={() => navigate("/")}>
-                    Back to Map
-                </Button> 
-            </div>
-            <div className='auth-header'>
-                <div className='app-logo'>
-                    <LocationPinIcon style={{width: '106px', height: '103px'}}/>
-                        <span>
-                        Bathroom 
-                        <br />
-                        Locator
-                    </span>
-                </div>
-                <div className='description'>
-                    Create an account to add new bathroom locations to the map or add details to existing bathrooms.
-                </div>
-            </div>
+        <div className='auth-screen'>
+            <AuthHeader description={description}/>
             <div className='auth-form'>
                 <Stack spacing={5}>
                     <Stack spacing={2}>
-                        <div style={{ textAlign: 'center', fontSize: '32px'}}>
+                        <div className='auth-form-name'>
                             Sign Up
                         </div>
                         <div>
@@ -59,36 +47,43 @@ export default function SignUp () {
                                 <div>
                                     <Alert severity="error">{errorMessage}</Alert>
                                 </div>
-                            ) : null }
+                            ) : null}
                         </div>
-                        <TextField 
-                            id="outlined-basic"
-                            label="Email"
-                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                                setEmail(event.target.value);
-                            }}
-                        />
-                        <TextField 
-                            id="outlined-basic" 
-                            label="Password"
-                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                                setPassword(event.target.value);
-                            }}
-                        />
-                        <TextField 
-                            id="outlined-basic" 
-                            label="Confirm Password"
-                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                                setConfirmPassword(event.target.value);
-                            }}
-                        />
+                        <Stack spacing={4}>
+                            <TextField 
+                                variant="outlined"
+                                label="Email"
+                                className='input-box'
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                    setEmail(event.target.value);
+                                }}
+                            />
+                            <TextField 
+                                variant="outlined" 
+                                label="Password"
+                                type="password"
+                                className='input-box'
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                    setPassword(event.target.value);
+                                }}
+                            />
+                            <TextField 
+                                variant="outlined" 
+                                label="Confirm Password"
+                                type="password"
+                                className='input-box'
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                    setConfirmPassword(event.target.value);
+                                }}
+                            />
+                        </Stack>
                     </Stack>
                     <Stack spacing={2}>
-                        <Button variant="contained" onClick={signUpNewUser}>
+                        <Button disabled={email === '' || password === '' || confirmPassword === ''} variant="contained" data-testid="signup-button" className='button' onClick={signUpNewUser}>
                             Sign Up
                         </Button>
-                        <Button variant="outlined" onClick={() => navigate("/login")}>
-                            Log In
+                        <Button variant="outlined" data-testid="login-button" className='button' onClick={() => navigate("/login")}>
+                            Login
                         </Button>
                     </Stack>
                 </Stack>
