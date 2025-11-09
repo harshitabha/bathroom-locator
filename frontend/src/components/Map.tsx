@@ -8,7 +8,7 @@ import {
 import "./Map.css";
 import { openWalkingDirections } from "../utils/navigation";
 import Button from "@mui/material/Button";
-import AddBathroomPage from "./AddBathroomPage";
+import AddBathroom from "./AddBathroom";
 import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import Snackbar from "@mui/material/Snackbar";
@@ -41,11 +41,11 @@ function MapInner({ apiKey }: { apiKey: string }) {
   const [bannerOpen, setBannerOpen] = useState(false);
   const [draftPosition, setDraftPosition] = useState<google.maps.LatLngLiteral | null>(null);
 
-  // controlled form fields that survive closing/re-opening the sheet
+  // controlled form fields that survive closing/reopening the sheet
   const [formName, setFormName] = useState("");
   const [formDetails, setFormDetails] = useState("");
 
-  // bump this to tell AddBathroomPage to clear its fields after a successful place
+  // bump this to tell AddBathroom to clear its fields after a successful place
   const [resetToken, setResetToken] = useState(0);
 
   // “peek” gesture helpers
@@ -64,13 +64,13 @@ function MapInner({ apiKey }: { apiKey: string }) {
     const dy = startYRef.current - e.changedTouches[0].clientY;
     if (dy > 20) {
       setAddOpen(true);
-      setBannerOpen(false); // hide the top banner when sheet opens
+      setBannerOpen(false);
     }
     startYRef.current = null;
     draggingRef.current = false;
   };
 
-  // Desktop testing helper (mouse drag ≈ swipe)
+  // Desktop testing helper
   const onPeekMouseDown: React.MouseEventHandler<HTMLDivElement> = (e) => {
     e.stopPropagation(); 
     startYRef.current = e.clientY;
@@ -81,7 +81,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
         const dy = startYRef.current - ev.clientY;
         if (dy > 20) {
           setAddOpen(true);
-          setBannerOpen(false); // hide on open
+          setBannerOpen(false);
         }
       }
       startYRef.current = null;
@@ -438,7 +438,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
           </Paper>
         </Box>
       )}
-      <AddBathroomPage
+      <AddBathroom
         open={addOpen}
         onOpen={() => {
           setBannerOpen(false);

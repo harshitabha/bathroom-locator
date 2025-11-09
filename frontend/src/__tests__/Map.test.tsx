@@ -1,7 +1,9 @@
+import '@testing-library/jest-dom/vitest';
 import { render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Map from '../components/Map';
 import { vi } from 'vitest';
+import { mockMatchMedia } from '../__test-helpers__/testUtils';
 
 /* -----------------------------
    Mocks
@@ -15,8 +17,12 @@ beforeAll(() => {
   // @ts-expect-error - we’re creating the google shim for tests
   global.window.google = {
     maps: {
-      Size: class Size { constructor(public width: number, public height: number) {} },
-      Point: class Point { constructor(public x: number, public y: number) {} },
+      Size: class Size {
+        constructor(public width: number, public height: number) {}
+      },
+      Point: class Point {
+        constructor(public x: number, public y: number) {}
+      },
       MapTypeId: { ROADMAP: 'roadmap' },
     },
   };
@@ -51,7 +57,6 @@ vi.mock('@react-google-maps/api', async () => {
     ...rest
   }: any) => {
     lastMapProps = { onClick, rest };
-    // give the component something like a real map object for onLoad
     React.useEffect(() => {
       if (onLoad) onLoad({ getBounds: () => null });
     }, [onLoad]);
@@ -61,7 +66,6 @@ vi.mock('@react-google-maps/api', async () => {
         data-testid="google-map"
         className={mapContainerClassName}
         onClick={() => {
-          // simulate Maps event
           const latLng = { lat: () => 36.991, lng: () => -122.059 };
           onClick?.({ latLng });
         }}
@@ -71,16 +75,16 @@ vi.mock('@react-google-maps/api', async () => {
     );
   };
 
-    const Marker = ({ title, onClick }: any) => (
+  const Marker = ({ title, onClick }: any) => (
     <button
-        type="button"
-        aria-label={`marker:${title ?? 'draft'}`}
-        onClick={(e) => {
+      type="button"
+      aria-label={`marker:${title ?? 'draft'}`}
+      onClick={(e) => {
         e.stopPropagation();
         onClick?.();
-        }}
+      }}
     />
-    );
+  );
 
   const InfoWindow = ({ children }: any) => <div role="dialog">{children}</div>;
 
@@ -88,26 +92,6 @@ vi.mock('@react-google-maps/api', async () => {
 
   return { GoogleMap, Marker, InfoWindow, useLoadScript };
 });
-
-/* -----------------------------
-   Helpers
-------------------------------*/
-
-function mockMatchMedia(matches: boolean) {
-  Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: vi.fn().mockImplementation((query: string) => ({
-      matches,
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    })),
-  });
-}
 
 /* =============================
    TESTS
@@ -133,7 +117,7 @@ describe('Map add-flow & info window', () => {
     ).toBeInTheDocument();
   });
 
-    it('clicking the map in add mode opens the form and hides the banner', async () => {
+  it('clicking the map in add mode opens the form and hides the banner', async () => {
     const user = userEvent.setup();
     render(<Map />);
 
@@ -144,11 +128,11 @@ describe('Map add-flow & info window', () => {
     await user.click(map);
 
     await waitForElementToBeRemoved(() =>
-        screen.getByText(/choose a location for the bathroom/i)
+      screen.getByText(/choose a location for the bathroom/i)
     );
 
     await screen.findByLabelText(/bathroom name/i);
-    });
+  });
 
   it('closing the sheet via Cancel keeps add mode but re-opens the banner', async () => {
     const user = userEvent.setup();
@@ -162,12 +146,12 @@ describe('Map add-flow & info window', () => {
 
     // Wait for the sheet to close
     await waitForElementToBeRemoved(() =>
-    screen.queryByLabelText(/Bathroom Name/i)
+      screen.queryByLabelText(/Bathroom Name/i)
     );
 
     // Then verify banner is visible again
     expect(
-    await screen.findByText(/Choose a location for the bathroom/i)
+      await screen.findByText(/Choose a location for the bathroom/i)
     ).toBeInTheDocument();
   });
 
@@ -180,8 +164,14 @@ describe('Map add-flow & info window', () => {
     await user.click(screen.getByTestId('google-map'));
 
     // fill form
-    await user.type(await screen.findByLabelText(/Bathroom Name/i), 'Cowell Restroom');
-    await user.type(screen.getByLabelText(/Bathroom Description/i), 'near lobby');
+    await user.type(
+      await screen.findByLabelText(/Bathroom Name/i),
+      'Cowell Restroom'
+    );
+    await user.type(
+      screen.getByLabelText(/Bathroom Description/i),
+      'near lobby'
+    );
 
     // save
     await user.click(screen.getByRole('button', { name: /save/i }));
@@ -192,10 +182,12 @@ describe('Map add-flow & info window', () => {
     ).not.toBeInTheDocument();
 
     // Add FAB is back
-    expect(await screen.findByRole('button', { name: /add/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('button', { name: /add/i })
+    ).toBeInTheDocument();
   });
 
-    it('marker click opens InfoWindow and "Get Directions" triggers util', async () => {
+  it('marker click opens InfoWindow and "Get Directions" triggers util', async () => {
     const user = userEvent.setup();
     const { openWalkingDirections } = await import('../utils/navigation');
     render(<Map />);
@@ -203,27 +195,37 @@ describe('Map add-flow & info window', () => {
     // Add a bathroom via form so a real marker exists
     await user.click(await screen.findByRole('button', { name: /add/i }));
     await user.click(screen.getByTestId('google-map'));
-    await user.type(await screen.findByLabelText(/Bathroom Name/i), 'McHenry');
-    await user.type(screen.getByLabelText(/Bathroom Description/i), 'downstairs');
+    await user.type(
+      await screen.findByLabelText(/Bathroom Name/i),
+      'McHenry'
+    );
+    await user.type(
+      screen.getByLabelText(/Bathroom Description/i),
+      'downstairs'
+    );
     await user.click(screen.getByRole('button', { name: /save/i }));
 
     // There should be a marker button with accessible name "marker:McHenry"
-    const markerBtn = await screen.findByRole('button', { name: /marker:McHenry/i });
+    const markerBtn = await screen.findByRole('button', {
+      name: /marker:McHenry/i,
+    });
     await user.click(markerBtn);
 
-    // Just find the "Get Directions" button directly (no dialog scoping)
-    const cta = await screen.findByRole('button', { name: /get directions/i });
+    // Just find the "Get Directions" button directly
+    const cta = await screen.findByRole('button', {
+      name: /get directions/i,
+    });
     await user.click(cta);
 
     // Verify openWalkingDirections was called correctly
     expect(openWalkingDirections).toHaveBeenCalledWith(
-        expect.any(Number),
-        expect.any(Number)
+      expect.any(Number),
+      expect.any(Number)
     );
 
     // Ensure arguments are numeric
     const args = (openWalkingDirections as any).mock.calls[0];
     expect(typeof args[0]).toBe('number');
     expect(typeof args[1]).toBe('number');
-    });
-    });
+  });
+});
