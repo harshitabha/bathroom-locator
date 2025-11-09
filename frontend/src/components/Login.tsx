@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import {Stack, TextField, Button, Alert} from '@mui/material';
-import LocationPinIcon from '@mui/icons-material/LocationPin';
 import { useNavigate } from "react-router-dom";
+import AuthHeader from './AuthHeader';
 import './Auth.css';
 
 export default function Login () {
@@ -12,8 +12,11 @@ export default function Login () {
     const navigate = useNavigate();
     
     async function signInWithEmail() {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        const { error } = await supabase.auth.signInWithPassword({ email: email, password: password })
         if (error) {
+            if (error.message === "missing email or phone") {
+                error.message = "Missing credentials";
+            }
             setErrorMessage(error.message);
         }
         else {
@@ -21,31 +24,16 @@ export default function Login () {
             navigate("/");
         }
     }
+
+    const description = "Log in ";
     
     return (
-        <div style={{display: 'flex', flexDirection: 'column', minHeight: '100vh'}}>
-            <div style={{marginTop: '10px'}}>
-               <Button variant="contained" onClick={() => navigate("/")}>
-                    Back to Map
-                </Button> 
-            </div>
-            <div className='auth-header'>
-                <div className='app-logo'>
-                    <LocationPinIcon style={{width: '106px', height: '103px'}}/>
-                        <span>
-                        Bathroom 
-                        <br />
-                        Locator
-                    </span>
-                </div>
-                <div className='description'>
-                    Log in to add new bathroom locations to the map or add details to existing bathrooms.
-                </div>
-            </div>
+        <div className='auth-screen'>
+            <AuthHeader description={description}/>
             <div className='auth-form'>
                 <Stack spacing={5}>
                     <Stack spacing={2}>
-                        <div style={{ textAlign: 'center', fontSize: '32px'}}>
+                        <div className='auth-form-name'>
                             Login
                         </div>
                         <div>
@@ -55,26 +43,31 @@ export default function Login () {
                                 </div>
                             ) : null }
                         </div>
-                        <TextField 
-                            id="outlined-basic"
-                            label="Email"
-                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                                setEmail(event.target.value);
-                            }}
-                        />
-                        <TextField 
-                            id="outlined-basic" 
-                            label="Password"
-                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                                setPassword(event.target.value);
-                            }}
-                        />
+                        <Stack spacing={4}>
+                            <TextField 
+                                variant="outlined"
+                                label="Email"
+                                className='input-box'
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                    setEmail(event.target.value);
+                                }}
+                            />
+                            <TextField 
+                                variant="outlined"
+                                label="Password"
+                                type="password"
+                                className='input-box'
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                    setPassword(event.target.value);
+                                }}
+                            />
+                        </Stack>
                     </Stack>
                     <Stack spacing={2}>
-                        <Button variant="contained" onClick={signInWithEmail}>
+                        <Button disabled={email === '' || password === ''} variant="contained" className='button' onClick={signInWithEmail}>
                             Login
                         </Button>
-                        <Button variant="outlined" onClick={() => navigate("/SignUp")}>
+                        <Button variant="outlined" className='button' onClick={() => navigate("/signup")}>
                             Sign Up
                         </Button>
                     </Stack>
