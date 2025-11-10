@@ -17,7 +17,7 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 
 type Place = {
-  id: number;
+  id: string;
   name: string;
   position: google.maps.LatLngLiteral;
   details?: string;
@@ -456,22 +456,38 @@ function MapInner({ apiKey }: { apiKey: string }) {
         onDetailsChange={setFormDetails}
         resetToken={resetToken}
         onSubmit={async (data) => {
-          setPlaces((prev) => [
-            ...prev,
-            {
-              id: Date.now(),
+          let created: Place | null = null;
+          try {
+            const res = await fetch("http://localhost:3000/bathroom", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name: data.name,
+                position: data.position,
+                details: data.details ?? "",
+              }),
+            });
+
+            if (res.ok) {
+              created = await res.json();
+            } else {
+              console.error("Failed to create bathroom:", res.status);
+            }
+          } catch (err) {
+            console.error("Error creating bathroom:", err);
+          }
+          if (!created) {
+            created = {
+              id: Date.now().toString(),
               name: data.name,
               position: data.position,
-              details: data.details,
-            },
-          ]);
-
-          // End the flow completely:
+              details: data.details ?? "",
+            };
+          }
+          setPlaces((prev) => [...prev, created]);
           setAddOpen(false);
           setAddMode(false);
           setBannerOpen(false);
-
-          // Reset form text after a successful "place":
           setFormName("");
           setFormDetails("");
           setDraftPosition(null);
