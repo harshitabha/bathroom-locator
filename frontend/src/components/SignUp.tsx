@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import {Stack, TextField, Button, Alert} from '@mui/material';
+import {Stack, TextField, Button, Alert, Typography} from '@mui/material';
 import AuthHeader from './AuthHeader';
 import { useNavigate } from "react-router-dom";
 import './Auth.css';
@@ -39,9 +39,12 @@ export default function SignUp () {
             <div className='auth-form'>
                 <Stack spacing={5}>
                     <Stack spacing={2}>
-                        <div className='auth-form-name'>
+                        <Typography
+                            className='auth-form-name'
+                            variant="h4"
+                        >
                             Sign Up
-                        </div>
+                        </Typography>
                         <div>
                             {errorMessage ? (
                                 <div>
