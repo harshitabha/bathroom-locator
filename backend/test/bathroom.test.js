@@ -38,6 +38,9 @@ describe('GET Bathroom Endpoint', () => {
           expect(first.position.lat).toBe(37.00076576303953);
           expect(first.position.lng).toBe(-122.05719563060227);
           expect(first.description).toBe('more details');
+          expect(first.num_stalls).toBe(1);
+          expect(first.amenities.toilet_paper).toBe(true);
+          expect(first.amenities.hand_dryer).toBe(false);
         });
   });
 });
@@ -98,23 +101,29 @@ describe('POST Bathroom Endpoint', () => {
       'mirror': true,
     },
   };
+  it('should return a 201 status code', async () => {
+    await request.post(`/bathroom`)
+        .send(bathroom)
+        .expect(201);
+  })
   it('should create a new bathroom and return it', async () => {
     await request.post(`/bathroom`)
         .send(bathroom)
         .then((data) => {
           const newBathroom = data.body;
-          expect(201);
           expect(newBathroom).toHaveProperty('id');
           expect(newBathroom.name).toBe(bathroom.name);
           expect(newBathroom.position.lat).toBe(bathroom.position.lat);
           expect(newBathroom.description).toBe(bathroom.description);
+          expect(newBathroom.num_stalls).toBe(bathroom.num_stalls);
+          expect(newBathroom.amenities).toEqual(bathroom.amenities);
         });
   });
   it('should then exist in the database', async () => {
     await request.get(`/bathroom`)
         .then((data) => {
           expect(200);
-          expect(data.body.length).toBe(10);
+          expect(data.body.length).toBe(11);
         });
   });
 });
