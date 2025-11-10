@@ -456,39 +456,38 @@ function MapInner({ apiKey }: { apiKey: string }) {
         onDetailsChange={setFormDetails}
         resetToken={resetToken}
         onSubmit={async (data) => {
+          let created: Place | null = null;
           try {
-            // POST new bathroom to backend
             const res = await fetch("http://localhost:3000/bathroom", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 name: data.name,
-                position: data.position, // { lat, lng }
-                details: data.details,
+                position: data.position,
+                details: data.details ?? "",
               }),
             });
 
-            if (!res.ok) {
+            if (res.ok) {
+              created = await res.json();
+            } else {
               console.error("Failed to create bathroom:", res.status);
-              return;
             }
-
-            // backend returns the created bathroom 
-            const created = await res.json();
-
-            // update map markers with backend data
-            setPlaces((prev) => [...prev, created]);
           } catch (err) {
             console.error("Error creating bathroom:", err);
-            return;
           }
-
-          // End the flow completely
+          if (!created) {
+            created = {
+              id: Date.now().toString(),
+              name: data.name,
+              position: data.position,
+              details: data.details ?? "",
+            };
+          }
+          setPlaces((prev) => [...prev, created]);
           setAddOpen(false);
           setAddMode(false);
           setBannerOpen(false);
-
-          // Reset form fields after successful POST
           setFormName("");
           setFormDetails("");
           setDraftPosition(null);
