@@ -9,3 +9,35 @@
   width: 80vw;
   height: 80vh;
 }
+
+/* InfoWindow container */
+.map-align-center .gm-style .gm-style-iw-c.gm-style-iw-c {
+  padding: 0;
+  background: #fbfaed;
+  box-shadow: none;
+  border-radius: 12px;
+  line-height: 1.1;
+}
+
+/* InfoWindow inner wrapper */
+.map-align-center .gm-style .gm-style-iw-d.gm-style-iw-d {
+  overflow: visible;
+  margin-top: -17px;
+}
+
+/* Close button position */
+.map-align-center .gm-style .gm-style-iw-chr.gm-style-iw-chr {
+  right: 6px;
+  top: 6px;
+}
+
+/* Actual card content inside InfoWindow */
+.infowin {
+  background: #fbfaed;
+  color: #1b1c15;
+  border-radius: 12px;
+  padding: 8px 12px 10px 12px;
+  min-width: 180px;
+  max-width: 230px;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
