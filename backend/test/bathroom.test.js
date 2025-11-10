@@ -96,7 +96,7 @@ describe('POST Bathroom Endpoint', () => {
       'hand_dryer': false,
       'menstrual_products': true,
       'mirror': true,
-    }
+    },
   };
   it('should create a new bathroom and return it', async () => {
     await request.post(`/bathroom`)
