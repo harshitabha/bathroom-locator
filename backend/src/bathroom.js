@@ -14,6 +14,61 @@ export async function getBathrooms(req, res) {
   }
 }
 
+export let clients = [];
+// use shorter timeout for tests
+const LONG_POLL_TIMEOUT = process.env.NODE_ENV === 'test' ? 1000 : 30000;
+/**
+ * @param {object} req request object
+ * @param {object} res response object
+ * @returns {Array} array of bathrooms in the bounds
+ */
+export async function getUpdates(req, res) {
+  try {
+    req.setTimeout(0);
+    const client = {res, sent: false};
+    clients.push(client);
+
+    if (typeof global.clientRegistered === 'function') {
+      global.clientRegistered();
+    }
+
+    const timer = setTimeout(() => {
+      if (!client.sent) {
+        client.sent = true;
+        clients = clients.filter((c) => c !== client);
+        res.json([]); // no updates, send empty
+      }
+    }, LONG_POLL_TIMEOUT);
+
+    res.on('close', () => {
+      if (!client.sent) {
+        client.sent = true;
+        clearTimeout(timer);
+        clients = clients.filter((c) => c !== client);
+      }
+    });
+  } catch (err) {
+    console.error('Error in getUpdates:', err);
+    if (!res.headersSent) {
+      res.status(500).json({error: 'Internal Server Error'});
+    }
+  }
+}
+
+/**
+ * Called when a new bathroom is added to notify waiting clients
+ * @param {object} newBathroom - The new bathroom that was added.
+ */
+export async function notifyNewBathroom(newBathroom) {
+  clients.forEach((client) => {
+    if (!client.sent) {
+      client.sent = true;
+      client.res.json([newBathroom]);
+    }
+  });
+  clients = clients.filter((client) => client.sent === false);
+}
+
 /**
  * returns bathrooms in the database within bounds
  * @param {object} req request object
@@ -74,6 +129,8 @@ export async function getBathroomsInBounds(req, res) {
  */
 export async function createBathroom(req, res) {
   const bathroom = await db.createBathroom(req.body);
+  // Notify long-poll clients
+  notifyNewBathroom(bathroom);
   if (bathroom) {
     res.status(201).send(bathroom);
   }

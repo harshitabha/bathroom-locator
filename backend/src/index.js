@@ -40,8 +40,10 @@ app.get('/bathroom', (req, res) => {
   }
   return bathroom.getBathrooms(req, res);
 });
+
 app.post('/bathroom', bathroom.createBathroom);
 
+app.get('/bathroom/updates', bathroom.getUpdates);
 
 app.listen(port, () => {
   console.log(`App running on port ${port}.`);

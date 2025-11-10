@@ -5,6 +5,8 @@ import http from 'http';
 import * as db from './db.js';
 import app from '../src/index.js';
 
+import {notifyNewBathroom} from '../src/bathroom.js';
+
 let server;
 let request;
 
@@ -77,6 +79,39 @@ describe('GET bathroom with bounds', () => {
           expect(data.status).toBe(200);
           expect(data.body.length).toBe(0);
         });
+  });
+});
+
+describe('GET /bathroom/updates endpoint', () => {
+  // simulate new bathroom
+  const newBathroom = {
+    'id': 'cf0c26a5-fa2e-4685-8120-feafc76eb009',
+    'name': 'New Bathroom',
+    'position': {
+      'lat': 36.996621249644626,
+      'lng': -122.0626488260964,
+    },
+    'details': 'more details',
+  };
+
+  it('should wait and receive new bathroom updates', async () => {
+    const getUpdates = supertest(app).get('/bathroom/updates');
+
+    setTimeout(() => {
+      notifyNewBathroom(newBathroom);
+    }, 100);
+
+    const response = await getUpdates;
+    // Assertions
+    expect(response.status).toBe(200);
+    expect(response.body.length).toBe(1);
+    expect(response.body[0]).toEqual(newBathroom);
+  }, 5000);
+  it('should timeout and return empty after 30 seconds', async () => {
+    const response = await supertest(app).get('/bathroom/updates');
+    // Assertions
+    expect(response.status).toBe(200);
+    expect(response.body.length).toBe(0);
   });
 });
 
