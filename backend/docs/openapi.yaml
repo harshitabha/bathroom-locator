@@ -49,8 +49,6 @@ paths:
                   $ref: '#/components/schemas/Bathroom'
         400:
           description: Invalid parameters
-        404:
-          description: No results
     
     post:
       description: Add a new bathroom
@@ -94,10 +92,23 @@ components:
             - lng
         description:
           type: string
+        num_stalls:
+          type: number
+        amenities:
+          type: object
+          properties:
+            toilet_paper: { type: boolean }
+            soap: { type: boolean }
+            paper_towel: { type: boolean }
+            hand_dryer: { type: boolean }
+            menstrual_products: { type: boolean }
+            mirror: { type: boolean }
       required:
         - name
         - position
         - description
+        - num_stalls
+        - amenities
    
     NewBathroom:
       allOf:

@@ -88,6 +88,8 @@ describe('POST Bathroom Endpoint', () => {
       'lng': -122.0626488260964,
     },
     'description': 'next to media theater, very large',
+    'num_stalls': 1,
+    'amenities': {'toilet_paper': true, 'soap': true, 'paper_towel': true, 'hand_dryer': false, 'menstrual_products': true, 'mirror': true}
   };
   it('should create a new bathroom and return it', async () => {
     await request.post(`/bathroom`)
