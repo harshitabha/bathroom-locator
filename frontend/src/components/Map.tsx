@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import {
   GoogleMap,
   Marker,
@@ -6,90 +6,26 @@ import {
   useLoadScript,
 } from "@react-google-maps/api";
 import "./Map.css";
-import { openWalkingDirections } from "../utils/navigation";
-import Button from "@mui/material/Button";
-import AddBathroom from "./AddBathroom";
-import Fab from "@mui/material/Fab";
-import AddIcon from "@mui/icons-material/Add";
-import Snackbar from "@mui/material/Snackbar";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
+import { openWalkingDirections } from '../utils/navigation';
+import Button from '@mui/material/Button';
+
 
 type Place = {
-  id: number;
-  name: string;
-  position: google.maps.LatLngLiteral;
-  details?: string;
+  id: number; // id
+  name: string; // name of location
+  position: google.maps.LatLngLiteral; // position on map
+  details?: string; // description if needed
 };
 
 export default function Map() {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
   if (!apiKey) return <p>Missing VITE_GOOGLE_MAPS_API_KEY</p>;
-  return <MapInner apiKey={apiKey} />;
+  return <MapInner apiKey={apiKey} />; // makes sure all react hooks are called before returning
 }
 
 function MapInner({ apiKey }: { apiKey: string }) {
-  // bathrooms & selection
-  const [places, setPlaces] = useState<Place[]>([]);
-
-  const [selected, setSelected] = useState<Place | null>(null);
-
-  // add flow
-  const [addMode, setAddMode] = useState(false);
-  const [addOpen, setAddOpen] = useState(false);
-  const [bannerOpen, setBannerOpen] = useState(false);
-  const [draftPosition, setDraftPosition] = useState<google.maps.LatLngLiteral | null>(null);
-
-  // controlled form fields that survive closing/reopening the sheet
-  const [formName, setFormName] = useState("");
-  const [formDetails, setFormDetails] = useState("");
-
-  // bump this to tell AddBathroom to clear its fields after a successful place
-  const [resetToken, setResetToken] = useState(0);
-
-  // “peek” gesture helpers
-  const startYRef = useRef<number | null>(null);
-  const draggingRef = useRef(false);
-
-  const onPeekTouchStart: React.TouchEventHandler<HTMLDivElement> = (e) => {
-    e.stopPropagation(); 
-    startYRef.current = e.touches[0].clientY;
-    draggingRef.current = true;
-  };
-
-  const onPeekTouchEnd: React.TouchEventHandler<HTMLDivElement> = (e) => {
-    e.stopPropagation(); 
-    if (!draggingRef.current || startYRef.current == null) return;
-    const dy = startYRef.current - e.changedTouches[0].clientY;
-    if (dy > 20) {
-      setAddOpen(true);
-      setBannerOpen(false);
-    }
-    startYRef.current = null;
-    draggingRef.current = false;
-  };
-
-  // Desktop testing helper
-  const onPeekMouseDown: React.MouseEventHandler<HTMLDivElement> = (e) => {
-    e.stopPropagation(); 
-    startYRef.current = e.clientY;
-    draggingRef.current = true;
-    const onUp = (ev: MouseEvent) => {
-      ev.stopPropagation?.();
-      if (draggingRef.current && startYRef.current != null) {
-        const dy = startYRef.current - ev.clientY;
-        if (dy > 20) {
-          setAddOpen(true);
-          setBannerOpen(false);
-        }
-      }
-      startYRef.current = null;
-      draggingRef.current = false;
-      window.removeEventListener("mouseup", onUp);
-    };
-    window.addEventListener("mouseup", onUp);
-  };
+  const [places, setPlaces] = useState<Place[]>([]); // bathroom info
+  const [selected, setSelected] = useState<Place | null>(null); // tracks which pin is selected (which info window to show)
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -97,6 +33,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
     mapRef.current = map;
   };
 
+  // 
   const idleTimer = useRef<number | null>(null);
 
   // load map using api key
@@ -104,25 +41,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
     googleMapsApiKey: apiKey,
   });
 
-  const pinIcon = React.useMemo(() => {
-  if (!isLoaded || !window.google) return null;
-  const g = window.google; // type-safe alias
-
-  return {
-    url:
-      "data:image/svg+xml;charset=UTF-8," +
-      encodeURIComponent(`
-        <svg width="30" height="45" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg">
-          <path d="M15 0C7 0 0 7 0 15c0 11.25 15 30 15 30s15-18.75 15-30C30 7 23 0 15 0z" fill="#845416"/>
-          <circle cx="15" cy="15" r="6" fill="white"/>
-        </svg>
-      `),
-      scaledSize: new g.maps.Size(20, 30),
-      anchor: new g.maps.Point(10, 30),
-    } as google.maps.Icon;
-  }, [isLoaded]);
-
-  // default center coords when user doesn't provide location (somewhere in santa cruz)
+  // default center coords when user doesnt provide location (somewhere in santa cruz)
   const defaultCenter = useMemo<google.maps.LatLngLiteral>(
     () => ({ lat: 36.99034408117155, lng: -122.05891223939057 }),
     []
@@ -150,8 +69,8 @@ function MapInner({ apiKey }: { apiKey: string }) {
       },
       {
         enableHighAccuracy: true,
-        timeout: 10_000,
-        maximumAge: 60_000,
+        timeout: 10_000, // times out after 10s
+        maximumAge: 60_000, // saves location for 60s in browser cache
       }
     );
   }, []);
@@ -159,27 +78,8 @@ function MapInner({ apiKey }: { apiKey: string }) {
   // center map on user if location is given, else default on santa cruz
   const center = userLocation ?? defaultCenter;
 
-  // close info window when clicking off; in add mode, click drops draft pin and opens sheet
-  const handleMapClick = useCallback(
-    (e?: google.maps.MapMouseEvent) => {
-      setSelected(null);
-      if (addMode && e?.latLng) {
-        setDraftPosition({ lat: e.latLng.lat(), lng: e.latLng.lng() });
-        setAddOpen(true);
-        setBannerOpen(false);
-      }
-    },
-    [addMode]
-  );
-
-  const cancelAddFlow = useCallback(() => {
-    setAddOpen(false);
-    setBannerOpen(false);
-    setAddMode(false);
-    setDraftPosition(null);
-    setFormName("");
-    setFormDetails("");
-  }, []);
+  // close info window when clicking off
+  const handleMapClick = useCallback(() => setSelected(null), []);
 
   // fetch bathroom pins within the current map view + some padding
   const fetchVisiblePins = useCallback(async () => {
@@ -192,7 +92,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
     const ne = bounds.getNorthEast();
     const sw = bounds.getSouthWest();
 
-    // small padding so tiny movements don't refetch
+    // small padding so tiny movements dont refetch
     const pad = 0.1; // about 5 to 7 miles
     const minLng = sw.lng() - pad;
     const minLat = sw.lat() - pad;
@@ -312,221 +212,47 @@ function MapInner({ apiKey }: { apiKey: string }) {
         zoom={14}
         onClick={handleMapClick}
         options={{
-          clickableIcons: false,
-          disableDoubleClickZoom: true,
-          mapTypeId: google.maps.MapTypeId.ROADMAP,
-          disableDefaultUI: true,
+          clickableIcons: false, // prevents clicking on locations other than pins
+          disableDoubleClickZoom: true, // prevents accidental zoom
+          mapTypeControl: false, // prevents going to satellite mode
+          mapTypeId: google.maps.MapTypeId.ROADMAP, // locks map type to simple map
+          streetViewControl: false, // prevents going to streetview
+          zoomControl: true, // allows zooming buttons
         }}
       >
         {places.map((p) => (
           <Marker
             key={p.id}
-            position={p.position}
-            title={p.name}
-            icon={pinIcon ?? undefined}
+            position={p.position} // position of pin
+            title={p.name} // shows location name when hovering pins
             onClick={() => setSelected(p)}
           />
         ))}
-        {addMode && draftPosition && (
-          <Marker
-            position={draftPosition}
-            icon={pinIcon ?? undefined}
-          />
-        )}
+
         {selected && (
-        <InfoWindow
-          position={selected.position}
-          onCloseClick={() => setSelected(null)}
-          options={{
-            pixelOffset: new google.maps.Size(0, -10),
-            disableAutoPan: false,
-          }}
-        >
-        <div className="infowin">
-          <strong className="infowin-title">{selected.name}</strong>
-          {selected.details && <p className="infowin-text">{selected.details}</p>}
-          <div style={{ display: "flex", justifyContent: "center", marginTop: "6px" }}>
-            <Button
-              data-testid="get-directions"
-              variant="contained"
-              size="small"
-              onClick={() =>
-                openWalkingDirections(selected.position.lat, selected.position.lng)
-              }
-              sx={{
-                backgroundColor: "#576421",
-                color: "white",
-                fontWeight: 500,
-                textTransform: "none",
-                borderRadius: "8px",
-                "&:hover": { backgroundColor: "#6B7A29" },
-              }}
-            >
-              Get Directions
-            </Button>
-          </div>
-        </div>
-        </InfoWindow>
+          <InfoWindow
+            position={selected.position}
+            onCloseClick={() => setSelected(null)} // close info window by clicking x
+          >
+            <div>
+              <strong>{selected.name}</strong>
+              {selected.details && <p>{selected.details}</p>}
+              {/* TODO: add genders, amenenities, and navigate button here */}
+              <Button // Get Directions button
+                variant="contained"
+                color="primary" // default blue unless we manually change it
+                size="small"
+                onClick={() => openWalkingDirections(
+                  selected.position.lat,
+                  selected.position.lng
+                )}
+              >
+                Get Directions
+              </Button>
+            </div>
+          </InfoWindow>
         )}
       </GoogleMap>
-
-      {!addMode && (
-        <Fab
-          color="primary"
-          aria-label="add"
-          onClick={() => {
-            setAddMode(true);
-            setBannerOpen(true);
-            setSelected(null);
-            setAddOpen(false);
-            setDraftPosition(null);
-          }}
-          sx={{
-            position: "fixed",
-            right: 24,
-            bottom: 24,
-            zIndex: (theme) => theme.zIndex.modal + 1,
-            bgcolor: "#576421",
-            color: "white",
-            "&:hover": { bgcolor: "#6B7A29" },
-          }}
-        >
-          <AddIcon />
-        </Fab>
-      )}
-
-      <Snackbar
-        open={bannerOpen}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        slotProps={{
-          content: {
-            sx: {
-              bgcolor: "#FBFAED",
-              color: "#1B1C15",
-              borderRadius: "12px",
-              boxShadow: "0px 2px 6px rgba(0,0,0,0.15)",
-              display: "flex",
-              alignItems: "center",
-              px: 3,
-              py: 0.85,
-            },
-          },
-        }}
-        message={
-          <Typography variant="subtitle1" fontWeight={500}>
-            Choose a location for the bathroom
-          </Typography>
-        }
-        action={
-          <Button
-            size="small"
-            onClick={cancelAddFlow}
-            sx={{
-              color: "#1B1C15",
-              border: "1px solid #845416",
-              borderRadius: "8px",
-              fontWeight: 600,
-              ml: 0.1,
-              px: 1.6,
-              textTransform: "none",
-              "&:hover": {
-                backgroundColor: "rgba(132, 84, 22, 0.05)",
-              },
-            }}
-          >
-            Cancel
-          </Button>
-        }
-      />
-
-      {addMode && !addOpen && (
-        <Box
-          sx={{
-            position: "fixed",
-            left: 8,
-            right: 8,
-            bottom: 8,
-            zIndex: (t) => t.zIndex.modal + 1,
-          }}
-        >
-          <Paper
-            elevation={3}
-            onTouchStart={onPeekTouchStart}
-            onTouchEnd={onPeekTouchEnd}
-            onMouseDown={onPeekMouseDown}
-            sx={{
-              bgcolor: "#FBFAED",
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16,
-              px: 2,
-              pt: 1.5,
-              pb: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              cursor: "grab",
-            }}
-          >
-            <Box
-              sx={{
-                width: 40,
-                height: 4,
-                borderRadius: 2,
-                bgcolor: "text.disabled",
-                mb: 0.1,
-              }}
-            />
-            <Typography
-              variant="h6"
-              fontWeight={600}
-              color="#1B1C15"
-              sx={{ alignSelf: "flex-start" }}
-            >
-              New Bathroom
-            </Typography>
-          </Paper>
-        </Box>
-      )}
-      <AddBathroom
-        open={addOpen}
-        onOpen={() => {
-          setBannerOpen(false);
-        }}
-        onClose={() => {
-          setAddOpen(false);
-          setBannerOpen(true);
-          setDraftPosition(null);
-        }}
-        onCancelFull={cancelAddFlow}
-        position={draftPosition}
-        name={formName}
-        details={formDetails}
-        onNameChange={setFormName}
-        onDetailsChange={setFormDetails}
-        resetToken={resetToken}
-        onSubmit={async (data) => {
-          setPlaces((prev) => [
-            ...prev,
-            {
-              id: Date.now(),
-              name: data.name,
-              position: data.position,
-              details: data.details,
-            },
-          ]);
-
-          // End the flow completely:
-          setAddOpen(false);
-          setAddMode(false);
-          setBannerOpen(false);
-
-          // Reset form text after a successful "place":
-          setFormName("");
-          setFormDetails("");
-          setDraftPosition(null);
-          setResetToken((t) => t + 1);
-        }}
-      />
     </div>
   );
 }
