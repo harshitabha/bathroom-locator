@@ -2,8 +2,8 @@ import {Box, Button, Avatar} from '@mui/material';
 import { Link } from 'react-router-dom';
 
 export default function MapHeader() {
-  const loggedIn = false;  // TODO: make this real (maybe pass it down from App)
-
+  const loggedIn = localStorage.length >= 1; // TODO: make this real (maybe pass it down from App)
+  
   return (
     <Box sx={{
       position: 'fixed',
