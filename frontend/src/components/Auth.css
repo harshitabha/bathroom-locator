@@ -4,7 +4,6 @@ body {
 .auth-screen {
     display: flex;
     flex-direction: column;
-    max-height: 100vh;
     padding-bottom: 40px;
 }
 
@@ -17,38 +16,43 @@ body {
 .app-logo {
     display: flex;
     align-items: center;
-    line-height: 1;
 }
+
 .app-logo .location-icon {
     height: 90px;
     width: auto;
 }
+
 .description {
-    font-size: 16px;
     text-align: center;
     padding-top: 10px;
-    margin: auto;
     max-width: 500px;
 }
+
 .auth-form {
     display: flex;
     justify-content: center;
     margin-top: 30px;
 }
+
 .auth-form .auth-form-name {
     text-align: center;
 }
+
 .auth-form .input-box {
     width: 305px;
 }
+
 .error-hidden {
     visibility: hidden;
 }
+
 .button {
     text-transform: none !important;
     font-weight: bold !important;
 }
+
 .back-button {
     margin-top: 10px;
     margin-left: 10px;
- }
+}

@@ -82,10 +82,21 @@ export default function SignUp () {
                         </Stack>
                     </Stack>
                     <Stack spacing={2}>
-                        <Button disabled={email === '' || password === '' || confirmPassword === ''} variant="contained" data-testid="signup-button" className='button' onClick={signUpNewUser}>
+                        <Button
+                            disabled={email === '' || password === '' || confirmPassword === ''}
+                            variant="contained"
+                            data-testid="signup-button"
+                            className='button'
+                            onClick={signUpNewUser}
+                        >
                             Sign Up
                         </Button>
-                        <Button variant="outlined" data-testid="login-button" className='button' onClick={() => navigate("/login")}>
+                        <Button
+                            variant="outlined"
+                            data-testid="login-button"
+                            className='button'
+                            onClick={() => navigate("/login")}
+                        >
                             Login
                         </Button>
                     </Stack>

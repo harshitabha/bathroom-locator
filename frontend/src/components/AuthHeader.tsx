@@ -38,7 +38,6 @@ const AuthHeader : React.FC<AuthHeaderProps> = ({ description }) => {
                     />
                     <Typography
                         variant="h3"
-                        sx={{ typography: { xs: 'h3', sm: 'h3' }, lineHeight: 1 }}
                     >
                         <strong>Bathroom</strong>
                         <br/>
@@ -47,7 +46,7 @@ const AuthHeader : React.FC<AuthHeaderProps> = ({ description }) => {
                 </div>
                 <Typography
                     className='description'
-                    variant="subtitle2"
+                    variant="body2"
                 >
                     {description} to add new bathroom locations to the map or add details to existing bathrooms.
                 </Typography>

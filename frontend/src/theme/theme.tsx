@@ -8,6 +8,26 @@ const theme = createTheme({
     background: { default: '#FBFAED' },
     text: { primary: '#000000' },
   },
+  components: {
+    MuiTypography: {
+      variants: [
+        {
+          props: { variant: 'h3' },
+          style: {
+            lineHeight: 1,
+            fontSize: '2.8rem',
+          },
+        },
+        {
+          props: { variant: 'h4' },
+          style: {
+            lineHeight: 1,
+            fontSize: '2rem',
+          },
+        },
+      ],
+    },
+  }
 });
 
 export default theme;
