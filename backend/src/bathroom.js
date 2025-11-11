@@ -135,3 +135,18 @@ export async function createBathroom(req, res) {
     res.status(201).send(bathroom);
   }
 }
+
+/**
+ * creates a new like in userLikes and adds a like to the bathroom
+ * @param {object} req request object
+ * @param {object} res response object
+ */
+export async function likeBathroom(req, res) {
+  try {
+    await db.likeBathroom(req.body.userId, req.body.bathroomId);
+    res.status(201).send();
+  } catch (err) {
+    console.error('Error in likeBathroom:', err);
+    res.status(400).send();
+  }
+}
