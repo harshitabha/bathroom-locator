@@ -50,8 +50,37 @@ function MapInner({ apiKey }: { apiKey: string }) {
   // store user location as LatLng
   const [userLocation, setUserLocation] =
     useState<google.maps.LatLngLiteral | null>(null);
+  // store initial user location for initial centering
+  const [initialLocation, setInitialLocation] = useState<google.maps.LatLngLiteral | null>(null);
 
-  // ask for user location for centering map
+  // ask for user location for centering map once when page loads
+  useEffect(() => {
+    if (!("geolocation" in navigator)) {
+      console.error("Geolocation not supported by this browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setInitialLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
+      },
+      (err) => {
+        console.error("Geolocation error:", err.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10_000, // times out after 10s
+        maximumAge: 60_000, // saves location for 60s in browser cache
+      }
+    );
+  }, []);
+
+  // center map on user if location is given, else default on santa cruz
+  const center = initialLocation ?? defaultCenter;
+
+  // watch user location for updating marker (doesn't recenter)
   useEffect(() => {
     if (!("geolocation" in navigator)) {
       console.error("Geolocation not supported by this browser.");
@@ -77,9 +106,6 @@ function MapInner({ apiKey }: { apiKey: string }) {
       navigator.geolocation.clearWatch(watchId);
     };
   }, []);
-
-  // center map on user if location is given, else default on santa cruz
-  const center = userLocation ?? defaultCenter;
 
   // close info window when clicking off
   const handleMapClick = useCallback(() => setSelected(null), []);
