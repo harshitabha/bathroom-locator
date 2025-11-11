@@ -84,7 +84,7 @@ describe('Sign Up component', () => {
   });
 
   it('renders auth form', async () => {
-    expect(screen.getByText('Sign Up', { selector: 'div'}));
+    expect(screen.getByText('Sign Up', { selector: 'h4'}));
 
     expect(screen.getByLabelText('Email'));
     expect(screen.getByLabelText('Password'));
