@@ -45,13 +45,14 @@ export default function SignUp () {
                         >
                             Sign Up
                         </Typography>
-                        <div>
-                            {errorMessage ? (
-                                <div>
-                                    <Alert severity="error">{errorMessage}</Alert>
-                                </div>
-                            ) : null}
-                        </div>
+                        {errorMessage ? (
+                            <Alert
+                                severity="error"
+                                sx={{maxWidth: '100%'}}
+                            >
+                                {errorMessage}
+                            </Alert>
+                        ) : null}
                         <Stack spacing={4}>
                             <TextField 
                                 variant="outlined"

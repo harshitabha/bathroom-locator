@@ -9,6 +9,15 @@ const theme = createTheme({
     text: { primary: '#000000' },
   },
   components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          padding: '12px',
+          fontWeight: 'bold',
+          textTransform: 'none',
+        },
+      },
+    },
     MuiTypography: {
       variants: [
         {

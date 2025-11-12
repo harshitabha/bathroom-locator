@@ -22,7 +22,8 @@ const AuthHeader : React.FC<AuthHeaderProps> = ({ description }) => {
                 className='back-button'
                 sx={{
                     color: theme.palette.text.primary,
-                    p: {xs: 0, sm: 1}
+                    p: {xs: 0, sm: 1},
+                    marginBottom: 1,
                 }}
                 onClick={() => navigate("/")}
             >
