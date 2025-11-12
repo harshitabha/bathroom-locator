@@ -5,7 +5,9 @@ INSERT INTO bathrooms (id, data) VALUES (
   '{
     "name": "Namaste Lounge Bathroom",
     "position": {"lat": 37.00076576303953, "lng": -122.05719563060227},
-    "details": "more details"
+    "description": "more details",
+    "num_stalls": 1,
+    "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true}
   }'::jsonb
 );
 
@@ -14,7 +16,9 @@ INSERT INTO bathrooms (id, data) VALUES (
   '{
     "name": "E2 Second Floor Bathroom",
     "position": {"lat": 37.00089593913641, "lng": -122.06296383018844},
-    "details": "more details"
+    "description": "more details",
+    "num_stalls": 1,
+    "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true}
   }'::jsonb
 );
 
@@ -23,7 +27,9 @@ INSERT INTO bathrooms (id, data) VALUES (
   '{
     "name": "McDonald`s Ocean St Bathroom",
     "position": {"lat": 36.967136756404564, "lng": -122.03905636700443},
-    "details": "more details"
+    "description": "more details",
+    "num_stalls": 1,
+    "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true}
   }'::jsonb
 );
 
@@ -32,7 +38,9 @@ INSERT INTO bathrooms (id, data) VALUES (
   '{
     "name": "Disneyland Bathroom",
     "position": {"lat": 33.811565237221046, "lng": -117.91814700205742},
-    "details": "more details"
+    "description": "more details",
+    "num_stalls": 1,
+    "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true}
   }'::jsonb
 );
 
@@ -41,7 +49,9 @@ INSERT INTO bathrooms (id, data) VALUES (
   '{
     "name": "Paris Bathroom",
     "position": {"lat": 48.85406187463328, "lng": 2.333068483200026},
-    "details": "more details"
+    "description": "more details",
+    "num_stalls": 1,
+    "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true}
   }'::jsonb
 );
 
@@ -50,7 +60,9 @@ INSERT INTO bathrooms (id, data) VALUES (
   '{
     "name": "Russia Bathroom",
     "position": {"lat": 66.32386502931023, "lng": -179.1218123514762},
-    "details": "more details"
+    "description": "more details",
+    "num_stalls": 1,
+    "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true}
   }'::jsonb
 );
 
@@ -59,7 +71,9 @@ INSERT INTO bathrooms (id, data) VALUES (
   '{
     "name": "Another Bathroom in Russia",
     "position": {"lat": 66.32386502931023, "lng": 179.95655040405953},
-    "details": "more details"
+    "description": "more details",
+    "num_stalls": 1,
+    "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true}
   }'::jsonb
 );
 
@@ -68,7 +82,9 @@ INSERT INTO bathrooms (id, data) VALUES (
   '{
     "name": "Sydney Opera House Bathroom",
     "position": {"lat": -33.85692834407767, "lng": 151.21503341214125},
-    "details": "more details"
+    "description": "more details",
+    "num_stalls": 1,
+    "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true}
   }'::jsonb
 );
 
@@ -77,6 +93,8 @@ INSERT INTO bathrooms (id, data) VALUES (
   '{
     "name": "Cafe de Flore Bathroom",
     "position": {"lat": 48.854153437265325, "lng": 2.3326066198269526},
-    "details": "more details"
+    "description": "more details",
+    "num_stalls": 1,
+    "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true}
   }'::jsonb
 );
