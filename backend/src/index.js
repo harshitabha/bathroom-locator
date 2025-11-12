@@ -14,15 +14,15 @@ app.use(cors({
   origin: 'http://localhost:5173',
 }));
 
-const swaggerDocument = YAML.load('./docs/openapi.yaml');
+const swaggerDocument = YAML.load('./api/openapi.yaml');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(
     OpenApiValidator.middleware({
-      apiSpec: './docs/openapi.yaml',
+      apiSpec: './api/openapi.yaml',
       validateRequests: true,
       validateResponses: true,
     }),

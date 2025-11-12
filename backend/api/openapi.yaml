@@ -16,19 +16,23 @@ paths:
         - in: query
           name: minLng
           required: false
-          schema: { type: number }
+          schema:
+            type: number
         - in: query
           name: minLat
           required: false
-          schema: { type: number }
+          schema:
+            type: number
         - in: query
           name: maxLng
           required: false
-          schema: { type: number }
+          schema:
+            type: number
         - in: query
           name: maxLat
           required: false
-          schema: { type: number }
+          schema:
+            type: number
         - in: query
           name: limit
           required: false
@@ -66,13 +70,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Bathroom'
+        400:
+          description: Unexpected properties
 
   /bathroom/updates:
     get:
       summary: Get new bathroom updates (long polling)
       description: Returns newly added bathrooms for clients waiting for updates
       responses:
-        '200':
+        200:
           description: Array of new bathrooms
           content:
             application/json:
@@ -108,14 +114,14 @@ components:
           type: string
         num_stalls:
           type: number
+        gender:
+          $ref: '#/components/schemas/Gender'
         amenities:
           $ref: '#/components/schemas/Amenities'
       required:
         - name
         - position
         - description
-        - num_stalls
-        - amenities
    
     NewBathroom:
       allOf:
@@ -131,18 +137,36 @@ components:
               format: uuid
           required:
             - id
+            - num_stalls
+            - gender
+            - amenities
         - $ref: '#/components/schemas/BathroomBase'
       description: "Full bathroom resource returned by the API."
     
+    Gender:
+      type: object
+      properties:
+        female:
+          type: boolean
+        male:
+          type: boolean
+        gender_neutral:
+          type: boolean
     Amenities:
       type: object
       properties:
-        toilet_paper: { type: boolean }
-        soap: { type: boolean }
-        paper_towel: { type: boolean }
-        hand_dryer: { type: boolean }
-        menstrual_products: { type: boolean }
-        mirror: { type: boolean }
+        toilet_paper:
+          type: boolean
+        soap:
+          type: boolean
+        paper_towel:
+          type: boolean
+        hand_dryer:
+          type: boolean
+        menstrual_products:
+          type: boolean
+        mirror:
+          type: boolean
       required:
         - toilet_paper
         - soap

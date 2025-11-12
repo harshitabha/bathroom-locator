@@ -26,6 +26,7 @@ export async function getBathrooms() {
           b.data->>'position' AS position,
           (b.data->>'num_stalls')::int AS num_stalls,
           b.data->>'amenities' AS amenities
+          b.data->>'gender' AS amenities
         FROM bathrooms b;
       `,
       values: [],
@@ -33,6 +34,7 @@ export async function getBathrooms() {
     rows.forEach((bathroom) => {
       bathroom.position = JSON.parse(bathroom.position);
       bathroom.amenities = JSON.parse(bathroom.amenities);
+      bathroom.gender = JSON.parse(bathroom.gender);
     });
     return rows;
   } catch (error) {
@@ -47,26 +49,44 @@ export async function getBathrooms() {
  * @returns {object} the newly created bathroom
  */
 export async function createBathroom(bathroom) {
-  try {
-    const {rows} = await pool.query({
-      text: `
-        INSERT INTO bathrooms(data) 
-        VALUES ($1)
-        RETURNING id;
-      `,
-      values: [bathroom],
-    });
+  const defaultAmenities = {
+    toilet_paper: false,
+    soap: false,
+    paper_towel: false,
+    hand_dryer: false,
+    menstrual_products: false,
+    mirror: false,
+  };
 
-    const newBathroom = {
-      ...bathroom,
-      id: rows[0].id,
-    };
+  const defaultGender = {
+    female: false,
+    male: false,
+    gender_neutral: false,
+  };
 
-    return newBathroom;
-  } catch (error) {
-    console.error('Database query error:', error);
-    throw error;
-  }
+  const bathroomToInsert = {
+    ...bathroom,
+    // treat 0 as nothing is selected
+    'num_stalls': bathroom['num_stalls'] || 0,
+    'amenities': bathroom.amenities || defaultAmenities,
+    'gender': bathroom.gender || defaultGender,
+  };
+
+  const {rows} = await pool.query({
+    text: `
+      INSERT INTO bathrooms(data) 
+      VALUES ($1)
+      RETURNING id;
+    `,
+    values: [bathroomToInsert],
+  });
+
+  const newBathroom = {
+    ...bathroom,
+    id: rows[0].id,
+  };
+
+  return newBathroom;
 }
 
 /**
