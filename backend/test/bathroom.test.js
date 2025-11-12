@@ -144,13 +144,13 @@ describe('POST Bathroom Endpoint', () => {
       'mirror': true,
     },
   };
-  
+
   it('should return a 201 status code', async () => {
     await request.post(`/bathroom`)
         .send(bathroom)
         .expect(201);
   });
-  
+
   it('should create a new bathroom and return it', async () => {
     await request.post(`/bathroom`)
         .send(bathroom)
