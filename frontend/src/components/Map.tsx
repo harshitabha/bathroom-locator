@@ -19,7 +19,7 @@ type Place = {
   id: number; // id
   name: string; // name of location
   position: google.maps.LatLngLiteral; // position on map
-  details?: string; // description if needed
+  description?: string; // description if needed
 };
 
 const Map = () => {
@@ -127,7 +127,7 @@ function MapInner({apiKey}: { apiKey: string }) {
               id: bathroom.id,
               name: bathroom.name,
               position: bathroom.position,
-              details: bathroom.details,
+              details: bathroom.description,
             }));
 
         setPlaces(parsedBathroomData);
@@ -258,7 +258,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           >
             <div>
               <strong>{selected.name}</strong>
-              {selected.details && <p>{selected.details}</p>}
+              {selected.description && <p>{selected.description}</p>}
               {/* TODO: add genders, amenenities, and navigate button here */}
               <Button // Get Directions button
                 variant="contained"
