@@ -40,6 +40,7 @@ describe('GET Bathroom Endpoint', () => {
           expect(first.position.lat).toBe(37.00076576303953);
           expect(first.position.lng).toBe(-122.05719563060227);
           expect(first.details).toBe('more details');
+          expect(first.likes).toBe(0);
         });
   });
 });

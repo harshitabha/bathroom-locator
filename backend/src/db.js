@@ -113,8 +113,6 @@ export async function getBathroomsInBounds(
  * @returns {void}
  */
 export async function likeBathroom(userId, bathroomId) {
-  console.log(userId);
-  console.log(bathroomId);
   try {
     await pool.query({
       text: `
@@ -124,7 +122,7 @@ export async function likeBathroom(userId, bathroomId) {
       values: [userId, bathroomId],
     });
 
-    const row = await pool.query({
+    await pool.query({
       text: `
         UPDATE bathrooms
         SET data = jsonb_set(
@@ -134,23 +132,9 @@ export async function likeBathroom(userId, bathroomId) {
             true
         )
         WHERE id = $1
-        RETURNING data->>'likes';
       `,
       values: [bathroomId],
     });
-
-    console.log(row);
-    console.log('bathroomid after update: ', bathroomId);
-    const bathroom = await pool.query({
-      text: `
-      SELECT *
-      FROM bathrooms
-      WHERE id = $1
-      `,
-      values: [bathroomId],
-    });
-
-    console.log(bathroom);
   } catch (error) {
     console.error('Database query error:', error);
     throw error;
