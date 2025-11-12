@@ -49,8 +49,6 @@ paths:
                   $ref: '#/components/schemas/Bathroom'
         400:
           description: Invalid parameters
-        404:
-          description: No results
     
     post:
       description: Add a new bathroom
@@ -133,15 +131,21 @@ components:
           required:
             - lat
             - lng
-        details:
+        description:
           type: string
+        num_stalls:
+          type: number
+        amenities:
+          $ref: '#/components/schemas/Amenities'
         likes:
           type: integer
           default: 0
       required:
         - name
         - position
-        - details
+        - description
+        - num_stalls
+        - amenities
    
     NewBathroom:
       allOf:
@@ -159,6 +163,23 @@ components:
             - id
         - $ref: '#/components/schemas/BathroomBase'
       description: "Full bathroom resource returned by the API."
+    
+    Amenities:
+      type: object
+      properties:
+        toilet_paper: { type: boolean }
+        soap: { type: boolean }
+        paper_towel: { type: boolean }
+        hand_dryer: { type: boolean }
+        menstrual_products: { type: boolean }
+        mirror: { type: boolean }
+      required:
+        - toilet_paper
+        - soap
+        - paper_towel
+        - hand_dryer
+        - menstrual_products
+        - mirror
   
     UserLike:
       type : object

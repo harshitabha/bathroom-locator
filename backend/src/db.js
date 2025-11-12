@@ -20,16 +20,20 @@ export async function getBathrooms() {
     const {rows} = await pool.query({
       text: `
         SELECT
-          b.id, b.data->>'name' AS name, 
-          b.data->>'details' AS details, 
+          b.id,
+          b.data->>'name' AS name, 
+          b.data->>'description' AS description, 
           b.data->>'position' AS position,
+          (b.data->>'num_stalls')::int AS num_stalls,
+          b.data->>'amenities' AS amenities,
           COALESCE((b.data->>'likes')::int, 0) AS likes
-        FROM bathrooms b
+        FROM bathrooms b;
       `,
       values: [],
     });
     rows.forEach((bathroom) => {
       bathroom.position = JSON.parse(bathroom.position);
+      bathroom.amenities = JSON.parse(bathroom.amenities);
     });
     return rows;
   } catch (error) {
@@ -49,7 +53,7 @@ export async function createBathroom(bathroom) {
       text: `
         INSERT INTO bathrooms(data) 
         VALUES ($1)
-        RETURNING id
+        RETURNING id;
       `,
       values: [bathroom],
     });
@@ -84,20 +88,23 @@ export async function getBathroomsInBounds(
         SELECT
           b.id,
           b.data->>'name' AS name,
-          b.data->>'details' AS details,
-          b.data->>'position' AS position
+          b.data->>'description' AS description,
+          b.data->>'position' AS position,
+          (b.data->>'num_stalls')::int AS num_stalls,
+          b.data->>'amenities' AS amenities
         FROM bathrooms b
         WHERE
           ((b.data->'position'->>'lng')::double precision BETWEEN $1 AND $3)
           AND
           ((b.data->'position'->>'lat')::double precision BETWEEN $2 AND $4)
-        LIMIT $5
+        LIMIT $5;
       `,
       values: [minLng, minLat, maxLng, maxLat, limit],
     });
 
     rows.forEach((bathroom) => {
       bathroom.position = JSON.parse(bathroom.position);
+      bathroom.amenities = JSON.parse(bathroom.amenities);
     });
     return rows;
   } catch (error) {
