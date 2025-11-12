@@ -149,7 +149,7 @@ describe('POST Bathroom Endpoint', () => {
     await request.post(`/bathroom`)
         .send(bathroom)
         .expect(201);
-  })
+  });
   it('should create a new bathroom and return it', async () => {
     await request.post(`/bathroom`)
         .send(bathroom)
