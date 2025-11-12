@@ -107,6 +107,8 @@ paths:
       responses:
         200:
           description: Removed like successfully
+        404:
+          description: Bathroom not found
       
 components:
   schemas:

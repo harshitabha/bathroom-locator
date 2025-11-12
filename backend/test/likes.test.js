@@ -147,4 +147,14 @@ describe('DELETE Like Endpoint', () => {
           expect(bathroom.likes).toBe(0);
         });
   });
+
+  it('should error on nonexisting bathroom', async () => {
+    const like = {
+      'userId': '6697fe75-586e-4f24-9c56-243d15d1d9f1',
+      'bathroomId': '6697fe75-586e-4f24-9c56-243d15d1d9f1',
+    };
+    await request.delete('/user/likes')
+        .send(like)
+        .expect(404);
+  });
 });

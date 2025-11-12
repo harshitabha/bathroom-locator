@@ -155,6 +155,11 @@ export async function likeBathroom(req, res) {
  * @param {object} res response object
  */
 export async function unlikeBathroom(req, res) {
-  await db.unlikeBathroom(req.body.userId, req.body.bathroomId);
-  res.status(200).send();
+  try {
+    await db.unlikeBathroom(req.body.userId, req.body.bathroomId);
+    res.status(200).send();
+  } catch (err) {
+    console.error('Error in unlikeBathroom:', err);
+    res.status(404).send();
+  }
 }
