@@ -21,7 +21,14 @@ export default function MapHeader() {
       />
       :
       <Link to="/login">
-        <Button variant="contained" size="small">
+        <Button
+          variant="contained"
+          size="small"
+          color="secondary"
+          sx={{
+            padding: '7px',
+            borderRadius: '25px',
+          }}>
           Login
         </Button>
       </Link>
