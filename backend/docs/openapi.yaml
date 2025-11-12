@@ -82,7 +82,34 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Bathroom'
-
+  /user/likes:
+    post:
+      description: Add a like to a bathroom
+      requestBody:
+        description: User Id and Bathroom Id
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLike'
+      responses:
+        201:
+          description: Like added successfully
+        400:
+          description: Bad request
+    delete:
+      description: Unlike a bathroom
+      requestBody:
+        description: User Id and Bathroom Id
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLike'
+      responses:
+        200:
+          description: Removed like successfully
+      
 components:
   schemas:
     BathroomBase:
@@ -108,6 +135,9 @@ components:
             - lng
         details:
           type: string
+        likes:
+          type: integer
+          default: 0
       required:
         - name
         - position
@@ -129,3 +159,16 @@ components:
             - id
         - $ref: '#/components/schemas/BathroomBase'
       description: "Full bathroom resource returned by the API."
+  
+    UserLike:
+      type : object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        bathroomId:
+          type: string
+          format: uuid
+      required:
+        - userId
+        - bathroomId

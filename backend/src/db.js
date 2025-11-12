@@ -22,7 +22,8 @@ export async function getBathrooms() {
         SELECT
           b.id, b.data->>'name' AS name, 
           b.data->>'details' AS details, 
-          b.data->>'position' AS position
+          b.data->>'position' AS position,
+          COALESCE((b.data->>'likes')::int, 0) AS likes
         FROM bathrooms b
       `,
       values: [],
@@ -105,3 +106,68 @@ export async function getBathroomsInBounds(
   }
 }
 
+/**
+ * add like to bathroom
+ * @param {string} userId user id
+ * @param {string} bathroomId bathroom id
+ * @returns {void}
+ */
+export async function likeBathroom(userId, bathroomId) {
+  try {
+    await pool.query({
+      text: `
+        INSERT INTO userLikes
+        VALUES ($1, $2)
+      `,
+      values: [userId, bathroomId],
+    });
+
+    await pool.query({
+      text: `
+        UPDATE bathrooms
+        SET data = jsonb_set(
+            data, 
+            '{likes}',
+            to_jsonb(COALESCE(data->>'likes', '0')::int + 1),
+            true
+        )
+        WHERE id = $1
+      `,
+      values: [bathroomId],
+    });
+  } catch (error) {
+    // will error if like already exists
+    console.error('Database query error:', error);
+    throw error;
+  }
+}
+
+/**
+ * remove like from bathroom
+ * @param {string} userId user id
+ * @param {string} bathroomId bathroom id
+ * @returns {void}
+ */
+export async function unlikeBathroom(userId, bathroomId) {
+  await pool.query({
+    text: `
+      DELETE FROM userLikes
+      WHERE userId = $1 AND bathroomId = $2
+    `,
+    values: [userId, bathroomId],
+  });
+
+  await pool.query({
+    text: `
+      UPDATE bathrooms
+      SET data = jsonb_set(
+          data, 
+          '{likes}',
+          to_jsonb(GREATEST(0, COALESCE(data->>'likes', '0')::int - 1)),
+          true
+      )
+      WHERE id = $1
+    `,
+    values: [bathroomId],
+  });
+}
