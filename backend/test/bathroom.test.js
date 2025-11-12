@@ -102,14 +102,13 @@ describe('GET /bathroom/updates endpoint', () => {
     }, 100);
 
     const response = await getUpdates;
-    // Assertions
     expect(response.status).toBe(200);
     expect(response.body.length).toBe(1);
     expect(response.body[0]).toEqual(newBathroom);
   }, 5000);
+
   it('should timeout and return empty after 30 seconds', async () => {
     const response = await supertest(app).get('/bathroom/updates');
-    // Assertions
     expect(response.status).toBe(200);
     expect(response.body.length).toBe(0);
   });
@@ -124,6 +123,7 @@ describe('POST Bathroom Endpoint', () => {
     },
     'details': 'next to media theater, very large',
   };
+
   it('should create a new bathroom and return it', async () => {
     await request.post(`/bathroom`)
         .send(bathroom)
@@ -136,6 +136,7 @@ describe('POST Bathroom Endpoint', () => {
           expect(newBathroom.details).toBe(bathroom.details);
         });
   });
+
   it('should then exist in the database', async () => {
     await request.get(`/bathroom`)
         .then((data) => {
