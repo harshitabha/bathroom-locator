@@ -7,7 +7,6 @@ import {
   expect,
   vi,
   type MockedFunction,
-  beforeAll,
 } from 'vitest';
 import {
   render,
@@ -23,6 +22,7 @@ import type {
   AuthTokenResponsePassword,
   SignInWithPasswordCredentials,
 } from '@supabase/supabase-js';
+import {AuthError} from '@supabase/supabase-js';
 
 // mock supabase
 vi.mock('../lib/supabaseClient', () => {
@@ -47,14 +47,26 @@ function mockUserLogin(
 ): MockedFunction<
   (credentials: SignInWithPasswordCredentials) =>
   Promise<AuthTokenResponsePassword>> {
+  const user = {
+    id: '123',
+    email: email,
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString()};
   // mock signInWithPassword
   const mockLogin = vi.mocked(supabase.auth.signInWithPassword);
-  // TODO: temp solution for linter (no unused vars)
-  console.log(error);
-  // mockLogin.mockResolvedValueOnce({
-  //   data: {user: {email: email, password: password}},
-  //   error: error.length === 0 ? null : {message: error},
-  // });
+  mockLogin.mockResolvedValueOnce({
+    data: {
+      user: user,
+      session: {
+        access_token: '',
+        refresh_token: '',
+        expires_in: 0,
+        token_type: 'bearer',
+        user: user}},
+    error: error.length === 0 ? null : new AuthError(error),
+  } as AuthTokenResponsePassword);
 
   // fill in login form
   fireEvent.change(screen.getByLabelText('Email'), {
@@ -112,7 +124,7 @@ it('renders header and description', async () => {
   expect(screen.getByLabelText('location-icon'));
   expect(screen.getByText('Bathroom'));
   expect(screen.getByText('Locator'));
-  expect(screen.getByText('Log in to add new bathroom locations to the map' +
+  expect(screen.getByText('Log in to add new bathroom locations to the map ' +
       'or add details to existing bathrooms.'));
 });
 
@@ -209,7 +221,7 @@ describe('Login failed with invalid credentials', async () => {
 });
 
 describe('No input provided', async () => {
-  beforeAll(async () => {
+  beforeEach(async () => {
     // mock unsuccessful login with no credentials provided
     const email = '';
     const password = '';
@@ -243,7 +255,7 @@ describe('No input provided', async () => {
 });
 
 describe('Only email is provided', async () => {
-  beforeAll(async () => {
+  beforeEach(async () => {
     // mock unsuccessful login with only email provided
     const email = 'test@example.com';
     const password = '';
@@ -277,7 +289,7 @@ describe('Only email is provided', async () => {
 });
 
 describe('Only password is provided', async () => {
-  beforeAll(async () => {
+  beforeEach(async () => {
     // mock unsuccessful login with only password provided
     const email = '';
     const password = 'password123';
