@@ -136,6 +136,7 @@ export async function likeBathroom(userId, bathroomId) {
       values: [bathroomId],
     });
   } catch (error) {
+    // will error if like already exists
     console.error('Database query error:', error);
     throw error;
   }

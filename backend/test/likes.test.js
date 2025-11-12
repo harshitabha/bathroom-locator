@@ -5,7 +5,6 @@ import http from 'http';
 import * as db from './db.js';
 import app from '../src/index.js';
 
-
 let server;
 let request;
 
@@ -96,5 +95,15 @@ describe('POST Like Endpoint', () => {
           const bathroom = data.body.find((b) => b.id === like.bathroomId);
           expect(bathroom.likes).toBe(2);
         });
+  });
+
+  it('should error when liking a nonexisting bathroom', async () => {
+    const like = {
+      'userId': '6697fe75-586e-4f24-9c56-243d15d1d9f1',
+      'bathroomId': '6697fe75-586e-4f24-9c56-243d15d1d9f1',
+    };
+    await request.post(`/user/likes`)
+        .send(like)
+        .expect(400);
   });
 });

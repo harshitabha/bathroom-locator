@@ -96,7 +96,8 @@ paths:
         201:
           description: Like added successfully
         400:
-          description: Invalid parameters
+          description: Bad request
+
 components:
   schemas:
     BathroomBase:
@@ -146,17 +147,16 @@ components:
             - id
         - $ref: '#/components/schemas/BathroomBase'
       description: "Full bathroom resource returned by the API."
-
+  
     UserLike:
-      allOf:
-        - type : object
-          properties:
-            userId:
-              type: string
-              format: uuid
-            bathroomId:
-              type: string
-              format: uuid
-          required:
-            - userId
-            - bathroomId
+      type : object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        bathroomId:
+          type: string
+          format: uuid
+      required:
+        - userId
+        - bathroomId
