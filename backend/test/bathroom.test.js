@@ -94,7 +94,16 @@ describe('GET /bathroom/updates endpoint', () => {
       'lat': 36.996621249644626,
       'lng': -122.0626488260964,
     },
-    'details': 'more details',
+    'description': 'more details',
+    'num_stalls': 1,
+    'amenities': {
+      'toilet_paper': true,
+      'soap': true,
+      'paper_towel': true,
+      'hand_dryer': false,
+      'menstrual_products': true,
+      'mirror': true,
+    },
   };
 
   it('should wait and receive new bathroom updates', async () => {
@@ -140,7 +149,7 @@ describe('POST Bathroom Endpoint', () => {
     await request.post(`/bathroom`)
         .send(bathroom)
         .expect(201);
-  })
+  });
   it('should create a new bathroom and return it', async () => {
     await request.post(`/bathroom`)
         .send(bathroom)
