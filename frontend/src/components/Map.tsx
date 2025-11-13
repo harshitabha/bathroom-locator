@@ -1,14 +1,9 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
-import {
-  GoogleMap,
-  Marker,
-  InfoWindow,
-  useLoadScript,
-} from "@react-google-maps/api";
+import { GoogleMap, Marker, InfoWindow, useLoadScript } from "@react-google-maps/api";
 import "./Map.css";
 import { openWalkingDirections } from '../utils/navigation';
 import Button from '@mui/material/Button';
-
+import SearchBar from "./SearchBar";
 
 type Place = {
   id: number; // id
@@ -202,6 +197,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
 
   return (
     <div className="map-align-center">
+      {isLoaded && <SearchBar map={mapRef.current} />}
       <GoogleMap
         onLoad={onMapLoad}
         onIdle={handleIdle}
@@ -214,10 +210,8 @@ function MapInner({ apiKey }: { apiKey: string }) {
         options={{
           clickableIcons: false, // prevents clicking on locations other than pins
           disableDoubleClickZoom: true, // prevents accidental zoom
-          mapTypeControl: false, // prevents going to satellite mode
           mapTypeId: google.maps.MapTypeId.ROADMAP, // locks map type to simple map
-          streetViewControl: false, // prevents going to streetview
-          zoomControl: true, // allows zooming buttons
+          disableDefaultUI: true,
         }}
       >
         {places.map((p) => (
