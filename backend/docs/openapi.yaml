@@ -80,6 +80,21 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Bathroom'
+  /user/likes:
+    post:
+      description: Add a like to a bathroom
+      requestBody:
+        description: User Id and Bathroom Id
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLike'
+      responses:
+        201:
+          description: Like added successfully
+        400:
+          description: Bad request
 
 components:
   schemas:
@@ -110,6 +125,9 @@ components:
           type: number
         amenities:
           $ref: '#/components/schemas/Amenities'
+        likes:
+          type: integer
+          default: 0
       required:
         - name
         - position
@@ -150,3 +168,16 @@ components:
         - hand_dryer
         - menstrual_products
         - mirror
+  
+    UserLike:
+      type : object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        bathroomId:
+          type: string
+          format: uuid
+      required:
+        - userId
+        - bathroomId

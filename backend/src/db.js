@@ -25,7 +25,8 @@ export async function getBathrooms() {
           b.data->>'description' AS description, 
           b.data->>'position' AS position,
           (b.data->>'num_stalls')::int AS num_stalls,
-          b.data->>'amenities' AS amenities
+          b.data->>'amenities' AS amenities,
+          COALESCE((b.data->>'likes')::int, 0) AS likes
         FROM bathrooms b;
       `,
       values: [],
@@ -112,3 +113,38 @@ export async function getBathroomsInBounds(
   }
 }
 
+/**
+ * add like to bathroom
+ * @param {string} userId user id
+ * @param {string} bathroomId bathroom id
+ * @returns {void}
+ */
+export async function likeBathroom(userId, bathroomId) {
+  try {
+    await pool.query({
+      text: `
+        INSERT INTO userLikes
+        VALUES ($1, $2)
+      `,
+      values: [userId, bathroomId],
+    });
+
+    await pool.query({
+      text: `
+        UPDATE bathrooms
+        SET data = jsonb_set(
+            data, 
+            '{likes}',
+            to_jsonb(COALESCE(data->>'likes', '0')::int + 1),
+            true
+        )
+        WHERE id = $1
+      `,
+      values: [bathroomId],
+    });
+  } catch (error) {
+    // will error if like already exists
+    console.error('Database query error:', error);
+    throw error;
+  }
+}
