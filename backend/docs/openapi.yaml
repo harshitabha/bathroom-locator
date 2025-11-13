@@ -97,9 +97,8 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/BathroomId'
-
-                  
+                  type: string
+                  format: uuid
     post:
       description: Add a like to a bathroom
       requestBody:
@@ -214,7 +213,3 @@ components:
       required:
         - userId
         - bathroomId
-
-    BathroomId:
-      type: string
-      format: uuid

@@ -52,7 +52,7 @@ describe('GET like Endpoint', () => {
         .query({userId: userId})
         .then((data) => {
           const bathroomIds = data.body;
-          expect(bathroomIds.length === 0);
+          expect(bathroomIds.length).toBe(0);
         });
   });
 
@@ -63,9 +63,7 @@ describe('GET like Endpoint', () => {
     await request.get(`/user/likes`)
         .query({userId: like.userId})
         .expect(200);
-    // need to delete like here to cleanup for next test
-    await request.delete(`/user/likes`)
-        .send(like);
+    await db.reset();
   });
 
   it('should successfully get a user\'s liked bathroomIds', async () => {

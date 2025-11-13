@@ -119,7 +119,7 @@ export async function getBathroomsInBounds(
  * @returns {object} user's liked bathroomIds
  */
 export async function getUserLikes(userId) {
-  const rows = await pool.query({
+  const {rows} = await pool.query({
     text: `
       SELECT bathroomId
       FROM userLikes
@@ -128,7 +128,7 @@ export async function getUserLikes(userId) {
     values: [userId],
   });
 
-  const bathroomIds = rows.rows.map((bId) => bId.bathroomid);
+  const bathroomIds = rows.map((bId) => bId.bathroomid);
   return bathroomIds;
 }
 
