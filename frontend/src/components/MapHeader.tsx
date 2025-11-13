@@ -1,8 +1,10 @@
 import {Box, Button, Avatar} from '@mui/material';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
 
 export default function MapHeader() {
-  const loggedIn = localStorage.length >= 1; // TODO: make this real (maybe pass it down from App)
+  const loggedIn = false; // TODO: make this real (maybe pass it down from App)
+  const navigate = useNavigate();
   
   return (
     <Box sx={{
@@ -17,21 +19,25 @@ export default function MapHeader() {
       
       {loggedIn ?
       <Avatar 
-        sx={{bgcolor: 'primary.main', color: 'background.default'}}
+        sx={{
+          bgcolor: 'primary.main',
+          color: 'background.default',
+        }}
+        aria-label='profile-picture'
       />
       :
-      <Link to="/login">
-        <Button
-          variant="contained"
-          size="small"
-          color="secondary"
-          sx={{
-            padding: '7px',
-            borderRadius: '25px',
-          }}>
-          Login
-        </Button>
-      </Link>
+      <Button
+        variant="contained"
+        size="small"
+        color="secondary"
+        sx={{
+          padding: '7px',
+          borderRadius: '25px',
+        }}
+        onClick={() => navigate("/login")}
+      >
+        Login
+      </Button>
       }
     </Box>
   );
