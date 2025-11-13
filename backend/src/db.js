@@ -148,3 +148,55 @@ export async function likeBathroom(userId, bathroomId) {
     throw error;
   }
 }
+
+/**
+ * get bathroom
+ * @param {string} bathroomId bathroom id
+ * @returns {object | undefined} bathroom if exists
+ */
+async function getBathroom(bathroomId) {
+  const {rows} = await pool.query({
+    text: `
+      SELECT *
+      FROM bathrooms
+      WHERE id = $1
+    `,
+    values: [bathroomId],
+  });
+
+  return rows.length > 0 ? rows[0] : undefined;
+}
+
+/**
+ * remove like from bathroom
+ * @param {string} userId user id
+ * @param {string} bathroomId bathroom id
+ */
+export async function unlikeBathroom(userId, bathroomId) {
+  if (!(await getBathroom(bathroomId))) {
+    // throw error if bathroom doesn't exist
+    throw (new Error('bathroom doesn\'t exist'));
+  }
+
+  await pool.query({
+    text: `
+      DELETE FROM userLikes
+      WHERE userId = $1 AND bathroomId = $2
+    `,
+    values: [userId, bathroomId],
+  });
+
+  await pool.query({
+    text: `
+      UPDATE bathrooms
+      SET data = jsonb_set(
+          data, 
+          '{likes}',
+          to_jsonb(GREATEST(0, COALESCE(data->>'likes', '0')::int - 1)),
+          true
+      )
+      WHERE id = $1
+    `,
+    values: [bathroomId],
+  });
+}

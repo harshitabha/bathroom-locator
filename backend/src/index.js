@@ -47,6 +47,8 @@ app.get('/bathroom/updates', bathroom.getUpdates);
 
 app.post('/user/likes', bathroom.likeBathroom);
 
+app.delete('/user/likes', bathroom.unlikeBathroom);
+
 app.listen(port, () => {
   console.log(`App running on port ${port}.`);
 });

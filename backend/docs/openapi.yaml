@@ -95,7 +95,21 @@ paths:
           description: Like added successfully
         400:
           description: Bad request
-
+    delete:
+      description: Unlike a bathroom
+      requestBody:
+        description: User Id and Bathroom Id
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLike'
+      responses:
+        200:
+          description: Removed like successfully
+        404:
+          description: Bathroom not found
+      
 components:
   schemas:
     BathroomBase:

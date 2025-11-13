@@ -107,3 +107,54 @@ describe('POST Like Endpoint', () => {
         .expect(400);
   });
 });
+
+describe('DELETE Like Endpoint', () => {
+  it('should successfully remove a like from the userLikes table', async () => {
+    const like = await getSampleLike();
+    await request.post(`/user/likes`)
+        .send(like);
+    await request.delete('/user/likes')
+        .send(like)
+        .expect(200);
+  });
+
+  it('should decrement bathroom\'s likes', async () => {
+    const like = await getSampleLike();
+    const like2 = {
+      'userId': '6697fe75-586e-4f24-9c56-243d15d1d9f1',
+      'bathroomId': like.bathroomId,
+    };
+    await request.post(`/user/likes`)
+        .send(like);
+    await request.post(`/user/likes`)
+        .send(like2);
+    await request.delete('/user/likes')
+        .send(like);
+    await request.get(`/bathroom`)
+        .then((data) => {
+          const bathroom = data.body.find((b) => b.id === like.bathroomId);
+          expect(bathroom.likes).toBe(1);
+        });
+  });
+
+  it('shouldn\'t change bathroom\'s likes on nonexisting like', async () => {
+    const like = await getSampleLike();
+    await request.delete('/user/likes')
+        .send(like);
+    await request.get(`/bathroom`)
+        .then((data) => {
+          const bathroom = data.body.find((b) => b.id === like.bathroomId);
+          expect(bathroom.likes).toBe(0);
+        });
+  });
+
+  it('should error on nonexisting bathroom', async () => {
+    const like = {
+      'userId': '6697fe75-586e-4f24-9c56-243d15d1d9f1',
+      'bathroomId': '6697fe75-586e-4f24-9c56-243d15d1d9f1',
+    };
+    await request.delete('/user/likes')
+        .send(like)
+        .expect(404);
+  });
+});

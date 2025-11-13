@@ -148,3 +148,18 @@ export async function likeBathroom(req, res) {
     res.status(400).send();
   }
 }
+
+/**
+ * removes like in userLikes and decrements bathroom likes
+ * @param {object} req request object
+ * @param {object} res response object
+ */
+export async function unlikeBathroom(req, res) {
+  try {
+    await db.unlikeBathroom(req.body.userId, req.body.bathroomId);
+    res.status(200).send();
+  } catch (err) {
+    console.error('Error in unlikeBathroom:', err);
+    res.status(404).send();
+  }
+}
