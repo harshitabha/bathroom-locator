@@ -38,6 +38,49 @@ async function getSampleLike() {
   return like;
 }
 
+describe('GET like Endpoint', () => {
+  it('should return success if user has no likes', async () => {
+    const userId = '6697fe75-586e-4f24-9c56-243d15d1d9f0';
+    await request.get(`/user/likes`)
+        .query({userId: userId})
+        .expect(200);
+  });
+
+  it('should return empty array if user has no likes', async () => {
+    const userId = '6697fe75-586e-4f24-9c56-243d15d1d9f0';
+    await request.get(`/user/likes`)
+        .query({userId: userId})
+        .then((data) => {
+          const bathroomIds = data.body;
+          expect(bathroomIds.length === 0);
+        });
+  });
+
+  it('should successfully query for user\'s liked bathrooms', async () => {
+    const like = await getSampleLike();
+    await request.post(`/user/likes`)
+        .send(like);
+    await request.get(`/user/likes`)
+        .query({userId: like.userId})
+        .expect(200);
+    // need to delete like here to cleanup for next test
+    await request.delete(`/user/likes`)
+        .send(like);
+  });
+
+  it('should successfully get a user\'s liked bathroomIds', async () => {
+    const like = await getSampleLike();
+    await request.post(`/user/likes`)
+        .send(like);
+    await request.get(`/user/likes`)
+        .query({userId: like.userId})
+        .then((data) => {
+          const bathroomIds = data.body;
+          expect(bathroomIds).toStrictEqual([like.bathroomId]);
+        });
+  });
+});
+
 describe('POST Like Endpoint', () => {
   it('should successfully add a like to the userLikes table', async () => {
     const like = await getSampleLike();

@@ -81,6 +81,25 @@ paths:
                 items:
                   $ref: '#/components/schemas/Bathroom'
   /user/likes:
+    get:
+      summary: Get a user's liked bathrooms
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Successfully got user's liked bathrooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BathroomId'
+
+                  
     post:
       description: Add a like to a bathroom
       requestBody:
@@ -195,3 +214,7 @@ components:
       required:
         - userId
         - bathroomId
+
+    BathroomId:
+      type: string
+      format: uuid

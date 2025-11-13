@@ -114,10 +114,28 @@ export async function getBathroomsInBounds(
 }
 
 /**
+ * get user's liked bathrooms
+ * @param {string} userId user id
+ * @returns {object} user's liked bathroomIds
+ */
+export async function getUserLikes(userId) {
+  const rows = await pool.query({
+    text: `
+      SELECT bathroomId
+      FROM userLikes
+      WHERE userId = $1;
+    `,
+    values: [userId],
+  });
+
+  const bathroomIds = rows.rows.map((bId) => bId.bathroomid);
+  return bathroomIds;
+}
+
+/**
  * add like to bathroom
  * @param {string} userId user id
  * @param {string} bathroomId bathroom id
- * @returns {void}
  */
 export async function likeBathroom(userId, bathroomId) {
   try {
@@ -174,7 +192,6 @@ async function getBathroom(bathroomId) {
  */
 export async function unlikeBathroom(userId, bathroomId) {
   if (!(await getBathroom(bathroomId))) {
-    // throw error if bathroom doesn't exist
     throw (new Error('bathroom doesn\'t exist'));
   }
 

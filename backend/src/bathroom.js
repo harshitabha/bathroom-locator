@@ -135,6 +135,18 @@ export async function createBathroom(req, res) {
 }
 
 /**
+ * gets user's liked bathrooms
+ * @param {object} req request object
+ * @param {object} res response object
+ * @returns {object} empty object for now
+ */
+export async function getUserLikes(req, res) {
+  const {userId} = req.query;
+  const bathroomIds = await db.getUserLikes(userId);
+  return res.status(200).json(bathroomIds);
+}
+
+/**
  * creates a new like in userLikes and adds a like to the bathroom
  * @param {object} req request object
  * @param {object} res response object
