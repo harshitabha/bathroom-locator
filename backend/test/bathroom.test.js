@@ -39,7 +39,10 @@ describe('GET Bathroom Endpoint', () => {
           expect(first.name).toBe('Namaste Lounge Bathroom');
           expect(first.position.lat).toBe(37.00076576303953);
           expect(first.position.lng).toBe(-122.05719563060227);
-          expect(first.details).toBe('more details');
+          expect(first.description).toBe('more details');
+          expect(first.num_stalls).toBe(1);
+          expect(first.amenities.toilet_paper).toBe(true);
+          expect(first.amenities.hand_dryer).toBe(false);
         });
   });
 });
@@ -91,7 +94,16 @@ describe('GET /bathroom/updates endpoint', () => {
       'lat': 36.996621249644626,
       'lng': -122.0626488260964,
     },
-    'details': 'more details',
+    'description': 'more details',
+    'num_stalls': 1,
+    'amenities': {
+      'toilet_paper': true,
+      'soap': true,
+      'paper_towel': true,
+      'hand_dryer': false,
+      'menstrual_products': true,
+      'mirror': true,
+    },
   };
 
   it('should wait and receive new bathroom updates', async () => {
@@ -121,19 +133,35 @@ describe('POST Bathroom Endpoint', () => {
       'lat': 36.996621249644626,
       'lng': -122.0626488260964,
     },
-    'details': 'next to media theater, very large',
+    'description': 'next to media theater, very large',
+    'num_stalls': 1,
+    'amenities': {
+      'toilet_paper': true,
+      'soap': true,
+      'paper_towel': true,
+      'hand_dryer': false,
+      'menstrual_products': true,
+      'mirror': true,
+    },
   };
+
+  it('should return a 201 status code', async () => {
+    await request.post(`/bathroom`)
+        .send(bathroom)
+        .expect(201);
+  });
 
   it('should create a new bathroom and return it', async () => {
     await request.post(`/bathroom`)
         .send(bathroom)
         .then((data) => {
           const newBathroom = data.body;
-          expect(201);
           expect(newBathroom).toHaveProperty('id');
           expect(newBathroom.name).toBe(bathroom.name);
           expect(newBathroom.position.lat).toBe(bathroom.position.lat);
-          expect(newBathroom.details).toBe(bathroom.details);
+          expect(newBathroom.description).toBe(bathroom.description);
+          expect(newBathroom.num_stalls).toBe(bathroom.num_stalls);
+          expect(newBathroom.amenities).toEqual(bathroom.amenities);
         });
   });
 
@@ -141,7 +169,7 @@ describe('POST Bathroom Endpoint', () => {
     await request.get(`/bathroom`)
         .then((data) => {
           expect(200);
-          expect(data.body.length).toBe(10);
+          expect(data.body.length).toBe(11);
         });
   });
 });
