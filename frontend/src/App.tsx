@@ -1,12 +1,12 @@
-import Map from "./components/Map";
+import Map from './components/Map';
 import Login from './components/Login';
-import SignUp from "./components/SignUp";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import "./App.css";
-import MapHeader from "./components/MapHeader";
+import SignUp from './components/SignUp';
+import {Button} from '@mui/material';
+import {BrowserRouter as Router, Routes, Route, Link} from 'react-router-dom';
+import './App.css';
 
-function App() {
 
+const App = () => {
   return (
     <Router>
       <Routes>
@@ -21,6 +21,6 @@ function App() {
       </Routes>
     </Router>
   );
-}
+};
 
 export default App;

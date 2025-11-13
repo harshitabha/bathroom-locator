@@ -1,7 +1,7 @@
 import { Button, useTheme, Box, Typography } from '@mui/material';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import LocationPinIcon from '@mui/icons-material/LocationPin';
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from 'react-router-dom';
 import React from 'react';
 
 
@@ -9,9 +9,9 @@ interface AuthHeaderProps {
     description: string;
 }
 
-const AuthHeader : React.FC<AuthHeaderProps> = ({ description }) => {
-    const navigate = useNavigate();
-    const theme = useTheme();
+const AuthHeader : React.FC<AuthHeaderProps> = ({description}) => {
+  const navigate = useNavigate();
+  const theme = useTheme();
 
     return (
         <Box 

@@ -1,31 +1,32 @@
-import { useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import {useState} from 'react';
+import {supabase} from '../lib/supabaseClient';
 import {Stack, TextField, Button, Alert, Typography} from '@mui/material';
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from 'react-router-dom';
 import AuthHeader from './AuthHeader';
 import './Auth.css';
 
-export default function Login () {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
-    const navigate = useNavigate();
-    
-    async function signInWithEmail() {
-        const { error } = await supabase.auth.signInWithPassword({ email: email, password: password })
-        if (error) {
-            if (error.message === "missing email or phone") {
-                error.message = "Missing credentials";
-            }
-            setErrorMessage(error.message);
-        }
-        else {
-            setErrorMessage('');
-            navigate("/");
-        }
-    }
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const navigate = useNavigate();
 
-    const description = "Log in ";
+  /**
+   * Try to sign in the user with the given email
+   */
+  async function signInWithEmail() {
+    const {error} = await supabase.auth.signInWithPassword(
+        {email: email, password: password},
+    );
+    if (error) {
+      setErrorMessage(error.message);
+    } else {
+      setErrorMessage('');
+      navigate('/');
+    }
+  }
+
+  const description = 'Log in ';
     
     return (
         <div className='auth-screen'>
@@ -76,6 +77,8 @@ export default function Login () {
                     </Stack>
                 </Stack>
             </div>
-        </div>
-    )
-} 
+      </div>
+  );
+};
+
+export default Login;

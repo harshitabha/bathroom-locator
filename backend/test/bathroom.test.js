@@ -43,6 +43,7 @@ describe('GET Bathroom Endpoint', () => {
           expect(first.num_stalls).toBe(1);
           expect(first.amenities.toilet_paper).toBe(true);
           expect(first.amenities.hand_dryer).toBe(false);
+          expect(first.likes).toBe(0);
         });
   });
 });
