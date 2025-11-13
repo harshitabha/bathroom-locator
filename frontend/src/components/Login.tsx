@@ -19,9 +19,6 @@ const Login = () => {
         {email: email, password: password},
     );
     if (error) {
-      if (error.message === 'missing email or phone') {
-        error.message = 'Missing credentials';
-      }
       setErrorMessage(error.message);
     } else {
       setErrorMessage('');
