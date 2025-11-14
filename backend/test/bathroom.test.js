@@ -240,7 +240,7 @@ describe('PUT Bathroom Endpoint', () => {
         });
   });
 
-  it('should return a 404 status code if the bathroom doesn\'t exist', async () => {
+  it('should return a 404 status code if bathroom doesn\'t exist', async () => {
     const bathroom = await getBathroom();
     bathroom.id = '6d6a6a5f-217d-4fea-9ab4-1f21ea2c1b0b';
     await request.put(`/bathroom`)

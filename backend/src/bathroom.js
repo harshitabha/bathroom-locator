@@ -143,7 +143,6 @@ export async function updateBathroom(req, res) {
     } else {
       res.status(404).send();
     }
-    
   } catch (err) {
     console.error('Error in updateBathroom:', err);
   }
