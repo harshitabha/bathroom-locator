@@ -187,12 +187,22 @@ describe('PUT Bathroom Endpoint', () => {
     return bathroom;
   }
 
-  it('should return a 204 status code', async () => {
+  it('should return a 200 status code', async () => {
     const bathroom = await getBathroom();
     bathroom.name = 'STATUS CODE TEST';
     await request.put(`/bathroom`)
         .send(bathroom)
-        .expect(204);
+        .expect(200);
+  });
+
+  it('should return the updated bathroom', async () => {
+    const bathroom = await getBathroom();
+    bathroom.name = 'RETURN VALUE TEST';
+    await request.put(`/bathroom`)
+        .send(bathroom)
+        .then((data) => {
+          expect(data.body).toEqual(bathroom);
+        });
   });
 
   it('should update the bathroom', async () => {

@@ -23,18 +23,15 @@ export async function getBathrooms() {
           b.id,
           b.data->>'name' AS name, 
           b.data->>'description' AS description, 
-          b.data->>'position' AS position,
+          (b.data->'position') AS position,
           (b.data->>'num_stalls')::int AS num_stalls,
-          b.data->>'amenities' AS amenities,
+          (b.data->'amenities') AS amenities,
           COALESCE((b.data->>'likes')::int, 0) AS likes
         FROM bathrooms b;
       `,
       values: [],
     });
-    rows.forEach((bathroom) => {
-      bathroom.position = JSON.parse(bathroom.position);
-      bathroom.amenities = JSON.parse(bathroom.amenities);
-    });
+
     return rows;
   } catch (error) {
     console.error('Database query error:', error);
@@ -89,9 +86,9 @@ export async function getBathroomsInBounds(
           b.id,
           b.data->>'name' AS name,
           b.data->>'description' AS description,
-          b.data->>'position' AS position,
+          (data->'position') AS position,
           (b.data->>'num_stalls')::int AS num_stalls,
-          b.data->>'amenities' AS amenities
+          (b.data->'amenities') AS amenities
         FROM bathrooms b
         WHERE
           ((b.data->'position'->>'lng')::double precision BETWEEN $1 AND $3)
@@ -102,10 +99,6 @@ export async function getBathroomsInBounds(
       values: [minLng, minLat, maxLng, maxLat, limit],
     });
 
-    rows.forEach((bathroom) => {
-      bathroom.position = JSON.parse(bathroom.position);
-      bathroom.amenities = JSON.parse(bathroom.amenities);
-    });
     return rows;
   } catch (error) {
     console.error('Database query error:', error);
@@ -116,17 +109,27 @@ export async function getBathroomsInBounds(
 /**
  * merges the fields of the bathroom object with the new values
  * @param {object} bathroom object
+ * @returns {object} the newly editted bathroom object
  */
 export async function updateBathroom(bathroom) {
   const {id, ...bathroomBase} = bathroom;
-  await pool.query({
+  const {rows} = await pool.query({
     text: `
       UPDATE bathrooms
       SET data = data || $1
-      WHERE id = $2;
+      WHERE id = $2
+      RETURNING
+        id,
+        data->>'name' AS name,
+        data->>'description' AS description,
+        (data->'position') AS position,
+        (data->'amenities') AS amenities,
+        (data->>'num_stalls')::int AS num_stalls,
+        (data->>'likes')::int AS likes;
     `,
     values: [bathroomBase, id],
   });
+  return rows[0];
 }
 
 /**

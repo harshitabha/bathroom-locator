@@ -106,11 +106,8 @@ export async function getBathroomsInBounds(req, res) {
       const left = await db.getBathroomsInBounds(a, b, 180, d, lim);
       const right = await db.getBathroomsInBounds(-180, b, c, d, lim);
       const bathrooms = [...left, ...right].slice(0, lim);
-      if (bathrooms.length > 0) {
-        return res.status(200).json(bathrooms);
-      } else {
-        return res.status(200).json([]);
-      }
+
+      return res.status(200).json(bathrooms);
     } catch (e) {
       console.error(e);
       return res.status(500).json({error: 'Server error'});
@@ -139,9 +136,9 @@ export async function createBathroom(req, res) {
  */
 export async function updateBathroom(req, res) {
   try {
-    await db.updateBathroom(req.body);
-    // notifyNewBathroom(bathroom);  // do i need this for real time updates?
-    res.status(204).send();
+    const bathroom = await db.updateBathroom(req.body);
+    notifyNewBathroom(bathroom);
+    res.status(200).send(bathroom);
   } catch (err) {
     console.error('Error in updateBathroom:', err);
   }

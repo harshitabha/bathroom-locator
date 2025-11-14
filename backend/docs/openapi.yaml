@@ -77,8 +77,12 @@ paths:
             schema:
               $ref: '#/components/schemas/Bathroom'
       responses:
-        204:
+        200:
           description: Bathroom successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bathroom'
         400:
           description: Invalid bathroom object
 
