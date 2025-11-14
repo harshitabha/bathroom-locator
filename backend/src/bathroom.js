@@ -7,9 +7,7 @@ import * as db from './db.js';
  */
 export async function getBathrooms(req, res) {
   const bathrooms = await db.getBathrooms();
-  if (bathrooms.length > 0) {
-    res.status(200).json(bathrooms);
-  }
+  res.status(200).json(bathrooms);
 }
 
 export let clients = [];
@@ -131,6 +129,21 @@ export async function createBathroom(req, res) {
   notifyNewBathroom(bathroom);
   if (bathroom) {
     res.status(201).send(bathroom);
+  }
+}
+
+/**
+ * update a bathroom
+ * @param {object} req request object
+ * @param {object} res response object
+ */
+export async function updateBathroom(req, res) {
+  try {
+    await db.updateBathroom(req.body);
+    // notifyNewBathroom(bathroom);  // do i need this for real time updates?
+    res.status(204).send();
+  } catch (err) {
+    console.error('Error in updateBathroom:', err);
   }
 }
 

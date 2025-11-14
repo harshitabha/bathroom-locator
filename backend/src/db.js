@@ -114,6 +114,22 @@ export async function getBathroomsInBounds(
 }
 
 /**
+ * merges the fields of the bathroom object with the new values
+ * @param {object} bathroom object
+ */
+export async function updateBathroom(bathroom) {
+  const {id, ...bathroomBase} = bathroom;
+  await pool.query({
+    text: `
+      UPDATE bathrooms
+      SET data = data || $1
+      WHERE id = $2;
+    `,
+    values: [bathroomBase, id],
+  });
+}
+
+/**
  * get user's liked bathrooms
  * @param {string} userId user id
  * @returns {object} user's liked bathroomIds
@@ -170,7 +186,7 @@ export async function likeBathroom(userId, bathroomId) {
 /**
  * get bathroom
  * @param {string} bathroomId bathroom id
- * @returns {object | undefined} bathroom if exists
+ * @returns {object} list of bathrooms
  */
 async function getBathroom(bathroomId) {
   const {rows} = await pool.query({
@@ -182,7 +198,7 @@ async function getBathroom(bathroomId) {
     values: [bathroomId],
   });
 
-  return rows.length > 0 ? rows[0] : undefined;
+  return rows[0];
 }
 
 /**

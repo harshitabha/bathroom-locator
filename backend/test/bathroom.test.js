@@ -172,3 +172,61 @@ describe('POST Bathroom Endpoint', () => {
         });
   });
 });
+
+describe('PUT Bathroom Endpoint', () => {
+  /**
+   * returns an arbitrary bathroom object
+   * @returns {object} a bathroom object
+   */
+  async function getBathroom() {
+    let bathroom;
+    await request.get(`/bathroom`)
+        .then((bathrooms) => {
+          bathroom = bathrooms.body[0];
+        });
+    return bathroom;
+  }
+
+  it('should return a 204 status code', async () => {
+    const bathroom = await getBathroom();
+    bathroom.name = 'STATUS CODE TEST';
+    await request.put(`/bathroom`)
+        .send(bathroom)
+        .expect(204);
+  });
+
+  it('should update the bathroom', async () => {
+    const bathroom = await getBathroom();
+    bathroom.name = 'UPDATED TEST';
+    await request.put(`/bathroom`)
+        .send(bathroom);
+    await request.get(`/bathroom`)
+        .then((data) => {
+          const updatedBathroom = data.body.find((b) => b.id === bathroom.id);
+          expect(updatedBathroom.id).toBe(bathroom.id);
+          expect(updatedBathroom.name).toBe(bathroom.name);
+        });
+  });
+
+  it('should return a 400 status code on an invalid input', async () => {
+    const bathroom = await getBathroom();
+    bathroom.num_stalls = 'invalid input';
+    await request.put(`/bathroom`)
+        .send(bathroom)
+        .expect(400);
+  });
+
+  it('should not update the bathroom on an invalid input', async () => {
+    const bathroom = await getBathroom();
+    const actualNumStalls = bathroom.num_stalls;
+    bathroom.num_stalls = 'invalid input';
+    await request.put(`/bathroom`)
+        .send(bathroom);
+    await request.get(`/bathroom`)
+        .then((data) => {
+          const updatedBathroom = data.body.find((b) => b.id === bathroom.id);
+          expect(updatedBathroom.id).toBe(bathroom.id);
+          expect(updatedBathroom.num_stalls).toBe(actualNumStalls);
+        });
+  });
+});

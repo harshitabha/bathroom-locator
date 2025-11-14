@@ -66,6 +66,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Bathroom'
+    
+    put:
+      description: Edit a bathroom
+      requestBody:
+        description: The updated bathroom details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bathroom'
+      responses:
+        204:
+          description: Bathroom successfully updated
+        400:
+          description: Invalid bathroom object
 
   /bathroom/updates:
     get:
