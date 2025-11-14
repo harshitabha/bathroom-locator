@@ -174,3 +174,77 @@ describe('POST Bathroom Endpoint', () => {
         });
   });
 });
+
+describe('PUT Bathroom Endpoint', () => {
+  /**
+   * returns an arbitrary bathroom object
+   * @returns {object} a bathroom object
+   */
+  async function getBathroom() {
+    let bathroom;
+    await request.get(`/bathroom`)
+        .then((bathrooms) => {
+          bathroom = bathrooms.body[0];
+        });
+    return bathroom;
+  }
+
+  it('should return a 200 status code', async () => {
+    const bathroom = await getBathroom();
+    bathroom.name = 'STATUS CODE TEST';
+    await request.put(`/bathroom`)
+        .send(bathroom)
+        .expect(200);
+  });
+
+  it('should return the updated bathroom', async () => {
+    const bathroom = await getBathroom();
+    bathroom.name = 'RETURN VALUE TEST';
+    await request.put(`/bathroom`)
+        .send(bathroom)
+        .then((data) => {
+          expect(data.body).toEqual(bathroom);
+        });
+  });
+
+  it('should update the bathroom', async () => {
+    const bathroom = await getBathroom();
+    bathroom.name = 'UPDATED TEST';
+    await request.put(`/bathroom`)
+        .send(bathroom);
+    await request.get(`/bathroom`)
+        .then((data) => {
+          const updatedBathroom = data.body.find((b) => b.id === bathroom.id);
+          expect(updatedBathroom.name).toBe(bathroom.name);
+        });
+  });
+
+  it('should return a 400 status code on an invalid input', async () => {
+    const bathroom = await getBathroom();
+    bathroom.num_stalls = 'invalid input';
+    await request.put(`/bathroom`)
+        .send(bathroom)
+        .expect(400);
+  });
+
+  it('should not update the bathroom on an invalid input', async () => {
+    const bathroom = await getBathroom();
+    const actualNumStalls = bathroom.num_stalls;
+    bathroom.num_stalls = 'invalid input';
+    await request.put(`/bathroom`)
+        .send(bathroom);
+    await request.get(`/bathroom`)
+        .then((data) => {
+          const updatedBathroom = data.body.find((b) => b.id === bathroom.id);
+          expect(updatedBathroom.num_stalls).toBe(actualNumStalls);
+        });
+  });
+
+  it('should return a 404 status code if bathroom doesn\'t exist', async () => {
+    const bathroom = await getBathroom();
+    bathroom.id = '6d6a6a5f-217d-4fea-9ab4-1f21ea2c1b0b';
+    await request.put(`/bathroom`)
+        .send(bathroom)
+        .expect(404);
+  });
+});
