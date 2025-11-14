@@ -1,10 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  GoogleMap,
-  Marker,
-  InfoWindow,
-  useLoadScript,
-} from "@react-google-maps/api";
+import {GoogleMap, Marker, InfoWindow, useLoadScript} from "@react-google-maps/api";
 import "./Map.css";
 import { openWalkingDirections } from "../utils/navigation";
 import Button from "@mui/material/Button";
@@ -15,12 +10,20 @@ import Snackbar from "@mui/material/Snackbar";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
+import MapFilters from "./MapFilters";
+import type { GenderFilter, StallsFilter, AmenityFilter } from "./MapFilters";
+
+
 
 type Place = {
   id: string;
   name: string;
   position: google.maps.LatLngLiteral;
   details?: string;
+
+  genders?: GenderFilter[];
+  stallsAvailable?: StallsFilter[];
+  amenities?: AmenityFilter[];
 };
 
 export default function Map() {
@@ -47,6 +50,11 @@ function MapInner({ apiKey }: { apiKey: string }) {
 
   // bump this to tell AddBathroom to clear its fields after a successful place
   const [resetToken, setResetToken] = useState(0);
+  
+  // filter states
+  const [selectedGenders, setSelectedGenders] = useState<GenderFilter[]>([]);
+  const [selectedStalls, setSelectedStalls] = useState<StallsFilter[]>([]);
+  const [selectedAmenities, setSelectedAmenities] = useState<AmenityFilter[]>([]);
 
   // “peek” gesture helpers
   const startYRef = useRef<number | null>(null);
@@ -132,6 +140,35 @@ function MapInner({ apiKey }: { apiKey: string }) {
   const [userLocation, setUserLocation] =
     useState<google.maps.LatLngLiteral | null>(null);
 
+  const filteredPlaces = useMemo(() => {
+    return places.filter((p) => {
+      // Gender filter
+      if (selectedGenders.length > 0) {
+        const genders = p.genders ?? [];
+        const hasMatch = genders.some((g) => selectedGenders.includes(g));
+        if (!hasMatch) return false;
+      }
+
+      // Stalls filter
+      if (selectedStalls.length > 0) {
+        const stalls = p.stallsAvailable ?? [];
+        const hasMatch = stalls.some((s) => selectedStalls.includes(s));
+        if (!hasMatch) return false;
+      }
+
+      // Amenities filter
+      if (selectedAmenities.length > 0) {
+        const amenities = p.amenities ?? [];
+        const hasMatch = amenities.some((a) =>
+          selectedAmenities.includes(a)
+        );
+        if (!hasMatch) return false;
+      }
+
+      return true;
+    });
+  }, [places, selectedGenders, selectedStalls, selectedAmenities]);
+  
   // ask for user location for centering map
   useEffect(() => {
     if (!("geolocation" in navigator)) {
@@ -269,7 +306,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
           disableDefaultUI: true,
         }}
       >
-        {places.map((p) => (
+        {filteredPlaces.map((p) => (
           <Marker
             key={p.id}
             position={p.position}
@@ -321,6 +358,17 @@ function MapInner({ apiKey }: { apiKey: string }) {
         )}
       </GoogleMap>
 
+      {!addMode && (
+        <MapFilters
+          selectedGenders={selectedGenders}
+          selectedStalls={selectedStalls}
+          selectedAmenities={selectedAmenities}
+          onGendersChange={setSelectedGenders}
+          onStallsChange={setSelectedStalls}
+          onAmenitiesChange={setSelectedAmenities}
+        />
+      )}
+      
       {!addMode && (
         <Fab
           color="primary"
