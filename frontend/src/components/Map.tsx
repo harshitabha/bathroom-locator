@@ -1,11 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  GoogleMap,
-  Marker,
-  InfoWindow,
-  useLoadScript,
-} from "@react-google-maps/api";
 import "./Map.css";
+import { useTheme } from "@mui/material/styles";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { GoogleMap, Marker, InfoWindow, useLoadScript } from "@react-google-maps/api";
 import { openWalkingDirections } from "../utils/navigation";
 import Button from "@mui/material/Button";
 import AddBathroom from "./AddBathroom";
@@ -30,25 +26,16 @@ export default function Map() {
 }
 
 function MapInner({ apiKey }: { apiKey: string }) {
-  // bathrooms & selection
+  const theme = useTheme();
   const [places, setPlaces] = useState<Place[]>([]);
-
   const [selected, setSelected] = useState<Place | null>(null);
-
-  // add flow
   const [addMode, setAddMode] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [bannerOpen, setBannerOpen] = useState(false);
   const [draftPosition, setDraftPosition] = useState<google.maps.LatLngLiteral | null>(null);
-
-  // controlled form fields that survive closing/reopening the sheet
   const [formName, setFormName] = useState("");
   const [formDetails, setFormDetails] = useState("");
-
-  // bump this to tell AddBathroom to clear its fields after a successful place
   const [resetToken, setResetToken] = useState(0);
-
-  // “peek” gesture helpers
   const startYRef = useRef<number | null>(null);
   const draggingRef = useRef(false);
 
@@ -105,24 +92,25 @@ function MapInner({ apiKey }: { apiKey: string }) {
   });
 
   const pinIcon = React.useMemo(() => {
-  if (!isLoaded || !window.google) return null;
-  const g = window.google; // type-safe alias
-
-  return {
-    url:
-      "data:image/svg+xml;charset=UTF-8," +
-      encodeURIComponent(`
-        <svg width="30" height="45" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg">
-          <path d="M15 0C7 0 0 7 0 15c0 11.25 15 30 15 30s15-18.75 15-30C30 7 23 0 15 0z" fill="#845416"/>
-          <circle cx="15" cy="15" r="6" fill="white"/>
-        </svg>
-      `),
+    if (!isLoaded || !window.google) return null;
+    const g = window.google;
+    const pinColor = theme.palette.secondary.main;
+    const innerColor = theme.palette.common.white;
+    return {
+      url:
+        "data:image/svg+xml;charset=UTF-8," +
+        encodeURIComponent(`
+          <svg width="30" height="45" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 0C7 0 0 7 0 15c0 11.25 15 30 15 30s15-18.75 15-30C30 7 23 0 15 0z" fill="${pinColor}"/>
+            <circle cx="15" cy="15" r="6" fill="${innerColor}"/>
+          </svg>
+        `),
       scaledSize: new g.maps.Size(20, 30),
       anchor: new g.maps.Point(10, 30),
     } as google.maps.Icon;
-  }, [isLoaded]);
+  }, [isLoaded, theme]);
 
-  // default center coords when user doesn't provide location (somewhere in santa cruz)
+  // default center coords when user doesn't allow location (somewhere in santa cruz)
   const defaultCenter = useMemo<google.maps.LatLngLiteral>(
     () => ({ lat: 36.99034408117155, lng: -122.05891223939057 }),
     []
@@ -293,7 +281,13 @@ function MapInner({ apiKey }: { apiKey: string }) {
             disableAutoPan: false,
           }}
         >
-        <div className="infowin">
+        <div
+          className="infowin"
+          style={{
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+          }}
+        >
           <strong className="infowin-title">{selected.name}</strong>
           {selected.details && <p className="infowin-text">{selected.details}</p>}
           <div style={{ display: "flex", justifyContent: "center", marginTop: "6px" }}>
@@ -305,12 +299,12 @@ function MapInner({ apiKey }: { apiKey: string }) {
                 openWalkingDirections(selected.position.lat, selected.position.lng)
               }
               sx={{
-                backgroundColor: "#576421",
-                color: "white",
+                bgcolor: "primary.main",
+                color: "common.white",
                 fontWeight: 500,
                 textTransform: "none",
                 borderRadius: "8px",
-                "&:hover": { backgroundColor: "#6B7A29" },
+                "&:hover": { bgcolor: "primary.dark" },
               }}
             >
               Get Directions
@@ -333,13 +327,13 @@ function MapInner({ apiKey }: { apiKey: string }) {
             setDraftPosition(null);
           }}
           sx={{
-            position: "fixed",
-            right: 24,
-            bottom: 24,
-            zIndex: (theme) => theme.zIndex.modal + 1,
-            bgcolor: "#576421",
-            color: "white",
-            "&:hover": { bgcolor: "#6B7A29" },
+              position: "fixed",
+              right: 24,
+              bottom: 24,
+              zIndex: (t) => t.zIndex.modal + 1,
+              bgcolor: "primary.main",
+              color: "common.white",
+              "&:hover": { bgcolor: "primary.dark" },
           }}
         >
           <AddIcon />
@@ -352,10 +346,10 @@ function MapInner({ apiKey }: { apiKey: string }) {
         slotProps={{
           content: {
             sx: {
-              bgcolor: "#FBFAED",
-              color: "#1B1C15",
+              bgcolor: "background.paper",
+              color: "text.primary",
               borderRadius: "12px",
-              boxShadow: "0px 2px 6px rgba(0,0,0,0.15)",
+              boxShadow: 3,
               display: "flex",
               alignItems: "center",
               px: 3,
@@ -373,15 +367,16 @@ function MapInner({ apiKey }: { apiKey: string }) {
             size="small"
             onClick={cancelAddFlow}
             sx={{
-              color: "#1B1C15",
-              border: "1px solid #845416",
+              color: "text.primary",
+              border: 1,
+              borderColor: "secondary.main",
               borderRadius: "8px",
               fontWeight: 600,
               ml: 0.1,
               px: 1.6,
               textTransform: "none",
               "&:hover": {
-                backgroundColor: "rgba(132, 84, 22, 0.05)",
+                bgcolor: "action.hover",
               },
             }}
           >
@@ -406,7 +401,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
             onTouchEnd={onPeekTouchEnd}
             onMouseDown={onPeekMouseDown}
             sx={{
-              bgcolor: "#FBFAED",
+              bgcolor: "background.paper",
               borderTopLeftRadius: 16,
               borderTopRightRadius: 16,
               px: 2,
@@ -430,7 +425,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
             <Typography
               variant="h6"
               fontWeight={600}
-              color="#1B1C15"
+              color="text.primary"
               sx={{ alignSelf: "flex-start" }}
             >
               New Bathroom

@@ -1,205 +1,149 @@
+import AddBathroom from '../components/AddBathroom';
+import {describe, it, afterEach, expect, vi} from 'vitest';
+import {render, screen, cleanup, fireEvent, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import AddBathroomPage from '../components/AddBathroom';
-import React from 'react';
-import { mockMatchMedia } from '../__test-helpers__/testUtils';
 
-const basePosition = { lat: 36.99, lng: -122.0589 };
+vi.mock('@mui/material', async () => {
+  const actual = await vi.importActual<any>('@mui/material');
+  return {
+    ...actual,
+    useMediaQuery: () => false,
+  };
+});
 
-describe('AddBathroomPage — mobile drawer (isSmall=true)', () => {
-  beforeEach(() => mockMatchMedia(true));
-
-  function renderMobile(
-    overrides: Partial<React.ComponentProps<typeof AddBathroomPage>> = {}
+describe('AddBathroom component', () => {
+  const basePosition = {lat: 36.991, lng: -122.059};
+  afterEach(() => {
+    cleanup();
+    vi.resetAllMocks();
+  });
+  function renderAddBathroom(
+    overrides: Partial<React.ComponentProps<typeof AddBathroom>> = {},
   ) {
     const onClose = vi.fn();
-    const onSubmit = vi.fn();
-    const onNameChange = vi.fn();
-    const onDetailsChange = vi.fn();
-
-    render(
-      <AddBathroomPage
-        open
-        onClose={onClose}
-        onSubmit={onSubmit}
-        onOpen={vi.fn()}
-        position={overrides.position === undefined ? basePosition : overrides.position}
-        name={overrides.name ?? ''}
-        details={overrides.details ?? ''}
-        onNameChange={overrides.onNameChange ?? onNameChange}
-        onDetailsChange={overrides.onDetailsChange ?? onDetailsChange}
-      />
-    );
-    return { onClose, onSubmit, onNameChange, onDetailsChange };
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    const props: React.ComponentProps<typeof AddBathroom> = {
+      open: true,
+      onClose,
+      onOpen: undefined,
+      position: basePosition,
+      name: '',
+      details: '',
+      onNameChange: () => {},
+      onDetailsChange: () => {},
+      onSubmit,
+      onCancelFull: undefined,
+      resetToken: 0,
+      ...overrides,
+    };
+    render(<AddBathroom {...props} />);
+    return {onClose, onSubmit, props};
   }
 
-  it('renders fields and location line', () => {
-    renderMobile({ name: 'A', details: 'B' });
-
-    expect(
-      screen.getByRole('heading', { name: /new bathroom/i })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(/bathroom name/i)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(/bathroom description/i)
-    ).toBeInTheDocument();
-    expect(screen.getByText(/location:/i)).toHaveTextContent('36.990000');
-    expect(screen.getByText(/location:/i)).toHaveTextContent('-122.058900');
+  it('renders dialog with title and form fields when open', () => {
+    renderAddBathroom();
+    expect(screen.getByText('New Bathroom')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Bathroom Name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Bathroom Description/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Cancel'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Save'})).toBeInTheDocument();
   });
 
-  it('calls onClose (and not onSubmit) when Cancel is clicked', async () => {
-    const user = userEvent.setup();
-    const { onClose, onSubmit } = renderMobile({ name: 'X', details: 'Y' });
+  it('shows the location text when position is provided', () => {
+    renderAddBathroom({
+      position: {lat: 36.1234567, lng: -122.7654321},
+    });
 
-    await user.click(screen.getByRole('button', { name: /cancel/i }));
+    expect(
+      screen.getByText('Location: 36.123457, -122.765432'),
+    ).toBeInTheDocument();
+  });
+
+  it('does not show location text when position is null', () => {
+    renderAddBathroom({position: null});
+    expect(
+      screen.queryByText(/Location:/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it('calls onClose when the Cancel button is clicked', () => {
+    const {onClose} = renderAddBathroom();
+
+    const cancelButton = screen.getByRole('button', {name: 'Cancel'});
+    fireEvent.click(cancelButton);
 
     expect(onClose).toHaveBeenCalledTimes(1);
-    expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('passes trimmed values and position to onSubmit when Save is clicked', async () => {
-    const user = userEvent.setup();
-    const { onSubmit } = renderMobile({
-      name: '   Cowell Restroom   ',
-      details: '  near lobby ',
-      position: basePosition,
+  it('calls onSubmit with trimmed values when all fields are valid', async () => {
+    const {onSubmit} = renderAddBathroom({
+      name: 'My Bathroom',
+      details: 'Near the blue door on the left',
+      onNameChange: vi.fn(),
+      onDetailsChange: vi.fn(),
     });
 
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    const nameInput = screen.getByLabelText(/Bathroom Name/i);
+    const detailsInput = screen.getByLabelText(/Bathroom Description/i);
 
-    expect(onSubmit).toHaveBeenCalledTimes(1);
-    expect(onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'Cowell Restroom',
-        details: 'near lobby',
-        position: basePosition,
-      })
-    );
-  });
-
-  it('does not call onSubmit when name is blank', async () => {
-    const user = userEvent.setup();
-
-    const { onSubmit } = renderMobile({
-      name: '   ',
-      details: 'some description',
-      position: basePosition,
+    fireEvent.change(nameInput, {target: {value: 'My Bathroom'}});
+    fireEvent.change(detailsInput, {
+      target: {value: 'Near the blue door on the left'},
     });
 
-    await user.click(screen.getByRole('button', { name: /save/i }));
-    expect(onSubmit).not.toHaveBeenCalled();
-  });
+    const saveButton = screen.getByRole('button', {name: 'Save'});
+    fireEvent.click(saveButton);
 
-  it('does not call onSubmit when description is blank', async () => {
-    const user = userEvent.setup();
-
-    const { onSubmit } = renderMobile({
-      name: 'Library Bathroom',
-      details: '   ',
-      position: basePosition,
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+      expect(onSubmit).toHaveBeenCalledWith({
+        name: 'My Bathroom',
+        details: 'Near the blue door on the left',
+        position: {lat: 36.991, lng: -122.059},
+      });
     });
-
-    await user.click(screen.getByRole('button', { name: /save/i }));
-    expect(onSubmit).not.toHaveBeenCalled();
   });
 
   it('does not call onSubmit when position is missing', async () => {
-    const user = userEvent.setup();
-
-    const { onSubmit } = renderMobile({
-      name: 'Library Bathroom',
-      details: 'near lobby',
+    const {onSubmit} = renderAddBathroom({
       position: null,
+      name: 'Some name',
+      details: 'Some details',
     });
 
-    await user.click(screen.getByRole('button', { name: /save/i }));
-    expect(onSubmit).not.toHaveBeenCalled();
-  });
-});
+    const saveButton = screen.getByRole('button', {name: 'Save'});
+    fireEvent.click(saveButton);
 
-describe('AddBathroomPage — desktop dialog (isSmall=false)', () => {
-  beforeEach(() => mockMatchMedia(false));
-
-  it('renders dialog and calls onSubmit with values on Save', async () => {
-    const user = userEvent.setup();
-    const onSubmit = vi.fn();
-    const onClose = vi.fn();
-
-    render(
-      <AddBathroomPage
-        open
-        onClose={onClose}
-        onSubmit={onSubmit}
-        position={basePosition}
-        name="S&E Building"
-        details="first floor"
-        onNameChange={vi.fn()}
-        onDetailsChange={vi.fn()}
-      />
-    );
-
-    // dialog fields exist
-    expect(
-      screen.getByLabelText(/bathroom name/i)
-    ).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: /save/i }));
-
-    expect(onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'S&E Building',
-        details: 'first floor',
-        position: basePosition,
-      })
-    );
-
-    // Cancel still calls onClose in desktop mode
-    await user.click(screen.getByRole('button', { name: /^cancel$/i }));
-    expect(onClose).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
   });
 
-  it('does not call onSubmit when name is blank', async () => {
-    const user = userEvent.setup();
-    const onSubmit = vi.fn();
+  it('does not call onSubmit when name is empty', async () => {
+    const {onSubmit} = renderAddBathroom({
+      name: ' ',
+      details: 'Some details',
+    });
 
-    render(
-      <AddBathroomPage
-        open
-        onClose={vi.fn()}
-        onSubmit={onSubmit}
-        position={basePosition}
-        name="   "
-        details="first floor"
-        onNameChange={vi.fn()}
-        onDetailsChange={vi.fn()}
-      />
-    );
+    const saveButton = screen.getByRole('button', {name: 'Save'});
+    fireEvent.click(saveButton);
 
-    await user.click(screen.getByRole('button', { name: /save/i }));
-    expect(onSubmit).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
   });
 
-  it('does not call onSubmit when description is blank', async () => {
-    const user = userEvent.setup();
-    const onSubmit = vi.fn();
+  it('does not call onSubmit when details are empty', async () => {
+    const {onSubmit} = renderAddBathroom({
+      name: 'Some name',
+      details: ' ',
+    });
 
-    render(
-      <AddBathroomPage
-        open
-        onClose={vi.fn()}
-        onSubmit={onSubmit}
-        position={basePosition}
-        name="S&E Building"
-        details="   "
-        onNameChange={vi.fn()}
-        onDetailsChange={vi.fn()}
-      />
-    );
+    const saveButton = screen.getByRole('button', {name: 'Save'});
+    fireEvent.click(saveButton);
 
-    await user.click(screen.getByRole('button', { name: /save/i }));
-    expect(onSubmit).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
   });
 });

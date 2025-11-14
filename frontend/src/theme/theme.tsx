@@ -2,11 +2,12 @@ import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
   palette: {
-    primary: { main: '#576421' },
+    primary: { main: '#576421', dark: "#6B7A29" },
     secondary: { main: '#845416' },
     error: { main: '#F44336' },
-    background: { default: '#FBFAED' },
+    background: { default: '#FBFAED', paper: "#FBFAED" },
     text: { primary: '#000000' },
+    action: { disabled: "rgba(0, 0, 0, 0.38)", hover: "rgba(0, 0, 0, 0.04)", },
   },
 });
 

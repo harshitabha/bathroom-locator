@@ -1,138 +1,49 @@
-/* ======================================
-   Shared color variables
-====================================== */
-:root {
-  --color-bg-light: #fbfaed;
-  --color-text-dark: #1b1c15;
-  --color-accent-brown: #845416;
-  --color-primary-green: #576421;
-  --color-primary-green-hover: #6b7a29;
-  --color-disabled-gray: rgba(0, 0, 0, 0.38);
-  --color-hover-gray: rgba(0, 0, 0, 0.04);
-}
-
-/* ======================================
-   Mobile Drawer Styles
-====================================== */
-
-/* Mobile drawer paper */
 .addbathroom-drawer-paper.MuiDrawer-paper {
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
-  max-height: 86vh;
-  background-color: var(--color-bg-light);
+  max-height: 86vh
 }
 
-/* drag handle container */
 .addbathroom-drag-handle-container {
   display: flex;
   justify-content: center;
-  padding-top: 8px;
+  padding-top: 8px
 }
 
-/* little grabber bar */
 .addbathroom-drag-handle {
   width: 40px;
   height: 4px;
   border-radius: 2px;
-  background-color: var(--color-disabled-gray);
-  margin-bottom: 8px;
+  margin-bottom: 8px
 }
 
-/* outer wrapper padding on mobile */
-.addbathroom-mobile-wrapper {
-  padding: 0 16px 16px 16px;
-  background-color: var(--color-bg-light);
-}
+.addbathroom-mobile-wrapper {padding: 0 16px 16px 16px}
 
-/* card around the form on mobile */
 .addbathroom-card {
-  background-color: var(--color-bg-light);
   border-radius: 8px;
-  padding: 16px;
+  padding: 16px
 }
 
-/* title spacing (mobile only) */
-.addbathroom-card .addbathroom-title {
-  margin-bottom: 28px; /* slightly larger for breathing room */
-}
+.addbathroom-card .addbathroom-title {margin-bottom: 28px}
 
-/* small location text */
 .addbathroom-location {
   display: block;
   margin-top: 8px;
-  opacity: 0.7;
+  opacity: 0.7
 }
 
-/* row holding Cancel / Save buttons */
 .addbathroom-actions-row {
   display: flex;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 16px
 }
 
-/* ======================================
-   Desktop Dialog Styles
-====================================== */
+.addbathroom-dialog-title {padding-bottom: 8px}
 
-.addbathroom-dialog-paper {
-  background-color: var(--color-bg-light);
-}
+.addbathroom-dialog-content {padding-top: 8px}
 
-/* title + actions need same background to cover whole popup */
-.addbathroom-dialog-title,
-.addbathroom-dialog-actions {
-  background-color: var(--color-bg-light);
-}
+.addbathroom-dialog-inner {padding: 16px 16px 8px 16px}
 
-.addbathroom-dialog-title {
-  padding-bottom: 8px;
-}
+.addbathroom-card .MuiTextField-root + .MuiTextField-root {margin-top: 24px}
 
-.addbathroom-dialog-content {
-  background-color: var(--color-bg-light);
-  padding-top: 8px;
-}
-
-/* inner box padding */
-.addbathroom-dialog-inner {
-  padding: 16px 16px 8px 16px;
-}
-
-/* spacing between Name and Description on mobile */
-.addbathroom-card .MuiTextField-root + .MuiTextField-root {
-  margin-top: 24px;
-}
-
-/* spacing between Name and Description on desktop */
-.addbathroom-dialog-inner .MuiTextField-root + .MuiTextField-root {
-  margin-top: 24px;
-}
-
-/* ======================================
-   Buttons
-====================================== */
-
-/* Cancel button style – no !important */
-.addbathroom-btn-cancel.MuiButton-root {
-  color: var(--color-text-dark);
-  font-weight: 550;
-  border: 1px solid var(--color-accent-brown);
-  border-radius: 8px;
-  text-transform: none;
-}
-
-.addbathroom-btn-cancel.MuiButton-root:hover {
-  background-color: var(--color-hover-gray);
-}
-
-/* Save button style */
-.addbathroom-btn-save.MuiButton-root.MuiButton-contained {
-  background-color: var(--color-primary-green);
-  color: white;
-  text-transform: none;
-}
-
-.addbathroom-btn-save.MuiButton-root.MuiButton-contained:hover {
-  background-color: var(--color-primary-green-hover);
-}
+.addbathroom-dialog-inner .MuiTextField-root + .MuiTextField-root {margin-top: 24px}

@@ -90,6 +90,18 @@ function AddBathroomForm({
           fullWidth={!!isMobile}
           onClick={onCancel}
           className="addbathroom-btn-cancel"
+          variant="outlined"
+          sx={{
+            color: "text.primary",
+            fontWeight: 550,
+            textTransform: "none",
+            borderColor: "secondary.main",
+            borderRadius: 2,
+            "&:hover": {
+              bgcolor: "action.hover",
+              borderColor: "secondary.main",
+            },
+          }}
         >
           Cancel
         </Button>
@@ -98,6 +110,14 @@ function AddBathroomForm({
           variant="contained"
           onClick={onSubmit}
           className="addbathroom-btn-save"
+          sx={{
+            bgcolor: "primary.main",
+            color: "common.white",
+            textTransform: "none",
+            "&:hover": {
+              bgcolor: "primary.dark",
+            },
+          }}
         >
           Save
         </Button>
@@ -149,15 +169,27 @@ export default function AddBathroomPage({
         slotProps={{
           paper: {
             className: "addbathroom-drawer-paper",
+            sx: {
+              bgcolor: "background.paper",
+            },
           },
         }}
       >
         <Box className="addbathroom-drag-handle-container">
-          <Box className="addbathroom-drag-handle" />
+          <Box
+            className="addbathroom-drag-handle"
+            sx={{ bgcolor: "text.disabled" }}
+          />
         </Box>
 
-        <Box className="addbathroom-mobile-wrapper">
-          <Box className="addbathroom-card">
+        <Box
+          className="addbathroom-mobile-wrapper"
+          sx={{ bgcolor: "background.paper" }}
+        >
+          <Box
+            className="addbathroom-card"
+            sx={{ bgcolor: "background.paper" }}
+          >
             <Typography
               variant="h5"
               fontWeight={600}
@@ -192,14 +224,23 @@ export default function AddBathroomPage({
       slotProps={{
         paper: {
           className: "addbathroom-dialog-paper",
+          sx: {
+            bgcolor: "background.paper",
+          },
         },
       }}
     >
-      <DialogTitle className="addbathroom-dialog-title">
+      <DialogTitle
+        className="addbathroom-dialog-title"
+        sx={{ bgcolor: "background.paper" }}
+      >
         New Bathroom
       </DialogTitle>
 
-      <DialogContent className="addbathroom-dialog-content">
+      <DialogContent
+        className="addbathroom-dialog-content"
+        sx={{ bgcolor: "background.paper" }}
+      >
         <Box className="addbathroom-dialog-inner">
           <AddBathroomForm
             name={name}
@@ -213,8 +254,10 @@ export default function AddBathroomPage({
         </Box>
       </DialogContent>
 
-      <DialogActions className="addbathroom-dialog-actions">
-      </DialogActions>
+      <DialogActions
+        className="addbathroom-dialog-actions"
+        sx={{ bgcolor: "background.paper" }}
+      />
     </Dialog>
   );
 }
