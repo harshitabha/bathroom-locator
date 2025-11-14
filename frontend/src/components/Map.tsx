@@ -1,9 +1,19 @@
-import { useEffect, useMemo, useState, useCallback, useRef } from "react";
-import { GoogleMap, Marker, InfoWindow, useLoadScript } from "@react-google-maps/api";
-import "./Map.css";
-import { openWalkingDirections } from '../utils/navigation';
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  useRef} from 'react';
+import {
+  GoogleMap,
+  Marker,
+  InfoWindow,
+  useLoadScript,
+} from '@react-google-maps/api';
+import './Map.css';
+import {openWalkingDirections} from '../utils/navigation';
 import Button from '@mui/material/Button';
-import SearchBar from "./SearchBar";
+import SearchBar from './SearchBar';
 
 type Place = {
   id: number; // id
@@ -12,15 +22,23 @@ type Place = {
   description?: string; // description if needed
 };
 
-export default function Map() {
+const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
   if (!apiKey) return <p>Missing VITE_GOOGLE_MAPS_API_KEY</p>;
-  return <MapInner apiKey={apiKey} />; // makes sure all react hooks are called before returning
-}
+  // makes sure all react hooks are called before returning
+  return <MapInner apiKey={apiKey} />;
+};
+export default Map;
 
-function MapInner({ apiKey }: { apiKey: string }) {
+/**
+ * Renders the actual content of the map
+ * @param {string} apiKey api key for the map
+ * @returns {object} JSX compoent for the inner map content
+ */
+function MapInner({apiKey}: { apiKey: string }) {
   const [places, setPlaces] = useState<Place[]>([]); // bathroom info
-  const [selected, setSelected] = useState<Place | null>(null); // tracks which pin is selected (which info window to show)
+  // tracks which pin is selected (which info window to show)
+  const [selected, setSelected] = useState<Place | null>(null);
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -28,18 +46,19 @@ function MapInner({ apiKey }: { apiKey: string }) {
     mapRef.current = map;
   };
 
-  // 
+  //
   const idleTimer = useRef<number | null>(null);
 
   // load map using api key
-  const { isLoaded, loadError } = useLoadScript({
+  const {isLoaded, loadError} = useLoadScript({
     googleMapsApiKey: apiKey,
   });
 
-  // default center coords when user doesnt provide location (somewhere in santa cruz)
+  // default center coords when user doesn't provide location
+  // (somewhere in santa cruz)
   const defaultCenter = useMemo<google.maps.LatLngLiteral>(
-    () => ({ lat: 36.99034408117155, lng: -122.05891223939057 }),
-    []
+      () => ({lat: 36.99034408117155, lng: -122.05891223939057}),
+      [],
   );
 
   // store user location as LatLng
@@ -48,25 +67,25 @@ function MapInner({ apiKey }: { apiKey: string }) {
 
   // ask for user location for centering map
   useEffect(() => {
-    if (!("geolocation" in navigator)) {
-      console.error("Geolocation not supported by this browser.");
+    if (!('geolocation' in navigator)) {
+      console.error('Geolocation not supported by this browser.');
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setUserLocation({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        });
-      },
-      (err) => {
-        console.error("Geolocation error:", err.message);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10_000, // times out after 10s
-        maximumAge: 60_000, // saves location for 60s in browser cache
-      }
+        (pos) => {
+          setUserLocation({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
+        },
+        (err) => {
+          console.error('Geolocation error:', err.message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10_000, // times out after 10s
+          maximumAge: 60_000, // saves location for 60s in browser cache
+        },
     );
   }, []);
 
@@ -96,28 +115,29 @@ function MapInner({ apiKey }: { apiKey: string }) {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/bathroom?minLng=${minLng}&minLat=${minLat}&maxLng=${maxLng}&maxLat=${maxLat}`
+          `http://localhost:3000/bathroom?minLng=${minLng}&minLat=${minLat}&maxLng=${maxLng}&maxLat=${maxLat}`,
       );
 
       if (res.ok) {
         const bathroomData = await res.json();
 
         // ensure data is of correct type
-        const parsedBathroomData = (bathroomData as Place[]).map((bathroom) => ({
-          id: bathroom.id,
-          name: bathroom.name,
-          position: bathroom.position,
-          details: bathroom.description,
-        }));
+        const parsedBathroomData = (bathroomData as Place[])
+            .map((bathroom) => ({
+              id: bathroom.id,
+              name: bathroom.name,
+              position: bathroom.position,
+              details: bathroom.description,
+            }));
 
         setPlaces(parsedBathroomData);
       } else if (res.status === 404) {
         setPlaces([]); // handle empty response
       } else {
-        console.error("Error fetching bathrooms:", res.status);
+        console.error('Error fetching bathrooms:', res.status);
       }
     } catch (error) {
-      console.error("Error fetching bathrooms:", error);
+      console.error('Error fetching bathrooms:', error);
     }
   }, []);
 
@@ -143,16 +163,19 @@ function MapInner({ apiKey }: { apiKey: string }) {
   }, [clearIdleTimer]);
 
   // for long polling to get real-time updates
-  useEffect((  ) => {
+  useEffect(( ) => {
     let cancelled = false;
 
+    /**
+     * Polls the new bathrooms if they are added
+     */
     async function pollNewBathrooms() {
       if (cancelled) return;
 
       try {
         const res = await fetch('http://localhost:3000/bathroom/updates');
-        if (!res.ok) { 
-          console.error("Polling error:", res.status);
+        if (!res.ok) {
+          console.error('Polling error:', res.status);
         }
 
         const newBathrooms: Place[] = await res.json();
@@ -163,25 +186,26 @@ function MapInner({ apiKey }: { apiKey: string }) {
             // filter new bathrooms to only those within current map bounds
             const visibleNewBathrooms = newBathrooms.filter((bathroom) => {
               const pos = new google.maps.LatLng(
-                bathroom.position.lat,
-                bathroom.position.lng
+                  bathroom.position.lat,
+                  bathroom.position.lng,
               );
               return bounds.contains(pos);
             });
             if (visibleNewBathrooms.length > 0) {
               setPlaces((prevPlaces) => [
                 ...prevPlaces,
-                ...visibleNewBathrooms.filter(nb => !prevPlaces.some(p => p.id === nb.id)),
+                ...visibleNewBathrooms.filter((nb) =>
+                  !prevPlaces.some((p) => p.id === nb.id),
+                ),
               ]);
             }
           }
         }
-      }
-      catch (err){
-        console.error("Polling error:", err);
-        await new Promise((resolve) => setTimeout(resolve, 2000)); // wait before retrying
-      }
-      finally {
+      } catch (err) {
+        console.error('Polling error:', err);
+        // wait before retrying
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      } finally {
         if (!cancelled) pollNewBathrooms();
       }
     }
@@ -189,7 +213,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
     return () => {
       cancelled = true;
     };
-  }, [])
+  }, []);
 
   // map loading errors
   if (loadError) return <p>Failed to load Google Maps.</p>;
@@ -208,10 +232,14 @@ function MapInner({ apiKey }: { apiKey: string }) {
         zoom={14}
         onClick={handleMapClick}
         options={{
-          clickableIcons: false, // prevents clicking on locations other than pins
+          // prevents clicking on locations other than pins
+          clickableIcons: false,
           disableDoubleClickZoom: true, // prevents accidental zoom
-          mapTypeId: google.maps.MapTypeId.ROADMAP, // locks map type to simple map
-          disableDefaultUI: true,
+          mapTypeControl: false, // prevents going to satellite mode
+          // locks map type to simple map
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+          streetViewControl: false, // prevents going to streetview
+          zoomControl: true, // allows zooming buttons
         }}
       >
         {places.map((p) => (
@@ -226,7 +254,8 @@ function MapInner({ apiKey }: { apiKey: string }) {
         {selected && (
           <InfoWindow
             position={selected.position}
-            onCloseClick={() => setSelected(null)} // close info window by clicking x
+            // close info window by clicking x
+            onCloseClick={() => setSelected(null)}
           >
             <div>
               <strong>{selected.name}</strong>
@@ -237,8 +266,8 @@ function MapInner({ apiKey }: { apiKey: string }) {
                 color="primary" // default blue unless we manually change it
                 size="small"
                 onClick={() => openWalkingDirections(
-                  selected.position.lat,
-                  selected.position.lng
+                    selected.position.lat,
+                    selected.position.lng,
                 )}
               >
                 Get Directions

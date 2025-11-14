@@ -81,6 +81,24 @@ paths:
                 items:
                   $ref: '#/components/schemas/Bathroom'
   /user/likes:
+    get:
+      summary: Get a user's liked bathrooms
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Successfully got user's liked bathrooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: uuid
     post:
       description: Add a like to a bathroom
       requestBody:
@@ -95,7 +113,21 @@ paths:
           description: Like added successfully
         400:
           description: Bad request
-
+    delete:
+      description: Unlike a bathroom
+      requestBody:
+        description: User Id and Bathroom Id
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLike'
+      responses:
+        200:
+          description: Removed like successfully
+        404:
+          description: Bathroom not found
+      
 components:
   schemas:
     BathroomBase:

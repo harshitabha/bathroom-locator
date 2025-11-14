@@ -1,24 +1,34 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { ClickAwayListener, Divider, Box, Paper, TextField, List, 
-  ListItemButton, ListItemText, InputAdornment, IconButton
-} from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import {useState, useRef, useEffect, useCallback} from 'react';
+import {ClickAwayListener, Divider, Box, Paper, TextField, List,
+  ListItemButton, ListItemText, InputAdornment, IconButton,
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 
 // helper types
 type PlacePrediction = google.maps.places.PlacePrediction;
+type PlacePredictionWithFormat = PlacePrediction & {
+  structuredFormat?: {
+    secondaryText?: {
+      toString: () => string;
+    };
+  };
+};
 type Suggestion = google.maps.places.AutocompleteSuggestion;
-type SugWithPred = Suggestion & { placePrediction: PlacePrediction }; // guaranteed to have a pred
+// guaranteed to have a pred
+type SugWithPred = Suggestion & { placePrediction: PlacePrediction };
 
 type Props = { map: google.maps.Map | null };
 
-export default function SearchBar({ map }: Props) {
-  const [search, setSearch] = useState("");
+const SearchBar = ({map}: Props) => {
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [openList, setOpenList] = useState(false);
   const [suggestions, setSuggestions] = useState<SugWithPred[]>([]);
 
   // One session token per typing session
-  const tokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
+  const tokenRef = useRef<
+    google.maps.places.AutocompleteSessionToken | null
+  >(null);
 
   // 250ms delay to prevent excess api calls
   const debounceRef = useRef<number | null>(null);
@@ -31,7 +41,8 @@ export default function SearchBar({ map }: Props) {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const placesLib = (await google.maps.importLibrary("places")) as google.maps.PlacesLibrary;
+      const placesLib = (
+        await google.maps.importLibrary('places')) as google.maps.PlacesLibrary;
       if (!mounted) return;
       tokenRef.current = new placesLib.AutocompleteSessionToken();
     })();
@@ -45,10 +56,12 @@ export default function SearchBar({ map }: Props) {
   const getPredictions = useCallback( async (text: string) => {
     setLoading(true);
     try {
-      const placesLib = (await google.maps.importLibrary("places")) as google.maps.PlacesLibrary;
-      const { AutocompleteSuggestion } = placesLib;
+      const placesLib = (
+        await google.maps.importLibrary('places')) as google.maps.PlacesLibrary;
+      const {AutocompleteSuggestion} = placesLib;
 
-      const bounds = map?.getBounds?.()?.toJSON(); // used to create bias based on current map location
+      // used to create suggestion bias based on current map location
+      const bounds = map?.getBounds?.()?.toJSON();
 
       const req: google.maps.places.AutocompleteRequest = {
         input: text,
@@ -56,11 +69,12 @@ export default function SearchBar({ map }: Props) {
         sessionToken: tokenRef.current ?? undefined,
       };
 
-      const { suggestions } = (await AutocompleteSuggestion.fetchAutocompleteSuggestions(req)) ?? {};
+      const {suggestions} = (
+        await AutocompleteSuggestion.fetchAutocompleteSuggestions(req)) ?? {};
 
       // only keep the suggestions with places
       const list: SugWithPred[] = (suggestions ?? []).filter(
-        (s): s is SugWithPred => !!s.placePrediction
+          (s): s is SugWithPred => !!s.placePrediction,
       );
 
       setSuggestions(list);
@@ -81,13 +95,15 @@ export default function SearchBar({ map }: Props) {
     debounceRef.current = window.setTimeout(() => void getPredictions(v), 250);
   };
 
-  // Pan to a chosen place 
+  // Pan to a chosen place
   const panToPrediction = useCallback( async (pred: PlacePrediction) => {
     if (!map) return;
-    const placesLib = (await google.maps.importLibrary("places")) as google.maps.PlacesLibrary;
+    const placesLib = (
+      await google.maps.importLibrary('places')) as google.maps.PlacesLibrary;
 
     const place = pred.toPlace();
-    await place.fetchFields({ fields: ["location", "displayName", "formattedAddress"] });
+    await place.fetchFields(
+        {fields: ['location', 'displayName', 'formattedAddress']});
 
     if (place.location) {
       map.panTo(place.location);
@@ -121,12 +137,12 @@ export default function SearchBar({ map }: Props) {
       <Paper
         elevation={3}
         sx={{
-          position: "absolute",
+          position: 'absolute',
           top: 12,
           left: 12,
           right: 12,
           maxWidth: 520,
-          mx: { xs: 1, sm: 2 },
+          mx: {xs: 1, sm: 2},
           p: 1,
           borderRadius: 6,
           zIndex: 5,
@@ -138,11 +154,11 @@ export default function SearchBar({ map }: Props) {
           onChange={(e) => handleChange(e.target.value)}
           onFocus={() => setOpenList(suggestions.length > 0)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (e.key === 'Enter') {
               e.preventDefault();
               handleSearch();
               setOpenList(false);
-            } else if (e.key === "Escape") {
+            } else if (e.key === 'Escape') {
               setOpenList(false);
               (e.currentTarget as HTMLInputElement).blur();
             }
@@ -152,7 +168,7 @@ export default function SearchBar({ map }: Props) {
           variant="standard"
           slotProps={{
             input: {
-              style: { paddingLeft: 14 },
+              style: {paddingLeft: 14},
               disableUnderline: true,
               endAdornment: (
                 <InputAdornment position="end">
@@ -165,7 +181,7 @@ export default function SearchBar({ map }: Props) {
           }}
         />
 
-        {openList && <Divider sx={{ mt: 1, opacity: 0.6 }} />}
+        {openList && <Divider sx={{mt: 1, opacity: 0.6}} />}
 
         {/* list of autocomplete results */}
         {openList && suggestions.length > 0 && (
@@ -173,18 +189,18 @@ export default function SearchBar({ map }: Props) {
             sx={{
               mt: 1,
               maxHeight: 275,
-              overflowY: "auto",
-              boxShadow: "none",
-              backgroundColor: "transparent",
+              overflowY: 'auto',
+              boxShadow: 'none',
+              backgroundColor: 'transparent',
               p: 0,
             }}
           >
             <List dense disablePadding>
               {suggestions.map((s, index) => {
-                const pred = s.placePrediction;
-                const primary = pred.text?.toString?.() ?? "";
-                const secondary =
-                  (pred as any).structuredFormat?.secondaryText?.toString?.() ?? undefined;
+                const pred = s.placePrediction as PlacePredictionWithFormat;
+                const primary = pred.text?.toString?.() ?? '';
+                const structured = pred.structuredFormat;
+                const secondary = structured?.secondaryText?.toString?.();
 
                 return (
                   <ListItemButton
@@ -193,8 +209,9 @@ export default function SearchBar({ map }: Props) {
                     onClick={() => void handlePick(s)}
                     sx={{
                       px: 1.25,
-                      backgroundColor: "transparent",
-                      borderTop: index === 0 ? "none" : "1px solid rgba(0,0,0,0.08)",
+                      backgroundColor: 'transparent',
+                      borderTop: index === 0 ?
+                      'none' : '1px solid rgba(0,0,0,0.08)',
                     }}
                   >
                     <ListItemText primary={primary} secondary={secondary} />
@@ -207,4 +224,5 @@ export default function SearchBar({ map }: Props) {
       </Paper>
     </ClickAwayListener>
   );
-}
+};
+export default SearchBar;

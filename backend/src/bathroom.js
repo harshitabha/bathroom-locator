@@ -135,6 +135,18 @@ export async function createBathroom(req, res) {
 }
 
 /**
+ * gets user's liked bathrooms
+ * @param {object} req request object
+ * @param {object} res response object
+ * @returns {object} empty object for now
+ */
+export async function getUserLikes(req, res) {
+  const {userId} = req.query;
+  const bathroomIds = await db.getUserLikes(userId);
+  return res.status(200).json(bathroomIds);
+}
+
+/**
  * creates a new like in userLikes and adds a like to the bathroom
  * @param {object} req request object
  * @param {object} res response object
@@ -146,5 +158,20 @@ export async function likeBathroom(req, res) {
   } catch (err) {
     console.error('Error in likeBathroom:', err);
     res.status(400).send();
+  }
+}
+
+/**
+ * removes like in userLikes and decrements bathroom likes
+ * @param {object} req request object
+ * @param {object} res response object
+ */
+export async function unlikeBathroom(req, res) {
+  try {
+    await db.unlikeBathroom(req.body.userId, req.body.bathroomId);
+    res.status(200).send();
+  } catch (err) {
+    console.error('Error in unlikeBathroom:', err);
+    res.status(404).send();
   }
 }
