@@ -137,8 +137,13 @@ export async function createBathroom(req, res) {
 export async function updateBathroom(req, res) {
   try {
     const bathroom = await db.updateBathroom(req.body);
-    notifyNewBathroom(bathroom);
-    res.status(200).send(bathroom);
+    if (bathroom) {
+      notifyNewBathroom(bathroom);
+      res.status(200).send(bathroom);
+    } else {
+      res.status(404).send();
+    }
+    
   } catch (err) {
     console.error('Error in updateBathroom:', err);
   }

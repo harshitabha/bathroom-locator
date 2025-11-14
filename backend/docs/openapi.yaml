@@ -85,6 +85,9 @@ paths:
                 $ref: '#/components/schemas/Bathroom'
         400:
           description: Invalid bathroom object
+        
+        404:
+          description: Bathroom object not found
 
   /bathroom/updates:
     get:
