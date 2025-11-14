@@ -213,7 +213,6 @@ describe('PUT Bathroom Endpoint', () => {
     await request.get(`/bathroom`)
         .then((data) => {
           const updatedBathroom = data.body.find((b) => b.id === bathroom.id);
-          expect(updatedBathroom.id).toBe(bathroom.id);
           expect(updatedBathroom.name).toBe(bathroom.name);
         });
   });
@@ -235,7 +234,6 @@ describe('PUT Bathroom Endpoint', () => {
     await request.get(`/bathroom`)
         .then((data) => {
           const updatedBathroom = data.body.find((b) => b.id === bathroom.id);
-          expect(updatedBathroom.id).toBe(bathroom.id);
           expect(updatedBathroom.num_stalls).toBe(actualNumStalls);
         });
   });
