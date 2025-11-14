@@ -128,8 +128,8 @@ it('renders header and description', async () => {
       'or add details to existing bathrooms.'));
 });
 
-  it('renders auth form', async () => {
-    expect(screen.getByText('Login', { selector: 'h4'}));
+it('renders auth form', async () => {
+  expect(screen.getByText('Login', {selector: 'h4'}));
 
   expect(screen.getByLabelText('Email'));
   expect(screen.getByLabelText('Password'));

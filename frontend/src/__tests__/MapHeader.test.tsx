@@ -1,20 +1,9 @@
 import MapHeader from '../components/MapHeader';
 
 import {describe, it, beforeEach, afterEach, expect, vi} from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import {render, screen, cleanup, fireEvent} from '@testing-library/react';
+import {MemoryRouter} from 'react-router-dom';
 import '@testing-library/jest-dom/vitest';
-
-// mock supabase
-vi.mock('../lib/supabaseClient', () => {
-  return {
-    supabase: {
-      auth: {
-        signInWithPassword: vi.fn(),
-      },
-    },
-  }
-});
 
 // mock useNavigate
 const mockNavigate = vi.fn();
@@ -28,9 +17,9 @@ vi.mock('react-router-dom', async () => {
 
 beforeEach(() => {
   render(
-    <MemoryRouter>
-      <MapHeader />
-    </MemoryRouter>
+      <MemoryRouter>
+        <MapHeader />
+      </MemoryRouter>,
   );
 });
 
@@ -39,10 +28,9 @@ afterEach(() => {
   vi.resetAllMocks();
 });
 
-
 describe('Map Header component', () => {
   it('renders the login button by default', async () => {
-    const loginButton = screen.getByRole('button', { name: 'Login' });
+    const loginButton = screen.getByRole('button', {name: 'Login'});
     expect(loginButton);
   });
 
@@ -52,7 +40,7 @@ describe('Map Header component', () => {
   });
 
   it('leads to login page when login button is clicked', async () => {
-    const loginButton = screen.getByRole('button', { name: 'Login' });
+    const loginButton = screen.getByRole('button', {name: 'Login'});
     fireEvent.click(loginButton);
     expect(mockNavigate).toHaveBeenCalledWith('/login');
   });

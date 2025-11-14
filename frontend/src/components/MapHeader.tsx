@@ -1,11 +1,11 @@
 import {Box, Button, Avatar} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 
-export default function MapHeader() {
+const MapHeader = () => {
   const loggedIn = false; // TODO: make this real (maybe pass it down from App)
   const navigate = useNavigate();
-  
+
   return (
     <Box sx={{
       position: 'fixed',
@@ -14,18 +14,17 @@ export default function MapHeader() {
       width: '100%',
       display: 'flex',
       justifyContent: 'right',
-      px: 1
+      px: 1,
     }}>
-      
+
       {loggedIn ?
-      <Avatar 
+      <Avatar
         sx={{
           bgcolor: 'primary.main',
           color: 'background.default',
         }}
         aria-label='profile-picture'
-      />
-      :
+      /> :
       <Button
         variant="contained"
         size="small"
@@ -34,11 +33,13 @@ export default function MapHeader() {
           padding: '7px',
           borderRadius: '25px',
         }}
-        onClick={() => navigate("/login")}
+        onClick={() => navigate('/login')}
       >
         Login
       </Button>
       }
     </Box>
   );
-}
+};
+
+export default MapHeader;

@@ -21,14 +21,14 @@ const theme = createTheme({
     MuiTypography: {
       variants: [
         {
-          props: { variant: 'h3' },
+          props: {variant: 'h3'},
           style: {
             lineHeight: 1,
             fontSize: '2.8rem',
           },
         },
         {
-          props: { variant: 'h4' },
+          props: {variant: 'h4'},
           style: {
             lineHeight: 1,
             fontSize: '2rem',
@@ -36,7 +36,7 @@ const theme = createTheme({
         },
       ],
     },
-  }
+  },
 });
 
 export default theme;
