@@ -128,7 +128,7 @@ describe('Renders Sign up', async () => {
   });
 
   it('renders auth form', async () => {
-    screen.getByText('Sign Up', {selector: 'div'});
+    screen.getByText('Sign Up', {selector: 'h4'});
 
     screen.getByLabelText('Email');
     screen.getByLabelText('Password');

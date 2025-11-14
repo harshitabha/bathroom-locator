@@ -1,9 +1,10 @@
-import {useState} from 'react';
-import {supabase} from '../lib/supabaseClient';
-import {Stack, TextField, Button, Alert} from '@mui/material';
-import {useNavigate} from 'react-router-dom';
-import AuthHeader from './AuthHeader';
 import './Auth.css';
+import {supabase} from '../lib/supabaseClient';
+import AuthHeader from './AuthHeader';
+
+import {Stack, TextField, Button, Alert, Typography} from '@mui/material';
+import {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -34,16 +35,18 @@ const Login = () => {
       <div className='auth-form'>
         <Stack spacing={5}>
           <Stack spacing={2}>
-            <div className='auth-form-name'>
+            <Typography
+              className='auth-form-name'
+              variant="h4"
+            >
               Login
-            </div>
+            </Typography>
             <div>
-              {
-                errorMessage ?
-                <div>
-                  <Alert severity="error">{errorMessage}</Alert>
-                </div>: null
-              }
+              {errorMessage ? (
+                                <div>
+                                  <Alert severity="error">{errorMessage}</Alert>
+                                </div>
+                            ) : null }
             </div>
             <Stack spacing={4}>
               <TextField
@@ -68,15 +71,17 @@ const Login = () => {
           <Stack spacing={2}>
             <Button
               disabled={email === '' || password === ''}
-              variant="contained"
+              variant='contained'
               className='button'
-              onClick={signInWithEmail}>
+              onClick={signInWithEmail}
+            >
               Login
             </Button>
             <Button
-              variant="outlined"
+              variant='outlined'
               className='button'
-              onClick={() => navigate('/signup')}>
+              onClick={() => navigate('/signup')}
+            >
               Sign Up
             </Button>
           </Stack>

@@ -129,7 +129,7 @@ it('renders header and description', async () => {
 });
 
 it('renders auth form', async () => {
-  expect(screen.getByText('Login', {selector: 'div'}));
+  expect(screen.getByText('Login', {selector: 'h4'}));
 
   expect(screen.getByLabelText('Email'));
   expect(screen.getByLabelText('Password'));
