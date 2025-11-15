@@ -1,13 +1,24 @@
-import "./Map.css";
-import { useTheme } from "@mui/material/styles";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { GoogleMap, Marker, InfoWindow, useLoadScript } from "@react-google-maps/api";
-import { openWalkingDirections } from "../utils/navigation";
-import AddBathroom from "./AddBathroom";
+import './Map.css';
+import {useTheme} from '@mui/material/styles';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  GoogleMap,
+  Marker,
+  InfoWindow,
+  useLoadScript,
+} from '@react-google-maps/api';
+import {openWalkingDirections} from '../utils/navigation';
+import AddBathroom from './AddBathroom';
 import AddBathroomPrompt from './AddBathroomPrompt';
-import Button from "@mui/material/Button";
-import Fab from "@mui/material/Fab";
-import AddIcon from "@mui/icons-material/Add";
+import Button from '@mui/material/Button';
+import Fab from '@mui/material/Fab';
+import AddIcon from '@mui/icons-material/Add';
 
 type Place = {
   id: number;
@@ -16,34 +27,49 @@ type Place = {
   details?: string;
 };
 
+/**
+ * Map component that loads the API key
+ * @returns {object} JSX for the map wrapper
+ */
 export default function Map() {
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
-  if (!apiKey) return <p>Missing VITE_GOOGLE_MAPS_API_KEY</p>;
+  const apiKey =
+    import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
+
+  if (!apiKey) {
+    return <p>Missing VITE_GOOGLE_MAPS_API_KEY</p>;
+  }
+
   return <MapInner apiKey={apiKey} />;
 }
 
-function MapInner({ apiKey }: { apiKey: string }) {
+/**
+ * Renders the actual content of the map
+ * @param {string} apiKey api key for the map
+ * @returns {object} JSX component for the map
+ */
+function MapInner({apiKey}: { apiKey: string }) {
   const theme = useTheme();
   const [places, setPlaces] = useState<Place[]>([]);
   const [selected, setSelected] = useState<Place | null>(null);
   const [addMode, setAddMode] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [bannerOpen, setBannerOpen] = useState(false);
-  const [draftPosition, setDraftPosition] = useState<google.maps.LatLngLiteral | null>(null);
-  const [formName, setFormName] = useState("");
-  const [formDetails, setFormDetails] = useState("");
+  const [draftPosition, setDraftPosition] =
+    useState<google.maps.LatLngLiteral | null>(null);
+  const [formName, setFormName] = useState('');
+  const [formDetails, setFormDetails] = useState('');
   const [resetToken, setResetToken] = useState(0);
   const startYRef = useRef<number | null>(null);
   const draggingRef = useRef(false);
 
   const onPeekTouchStart: React.TouchEventHandler<HTMLDivElement> = (e) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     startYRef.current = e.touches[0].clientY;
     draggingRef.current = true;
   };
 
   const onPeekTouchEnd: React.TouchEventHandler<HTMLDivElement> = (e) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     if (!draggingRef.current || startYRef.current == null) return;
     const dy = startYRef.current - e.changedTouches[0].clientY;
     if (dy > 20) {
@@ -54,9 +80,8 @@ function MapInner({ apiKey }: { apiKey: string }) {
     draggingRef.current = false;
   };
 
-  // Desktop testing helper
   const onPeekMouseDown: React.MouseEventHandler<HTMLDivElement> = (e) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     startYRef.current = e.clientY;
     draggingRef.current = true;
     const onUp = (ev: MouseEvent) => {
@@ -70,9 +95,9 @@ function MapInner({ apiKey }: { apiKey: string }) {
       }
       startYRef.current = null;
       draggingRef.current = false;
-      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener('mouseup', onUp);
     };
-    window.addEventListener("mouseup", onUp);
+    window.addEventListener('mouseup', onUp);
   };
 
   // used to get map bounds
@@ -84,7 +109,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
   const idleTimer = useRef<number | null>(null);
 
   // load map using api key
-  const { isLoaded, loadError } = useLoadScript({
+  const {isLoaded, loadError} = useLoadScript({
     googleMapsApiKey: apiKey,
   });
 
@@ -95,11 +120,25 @@ function MapInner({ apiKey }: { apiKey: string }) {
     const innerColor = theme.palette.common.white;
     return {
       url:
-        "data:image/svg+xml;charset=UTF-8," +
+        'data:image/svg+xml;charset=UTF-8,' +
         encodeURIComponent(`
-          <svg width="30" height="45" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 0C7 0 0 7 0 15c0 11.25 15 30 15 30s15-18.75 15-30C30 7 23 0 15 0z" fill="${pinColor}"/>
-            <circle cx="15" cy="15" r="6" fill="${innerColor}"/>
+          <svg
+            width="30"
+            height="45"
+            viewBox="0 0 30 45"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M15 0C7 0 0 7 0 15c0 11.25 15 30 15 30
+              s15-18.75 15-30C30 7 23 0 15 0z"
+              fill="${pinColor}"
+            />
+            <circle
+              cx="15"
+              cy="15"
+              r="6"
+              fill="${innerColor}"
+            />
           </svg>
         `),
       scaledSize: new g.maps.Size(20, 30),
@@ -107,10 +146,10 @@ function MapInner({ apiKey }: { apiKey: string }) {
     } as google.maps.Icon;
   }, [isLoaded, theme]);
 
-  // default center coords when user doesn't allow location (somewhere in santa cruz)
+  // default center when user does not allow location (in santa cruz)
   const defaultCenter = useMemo<google.maps.LatLngLiteral>(
-    () => ({ lat: 36.99034408117155, lng: -122.05891223939057 }),
-    []
+      () => ({lat: 36.99034408117155, lng: -122.05891223939057}),
+      [],
   );
 
   // store user location as LatLng
@@ -119,42 +158,45 @@ function MapInner({ apiKey }: { apiKey: string }) {
 
   // ask for user location for centering map
   useEffect(() => {
-    if (!("geolocation" in navigator)) {
-      console.error("Geolocation not supported by this browser.");
+    if (!('geolocation' in navigator)) {
+      console.error('Geolocation not supported by this browser.');
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setUserLocation({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        });
-      },
-      (err) => {
-        console.error("Geolocation error:", err.message);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10_000,
-        maximumAge: 60_000,
-      }
+        (pos) => {
+          setUserLocation({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
+        },
+        (err) => {
+          console.error('Geolocation error:', err.message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10_000,
+          maximumAge: 60_000,
+        },
     );
   }, []);
 
   // center map on user if location is given, else default on santa cruz
   const center = userLocation ?? defaultCenter;
 
-  // close info window when clicking off; in add mode, click drops draft pin and opens sheet
+  // close info window when clicking off. in add state, click drops draft pin
   const handleMapClick = useCallback(
-    (e?: google.maps.MapMouseEvent) => {
-      setSelected(null);
-      if (addMode && e?.latLng) {
-        setDraftPosition({ lat: e.latLng.lat(), lng: e.latLng.lng() });
-        setAddOpen(true);
-        setBannerOpen(false);
-      }
-    },
-    [addMode]
+      (e?: google.maps.MapMouseEvent) => {
+        setSelected(null);
+        if (addMode && e?.latLng) {
+          setDraftPosition({
+            lat: e.latLng.lat(),
+            lng: e.latLng.lng(),
+          });
+          setAddOpen(true);
+          setBannerOpen(false);
+        }
+      },
+      [addMode],
   );
 
   const cancelAddFlow = useCallback(() => {
@@ -162,8 +204,8 @@ function MapInner({ apiKey }: { apiKey: string }) {
     setBannerOpen(false);
     setAddMode(false);
     setDraftPosition(null);
-    setFormName("");
-    setFormDetails("");
+    setFormName('');
+    setFormDetails('');
   }, []);
 
   // fetch bathroom pins within the current map view
@@ -182,28 +224,31 @@ function MapInner({ apiKey }: { apiKey: string }) {
     const maxLng = ne.lng() + pad;
     const maxLat = ne.lat() + pad;
 
+    const url =
+      `http://localhost:3000/bathroom?minLng=${minLng}` +
+      `&minLat=${minLat}&maxLng=${maxLng}&maxLat=${maxLat}`;
+
     try {
-      const res = await fetch(
-        `http://localhost:3000/bathroom?minLng=${minLng}&minLat=${minLat}&maxLng=${maxLng}&maxLat=${maxLat}`
-      );
+      const res = await fetch(url);
 
       if (res.ok) {
         const bathroomData = await res.json();
-        const parsedBathroomData = (bathroomData as Place[]).map((bathroom) => ({
-          id: bathroom.id,
-          name: bathroom.name,
-          position: bathroom.position,
-          details: bathroom.details,
-        }));
+        const parsedBathroomData =
+          (bathroomData as Place[]).map((bathroom) => ({
+            id: bathroom.id,
+            name: bathroom.name,
+            position: bathroom.position,
+            details: bathroom.details,
+          }));
 
         setPlaces(parsedBathroomData);
       } else if (res.status === 404) {
         setPlaces([]);
       } else {
-        console.error("Error fetching bathrooms:", res.status);
+        console.error('Error fetching bathrooms:', res.status);
       }
     } catch (error) {
-      console.error("Error fetching bathrooms:", error);
+      console.error('Error fetching bathrooms:', error);
     }
   }, []);
 
@@ -266,45 +311,60 @@ function MapInner({ apiKey }: { apiKey: string }) {
           />
         )}
         {selected && (
-        <InfoWindow
-          position={selected.position}
-          onCloseClick={() => setSelected(null)}
-          options={{
-            pixelOffset: new google.maps.Size(0, -10),
-            disableAutoPan: false,
-          }}
-        >
-        <div
-          className="infowin"
-          style={{
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-          }}
-        >
-          <strong className="infowin-title">{selected.name}</strong>
-          {selected.details && <p className="infowin-text">{selected.details}</p>}
-          <div style={{ display: "flex", justifyContent: "center", marginTop: "6px" }}>
-            <Button
-              data-testid="get-directions"
-              variant="contained"
-              size="small"
-              onClick={() =>
-                openWalkingDirections(selected.position.lat, selected.position.lng)
-              }
-              sx={{
-                bgcolor: "primary.main",
-                color: "common.white",
-                fontWeight: 500,
-                textTransform: "none",
-                borderRadius: "8px",
-                "&:hover": { bgcolor: "primary.dark" },
+          <InfoWindow
+            position={selected.position}
+            onCloseClick={() => setSelected(null)}
+            options={{
+              pixelOffset: new google.maps.Size(0, -10),
+              disableAutoPan: false,
+            }}
+          >
+            <div
+              className="infowin"
+              style={{
+                backgroundColor: theme.palette.background.paper,
+                color: theme.palette.text.primary,
               }}
             >
-              Get Directions
-            </Button>
-          </div>
-        </div>
-        </InfoWindow>
+              <strong className="infowin-title">
+                {selected.name}
+              </strong>
+              {selected.details && (
+                <p className="infowin-text">
+                  {selected.details}
+                </p>
+              )}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  marginTop: '6px',
+                }}
+              >
+                <Button
+                  data-testid="get-directions"
+                  variant="contained"
+                  size="small"
+                  onClick={() =>
+                    openWalkingDirections(
+                        selected.position.lat,
+                        selected.position.lng,
+                    )
+                  }
+                  sx={{
+                    'bgcolor': 'primary.main',
+                    'color': 'common.white',
+                    'fontWeight': 500,
+                    'textTransform': 'none',
+                    'borderRadius': '8px',
+                    '&:hover': {bgcolor: 'primary.dark'},
+                  }}
+                >
+                  Get Directions
+                </Button>
+              </div>
+            </div>
+          </InfoWindow>
         )}
       </GoogleMap>
 
@@ -320,13 +380,13 @@ function MapInner({ apiKey }: { apiKey: string }) {
             setDraftPosition(null);
           }}
           sx={{
-              position: "fixed",
-              right: 24,
-              bottom: 24,
-              zIndex: (t) => t.zIndex.modal + 1,
-              bgcolor: "primary.main",
-              color: "common.white",
-              "&:hover": { bgcolor: "primary.dark" },
+            'position': 'fixed',
+            'right': 24,
+            'bottom': 24,
+            'zIndex': (t) => t.zIndex.modal + 1,
+            'bgcolor': 'primary.main',
+            'color': 'common.white',
+            '&:hover': {bgcolor: 'primary.dark'},
           }}
         >
           <AddIcon />
@@ -341,7 +401,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
         onPeekTouchEnd={onPeekTouchEnd}
         onPeekMouseDown={onPeekMouseDown}
       />
-    
+
       <AddBathroom
         open={addOpen}
         onOpen={() => {
@@ -372,8 +432,8 @@ function MapInner({ apiKey }: { apiKey: string }) {
           setAddOpen(false);
           setAddMode(false);
           setBannerOpen(false);
-          setFormName("");
-          setFormDetails("");
+          setFormName('');
+          setFormDetails('');
           setDraftPosition(null);
           setResetToken((t) => t + 1);
         }}

@@ -1,6 +1,19 @@
+import type React from 'react';
 import AddBathroom from '../components/AddBathroom';
-import {describe, it, afterEach, expect, vi} from 'vitest';
-import {render, screen, cleanup, fireEvent, waitFor} from '@testing-library/react';
+import {
+  describe,
+  it,
+  afterEach,
+  expect,
+  vi,
+} from 'vitest';
+import {
+  render,
+  screen,
+  cleanup,
+  fireEvent,
+  waitFor,
+} from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 
 describe('AddBathroom component', () => {
@@ -11,8 +24,13 @@ describe('AddBathroom component', () => {
     vi.resetAllMocks();
   });
 
+  /**
+   * Render the AddBathroom component with default props
+   * @param {object} overrides Props to override for this render
+   * @returns {object} Object containing onClose and onSubmit
+   */
   function renderAddBathroom(
-    overrides: Partial<React.ComponentProps<typeof AddBathroom>> = {},
+      overrides: Partial<React.ComponentProps<typeof AddBathroom>> = {},
   ) {
     const onClose = vi.fn();
     const onSubmit = vi.fn().mockResolvedValue(undefined);
@@ -33,7 +51,7 @@ describe('AddBathroom component', () => {
     };
 
     render(<AddBathroom {...props} />);
-    return {onClose, onSubmit, props};
+    return {onClose, onSubmit};
   }
 
   it('shows the dialog title when open', () => {
@@ -109,37 +127,45 @@ describe('AddBathroom component', () => {
     });
   });
 
-  it('passes trimmed values and position to onSubmit when fields are valid', async () => {
-    const {onSubmit} = renderAddBathroom({
-      name: '   My Bathroom   ',
-      details: '  Near the blue door on the left   ',
-      onNameChange: vi.fn(),
-      onDetailsChange: vi.fn(),
-    });
+  it(
+      'passes trimmed values and position to onSubmit when fields are valid',
+      async () => {
+        const {onSubmit} = renderAddBathroom({
+          name: '   My Bathroom   ',
+          details: '  Near the blue door on the left   ',
+          onNameChange: vi.fn(),
+          onDetailsChange: vi.fn(),
+        });
 
-    const nameInput = screen.getByRole('textbox', {name: 'Bathroom Name'});
-    const detailsInput = screen.getByRole('textbox', {
-      name: 'Bathroom Description',
-    });
+        const nameInput = screen.getByRole('textbox', {
+          name: 'Bathroom Name',
+        });
+        const detailsInput = screen.getByRole('textbox', {
+          name: 'Bathroom Description',
+        });
 
-    fireEvent.change(nameInput, {
-      target: {value: '   My Bathroom   '},
-    });
-    fireEvent.change(detailsInput, {
-      target: {value: '  Near the blue door on the left   '},
-    });
+        fireEvent.change(nameInput, {
+          target: {value: '   My Bathroom   '},
+        });
+        fireEvent.change(detailsInput, {
+          target: {value: '  Near the blue door on the left   '},
+        });
 
-    const saveButton = screen.getByRole('button', {name: /save/i});
-    fireEvent.click(saveButton);
+        const saveButton = screen.getByRole('button', {name: /save/i});
+        fireEvent.click(saveButton);
 
-    await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith({
-        name: 'My Bathroom',
-        details: 'Near the blue door on the left',
-        position: {lat: 36.991, lng: -122.059},
-      });
-    });
-  });
+        await waitFor(() => {
+          expect(onSubmit).toHaveBeenCalledWith({
+            name: 'My Bathroom',
+            details: 'Near the blue door on the left',
+            position: {
+              lat: 36.991,
+              lng: -122.059,
+            },
+          });
+        });
+      },
+  );
 
   it('does not call onSubmit when name is empty', async () => {
     const {onSubmit} = renderAddBathroom({

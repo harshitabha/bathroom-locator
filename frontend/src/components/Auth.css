@@ -1,58 +1,41 @@
-body {
-    font-family: 'Roboto', sans-serif;
-}
 .auth-screen {
     display: flex;
     flex-direction: column;
-    max-height: 100vh;
-    margin-bottom: 20px;
+    padding-bottom: 40px;
 }
+
 .auth-header {
-    justify-content: center;
+    display: flex;
     flex-direction: column;
     align-items: center;
 }
+
 .app-logo {
     display: flex;
-    justify-content: center;
     align-items: center;
-    font-size: 57px;
 }
+
 .app-logo .location-icon {
-    width: 106px;
-    height: 103px;
+    height: 90px;
+    width: auto;
 }
+
 .description {
-    font-size: 16px;
-    justify-content: center;
     text-align: center;
-    margin-Left: 40px;
-    margin-Right: 40px;
+    padding-top: 10px;
+    max-width: 500px;
 }
+
 .auth-form {
     display: flex;
     justify-content: center;
-    align-items: 'center';
-    margin-top: 50px;
+    margin-top: 30px;
 }
+
 .auth-form .auth-form-name {
     text-align: center;
-    font-size: 32px;
 }
+
 .auth-form .input-box {
     width: 305px;
-}
-.error-hidden {
-    visibility: hidden;
-}
-.button {
-    text-transform: none !important;
-    padding: 12px !important;
-    font-weight: bold !important;
-}
-.back-button {
-    margin-top: 10px;
-    margin-left: 10px;
-    text-transform: none !important;
-    padding: 12px !important;
 }

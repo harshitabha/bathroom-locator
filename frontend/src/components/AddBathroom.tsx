@@ -10,8 +10,8 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
-} from "@mui/material";
-import "./AddBathroom.css";
+} from '@mui/material';
+import './AddBathroom.css';
 
 export type NewBathroomPayload = {
   name: string;
@@ -46,16 +46,23 @@ type AddBathroomFormProps = {
   isMobile?: boolean;
 };
 
-function AddBathroomForm({
-  name,
-  details,
-  position,
-  onNameChange,
-  onDetailsChange,
-  onSubmit,
-  onCancel,
-  isMobile,
-}: AddBathroomFormProps) {
+/**
+ * Form for entering bathroom info
+ * @param {object} props Component props
+ * @returns {object} JSX form fields
+ */
+function AddBathroomForm(props: AddBathroomFormProps) {
+  const {
+    name,
+    details,
+    position,
+    onNameChange,
+    onDetailsChange,
+    onSubmit,
+    onCancel,
+    isMobile,
+  } = props;
+
   return (
     <>
       <TextField
@@ -74,12 +81,18 @@ function AddBathroomForm({
         label="Bathroom Description"
         value={details}
         onChange={(e) => onDetailsChange(e.target.value)}
-        helperText="Please add details on how to find the bathroom, and anything else to note"
+        helperText={
+          'Please add details on how to find the bathroom, ' +
+          'and anything else to note.'
+        }
         className="addbathroom-description"
       />
 
       {position && (
-        <Typography variant="caption" className="addbathroom-location">
+        <Typography
+          variant="caption"
+          className="addbathroom-location"
+        >
           Location: {position.lat.toFixed(6)}, {position.lng.toFixed(6)}
         </Typography>
       )}
@@ -92,30 +105,31 @@ function AddBathroomForm({
           className="addbathroom-btn-cancel"
           variant="outlined"
           sx={{
-            color: "text.primary",
-            fontWeight: 550,
-            textTransform: "none",
-            borderColor: "secondary.main",
-            borderRadius: 2,
-            "&:hover": {
-              bgcolor: "action.hover",
-              borderColor: "secondary.main",
+            'color': 'text.primary',
+            'fontWeight': 550,
+            'textTransform': 'none',
+            'borderColor': 'secondary.main',
+            'borderRadius': 2,
+            '&:hover': {
+              bgcolor: 'action.hover',
+              borderColor: 'secondary.main',
             },
           }}
         >
           Cancel
         </Button>
+
         <Button
           fullWidth={!!isMobile}
           variant="contained"
           onClick={onSubmit}
           className="addbathroom-btn-save"
           sx={{
-            bgcolor: "primary.main",
-            color: "common.white",
-            textTransform: "none",
-            "&:hover": {
-              bgcolor: "primary.dark",
+            'bgcolor': 'primary.main',
+            'color': 'common.white',
+            'textTransform': 'none',
+            '&:hover': {
+              bgcolor: 'primary.dark',
             },
           }}
         >
@@ -126,19 +140,26 @@ function AddBathroomForm({
   );
 }
 
-export default function AddBathroomPage({
-  open,
-  onClose,
-  onOpen,
-  position,
-  onSubmit,
-  name,
-  details,
-  onNameChange,
-  onDetailsChange,
-}: Props) {
+/**
+ * Add bathroom UI wrapper
+ * @param {object} props Component props
+ * @returns {object} JSX container for the component
+ */
+export default function AddBathroomPage(props: Props) {
+  const {
+    open,
+    onClose,
+    onOpen,
+    position,
+    onSubmit,
+    name,
+    details,
+    onNameChange,
+    onDetailsChange,
+  } = props;
+
   const theme = useTheme();
-  const isSmall = useMediaQuery(theme.breakpoints.down("md"));
+  const isSmall = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleSubmit = async () => {
     if (!position || !name.trim() || !details.trim()) return;
@@ -168,27 +189,25 @@ export default function AddBathroomPage({
         }}
         slotProps={{
           paper: {
-            className: "addbathroom-drawer-paper",
-            sx: {
-              bgcolor: "background.paper",
-            },
+            className: 'addbathroom-drawer-paper',
+            sx: {bgcolor: 'background.paper'},
           },
         }}
       >
         <Box className="addbathroom-drag-handle-container">
           <Box
             className="addbathroom-drag-handle"
-            sx={{ bgcolor: "text.disabled" }}
+            sx={{bgcolor: 'text.disabled'}}
           />
         </Box>
 
         <Box
           className="addbathroom-mobile-wrapper"
-          sx={{ bgcolor: "background.paper" }}
+          sx={{bgcolor: 'background.paper'}}
         >
           <Box
             className="addbathroom-card"
-            sx={{ bgcolor: "background.paper" }}
+            sx={{bgcolor: 'background.paper'}}
           >
             <Typography
               variant="h5"
@@ -223,23 +242,21 @@ export default function AddBathroomPage({
       maxWidth="sm"
       slotProps={{
         paper: {
-          className: "addbathroom-dialog-paper",
-          sx: {
-            bgcolor: "background.paper",
-          },
+          className: 'addbathroom-dialog-paper',
+          sx: {bgcolor: 'background.paper'},
         },
       }}
     >
       <DialogTitle
         className="addbathroom-dialog-title"
-        sx={{ bgcolor: "background.paper" }}
+        sx={{bgcolor: 'background.paper'}}
       >
         New Bathroom
       </DialogTitle>
 
       <DialogContent
         className="addbathroom-dialog-content"
-        sx={{ bgcolor: "background.paper" }}
+        sx={{bgcolor: 'background.paper'}}
       >
         <Box className="addbathroom-dialog-inner">
           <AddBathroomForm
@@ -256,7 +273,7 @@ export default function AddBathroomPage({
 
       <DialogActions
         className="addbathroom-dialog-actions"
-        sx={{ bgcolor: "background.paper" }}
+        sx={{bgcolor: 'background.paper'}}
       />
     </Dialog>
   );

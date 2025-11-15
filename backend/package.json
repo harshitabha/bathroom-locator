@@ -6,7 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "restart-docker": "(docker-compose down -v) && (docker compose up -d)",
-    "test": "(npm run restart-docker) && (vitest run --no-file-parallelism --testTimeout=2000 --coverage)",
+    "test": "vitest run --no-file-parallelism --testTimeout=2000 --coverage",
     "start": "nodemon src/index.js",
     "lint": "eslint src test --no-inline-config --max-warnings 0",
     "lint-fix": "eslint src test --no-inline-config --max-warnings 0 --fix"
@@ -20,6 +20,8 @@
     "express": "^5.1.0",
     "express-openapi-validator": "^5.6.0",
     "pg": "^8.16.3",
+    "socket.io": "^4.8.1",
+    "supertest": "^7.1.4",
     "swagger-ui-express": "^5.0.1",
     "yamljs": "^0.3.0"
   },

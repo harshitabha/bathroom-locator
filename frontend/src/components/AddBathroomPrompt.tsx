@@ -14,19 +14,31 @@ type AddBathroomPromptProps = {
   onPeekMouseDown: React.MouseEventHandler<HTMLDivElement>;
 };
 
-export default function AddBathroomPrompt({
-  bannerOpen,
-  onCancel,
-  showPeekCard,
-  onPeekTouchStart,
-  onPeekTouchEnd,
-  onPeekMouseDown,
-}: AddBathroomPromptProps) {
+/**
+ * Banner and peek card prompting user to pick a bathroom
+ * @param {object} props Component props
+ * @returns {object} JSX element
+ */
+export default function AddBathroomPrompt(
+    props: AddBathroomPromptProps,
+) {
+  const {
+    bannerOpen,
+    onCancel,
+    showPeekCard,
+    onPeekTouchStart,
+    onPeekTouchEnd,
+    onPeekMouseDown,
+  } = props;
+
   return (
     <>
       <Snackbar
         open={bannerOpen}
-        anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
         slotProps={{
           content: {
             sx: {
@@ -41,24 +53,24 @@ export default function AddBathroomPrompt({
             },
           },
         }}
-        message={
+        message={(
           <Typography variant="subtitle1" fontWeight={500}>
             Choose a location for the bathroom
           </Typography>
-        }
-        action={
+        )}
+        action={(
           <Button
             size="small"
             onClick={onCancel}
             sx={{
-              color: 'text.primary',
-              border: 1,
-              borderColor: 'secondary.main',
-              borderRadius: '8px',
-              fontWeight: 600,
-              ml: 0.1,
-              px: 1.6,
-              textTransform: 'none',
+              'color': 'text.primary',
+              'border': 1,
+              'borderColor': 'secondary.main',
+              'borderRadius': '8px',
+              'fontWeight': 600,
+              'ml': 0.1,
+              'px': 1.6,
+              'textTransform': 'none',
               '&:hover': {
                 bgcolor: 'action.hover',
               },
@@ -66,7 +78,7 @@ export default function AddBathroomPrompt({
           >
             Cancel
           </Button>
-        }
+        )}
       />
       {showPeekCard && (
         <Box
