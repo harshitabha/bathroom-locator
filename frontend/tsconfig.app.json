@@ -5,10 +5,10 @@
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
+    "types": ["vite/client"],
     "skipLibCheck": true,
 
-    /* Linting */
+    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
@@ -16,14 +16,16 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Bundler mode */    
+    /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-
-    "erasableSyntaxOnly": false
+  //   "compilerOptions": {
+  //   "jsx": "react"
+  // },
   },
   "include": ["src"]
 }
