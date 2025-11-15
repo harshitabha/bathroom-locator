@@ -15,10 +15,33 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
+// google maps mock for SearchBar
+type GoogleWithMaps = {
+  maps: {
+    importLibrary: (libraryName: string) => Promise<unknown>;
+  };
+};
+const importLibraryMock = vi.fn<GoogleWithMaps['maps']['importLibrary']>();
+
 beforeEach(() => {
+  (globalThis as unknown as { google: GoogleWithMaps }).google = {
+    maps: {
+      importLibrary: importLibraryMock,
+    },
+  };
+
+  importLibraryMock.mockResolvedValue({
+    AutocompleteSessionToken: vi.fn(),
+    AutocompleteSuggestion: {
+      fetchAutocompleteSuggestions: vi
+          .fn()
+          .mockResolvedValue({suggestions: []}),
+    },
+  });
+
   render(
       <MemoryRouter>
-        <MapHeader />
+        <MapHeader map={null} />
       </MemoryRouter>,
   );
 });
