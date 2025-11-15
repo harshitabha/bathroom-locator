@@ -13,13 +13,14 @@ import {
 import './Map.css';
 import {openWalkingDirections} from '../utils/navigation';
 import Button from '@mui/material/Button';
+import Like from './Like';
 
-
-type Place = {
+export type Place = {
   id: number; // id
   name: string; // name of location
   position: google.maps.LatLngLiteral; // position on map
   description?: string; // description if needed
+  likes: number;
 };
 
 const Map = () => {
@@ -128,6 +129,7 @@ function MapInner({apiKey}: { apiKey: string }) {
               name: bathroom.name,
               position: bathroom.position,
               details: bathroom.description,
+              likes: bathroom.likes,
             }));
 
         setPlaces(parsedBathroomData);
@@ -258,6 +260,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           >
             <div>
               <strong>{selected.name}</strong>
+              <Like bathroom={selected}/>
               {selected.description && <p>{selected.description}</p>}
               {/* TODO: add genders, amenenities, and navigate button here */}
               <Button // Get Directions button
