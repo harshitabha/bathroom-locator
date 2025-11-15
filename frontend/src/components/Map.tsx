@@ -3,14 +3,11 @@ import { useTheme } from "@mui/material/styles";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GoogleMap, Marker, InfoWindow, useLoadScript } from "@react-google-maps/api";
 import { openWalkingDirections } from "../utils/navigation";
-import Button from "@mui/material/Button";
 import AddBathroom from "./AddBathroom";
+import AddBathroomPrompt from './AddBathroomPrompt';
+import Button from "@mui/material/Button";
 import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
-import Snackbar from "@mui/material/Snackbar";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
 
 type Place = {
   id: number;
@@ -169,7 +166,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
     setFormDetails("");
   }, []);
 
-  // fetch bathroom pins within the current map view + some padding
+  // fetch bathroom pins within the current map view
   const fetchVisiblePins = useCallback(async () => {
     const map = mapRef.current;
     if (!map) return;
@@ -179,9 +176,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
 
     const ne = bounds.getNorthEast();
     const sw = bounds.getSouthWest();
-
-    // small padding so tiny movements don't refetch
-    const pad = 0.1; // about 5 to 7 miles
+    const pad = 0.1;
     const minLng = sw.lng() - pad;
     const minLat = sw.lat() - pad;
     const maxLng = ne.lng() + pad;
@@ -194,8 +189,6 @@ function MapInner({ apiKey }: { apiKey: string }) {
 
       if (res.ok) {
         const bathroomData = await res.json();
-
-        // ensure data is of correct type
         const parsedBathroomData = (bathroomData as Place[]).map((bathroom) => ({
           id: bathroom.id,
           name: bathroom.name,
@@ -205,7 +198,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
 
         setPlaces(parsedBathroomData);
       } else if (res.status === 404) {
-        setPlaces([]); // handle empty response
+        setPlaces([]);
       } else {
         console.error("Error fetching bathrooms:", res.status);
       }
@@ -214,7 +207,7 @@ function MapInner({ apiKey }: { apiKey: string }) {
     }
   }, []);
 
-  // fetches pins after 250ms of idling. If user moves before, reset timer
+  // fetches pins. If user moves before, reset timer
   const clearIdleTimer = useCallback(() => {
     if (idleTimer.current) {
       window.clearTimeout(idleTimer.current);
@@ -340,99 +333,15 @@ function MapInner({ apiKey }: { apiKey: string }) {
         </Fab>
       )}
 
-      <Snackbar
-        open={bannerOpen}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        slotProps={{
-          content: {
-            sx: {
-              bgcolor: "background.paper",
-              color: "text.primary",
-              borderRadius: "12px",
-              boxShadow: 3,
-              display: "flex",
-              alignItems: "center",
-              px: 3,
-              py: 0.85,
-            },
-          },
-        }}
-        message={
-          <Typography variant="subtitle1" fontWeight={500}>
-            Choose a location for the bathroom
-          </Typography>
-        }
-        action={
-          <Button
-            size="small"
-            onClick={cancelAddFlow}
-            sx={{
-              color: "text.primary",
-              border: 1,
-              borderColor: "secondary.main",
-              borderRadius: "8px",
-              fontWeight: 600,
-              ml: 0.1,
-              px: 1.6,
-              textTransform: "none",
-              "&:hover": {
-                bgcolor: "action.hover",
-              },
-            }}
-          >
-            Cancel
-          </Button>
-        }
+      <AddBathroomPrompt
+        bannerOpen={bannerOpen}
+        onCancel={cancelAddFlow}
+        showPeekCard={addMode && !addOpen}
+        onPeekTouchStart={onPeekTouchStart}
+        onPeekTouchEnd={onPeekTouchEnd}
+        onPeekMouseDown={onPeekMouseDown}
       />
-
-      {addMode && !addOpen && (
-        <Box
-          sx={{
-            position: "fixed",
-            left: 8,
-            right: 8,
-            bottom: 8,
-            zIndex: (t) => t.zIndex.modal + 1,
-          }}
-        >
-          <Paper
-            elevation={3}
-            onTouchStart={onPeekTouchStart}
-            onTouchEnd={onPeekTouchEnd}
-            onMouseDown={onPeekMouseDown}
-            sx={{
-              bgcolor: "background.paper",
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16,
-              px: 2,
-              pt: 1.5,
-              pb: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              cursor: "grab",
-            }}
-          >
-            <Box
-              sx={{
-                width: 40,
-                height: 4,
-                borderRadius: 2,
-                bgcolor: "text.disabled",
-                mb: 0.1,
-              }}
-            />
-            <Typography
-              variant="h6"
-              fontWeight={600}
-              color="text.primary"
-              sx={{ alignSelf: "flex-start" }}
-            >
-              New Bathroom
-            </Typography>
-          </Paper>
-        </Box>
-      )}
+    
       <AddBathroom
         open={addOpen}
         onOpen={() => {
@@ -460,13 +369,9 @@ function MapInner({ apiKey }: { apiKey: string }) {
               details: data.details,
             },
           ]);
-
-          // End the flow completely:
           setAddOpen(false);
           setAddMode(false);
           setBannerOpen(false);
-
-          // Reset form text after a successful "place":
           setFormName("");
           setFormDetails("");
           setDraftPosition(null);
