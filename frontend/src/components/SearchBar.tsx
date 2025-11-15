@@ -137,15 +137,11 @@ const SearchBar = ({map}: Props) => {
       <Paper
         elevation={3}
         sx={{
-          position: 'absolute',
-          top: 12,
-          left: 12,
-          right: 12,
-          maxWidth: 520,
-          mx: {xs: 1, sm: 2},
-          p: 1,
+          width: '100%',
+          maxWidth: '100%',
+          padding: 0.5,
           borderRadius: 6,
-          zIndex: 5,
+          boxSizing: 'border-box',
         }}
       >
         <TextField
@@ -164,6 +160,7 @@ const SearchBar = ({map}: Props) => {
             }
           }}
           fullWidth
+          size="small"
           placeholder="Search"
           variant="standard"
           slotProps={{
