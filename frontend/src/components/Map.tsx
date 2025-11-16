@@ -39,7 +39,7 @@ export default Map;
 function MapInner({apiKey}: { apiKey: string }) {
   const [places, setPlaces] = useState<Place[]>([]); // bathroom info
   // tracks which pin is selected (which info window to show)
-  const [selected, setSelected] = useState<Place | null>(null);
+  const [selectedBathroom, setSelected] = useState<Place | null>(null);
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -252,24 +252,24 @@ function MapInner({apiKey}: { apiKey: string }) {
           />
         ))}
 
-        {selected && (
+        {selectedBathroom && (
           <InfoWindow
-            position={selected.position}
+            position={selectedBathroom.position}
             // close info window by clicking x
             onCloseClick={() => setSelected(null)}
           >
             <div>
-              <strong>{selected.name}</strong>
-              <Like bathroom={selected}/>
-              {selected.description && <p>{selected.description}</p>}
+              <strong>{selectedBathroom.name}</strong>
+              <Like bathroom={selectedBathroom}/>
+              {selectedBathroom.description}
               {/* TODO: add genders, amenenities, and navigate button here */}
               <Button // Get Directions button
                 variant="contained"
                 color="primary" // default blue unless we manually change it
                 size="small"
                 onClick={() => openWalkingDirections(
-                    selected.position.lat,
-                    selected.position.lng,
+                    selectedBathroom.position.lat,
+                    selectedBathroom.position.lng,
                 )}
               >
                 Get Directions
