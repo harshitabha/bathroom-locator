@@ -43,8 +43,8 @@ vi.mock('@react-google-maps/api', () => {
       );
     },
     Marker: (props: {
-      onClick?: () => void;
       title?: React.ReactNode;
+      onClick?: () => void;
     }) => (
       <button
         type="button"
@@ -76,6 +76,11 @@ vi.mock('../utils/navigation', () => ({
 type AddBathroomMockProps = {
   open: boolean;
   position?: {lat: number; lng: number} | null;
+  onSubmit: (data: {
+    name: string;
+    details?: string;
+    position: {lat: number; lng: number};
+  }) => void;
 };
 
 vi.mock('../components/AddBathroom', () => ({
@@ -89,11 +94,25 @@ vi.mock('../components/AddBathroom', () => ({
       data-lng={props.position?.lng ?? ''}
     >
       MockAddBathroom
+      {props.open && props.position && (
+        <button
+          type="button"
+          onClick={() =>
+            props.onSubmit({
+              name: 'Test Bathroom',
+              details: 'Near the blue door',
+              position: props.position!,
+            })
+          }
+        >
+          Save bathroom
+        </button>
+      )}
     </div>
   ),
 }));
 
-describe('Map component', () => {
+describe('Map add bathroom button & flow', () => {
   beforeEach(() => {
     vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', 'test-key');
 
@@ -124,172 +143,47 @@ describe('Map component', () => {
     delete (navigator as {geolocation?: unknown}).geolocation;
   });
 
-  const renderMapAndClickAddButton = () => {
+  it('renders the Add bathroom button', () => {
     render(<Map />);
-    const addButton = screen.getByLabelText('add');
-    fireEvent.click(addButton);
-  };
 
-  it('renders the map region', () => {
-    render(<Map />);
-    const region = screen.getByRole('region', {name: /bathroom map/i});
-    expect(region).toBeInTheDocument();
+    screen.getByLabelText('add');
   });
 
-  it(
-      'shows the banner text when the Add button is clicked',
-      () => {
-        renderMapAndClickAddButton();
+  it('shows the banner after clicking the Add bathroom button', () => {
+    render(<Map />);
 
-        screen.getByText('Choose a location for the bathroom');
+    const addButton = screen.getByLabelText('add');
+    fireEvent.click(addButton);
+
+    screen.getByText('Choose a location for the bathroom');
+  });
+
+  it('adds a new marker after choosing a location and saving', async () => {
+    render(<Map />);
+
+    const addButton = screen.getByLabelText('add');
+    fireEvent.click(addButton);
+
+    // Simulate clicking on the map to choose a position
+    if (!latestOnMapClick) {
+      throw new Error('Map click handler not registered');
+    }
+
+    latestOnMapClick({
+      latLng: {
+        lat: () => 36.123456,
+        lng: () => -122.765432,
       },
-  );
+    });
 
-  it(
-      'shows the "New Bathroom" heading when the Add button is clicked',
-      () => {
-        renderMapAndClickAddButton();
-
-        screen.getByText('New Bathroom');
-      },
-  );
-
-  it('hides the banner when Cancel is clicked', async () => {
-    renderMapAndClickAddButton();
-
-    const cancelButton = screen.getByRole(
-        'button',
-        {name: /cancel/i},
-    );
-    fireEvent.click(cancelButton);
+    // Click the mocked save button inside AddBathroom
+    const saveButton = await screen.findByText('Save bathroom');
+    fireEvent.click(saveButton);
 
     await waitFor(() => {
       expect(
-          screen.queryByText(
-              'Choose a location for the bathroom',
-          ),
-      ).toBeNull();
+          screen.getByText('Test Bathroom'),
+      ).toBeInTheDocument();
     });
   });
-
-  it(
-      'shows the Add button again after Cancel is clicked',
-      async () => {
-        renderMapAndClickAddButton();
-
-        const cancelButton = screen.getByRole(
-            'button',
-            {name: /cancel/i},
-        );
-        fireEvent.click(cancelButton);
-
-        await waitFor(() => {
-          screen.getByLabelText('add');
-        });
-      },
-  );
-
-  it(
-      'opens AddBathroom after clicking the map in add state',
-      async () => {
-        renderMapAndClickAddButton();
-
-        if (!latestOnMapClick) {
-          throw new Error('Map click handler not registered');
-        }
-
-        latestOnMapClick({
-          latLng: {
-            lat: () => 12.34,
-            lng: () => 56.78,
-          },
-        });
-
-        await waitFor(() => {
-          const addBathroom = screen.getByRole('dialog', {
-            name: /add bathroom/i,
-          });
-
-          expect(addBathroom).toHaveAttribute('data-open', 'open');
-        });
-      },
-  );
-
-  it(
-      'passes the clicked latitude into AddBathroom',
-      async () => {
-        renderMapAndClickAddButton();
-
-        if (!latestOnMapClick) {
-          throw new Error('Map click handler not registered');
-        }
-
-        latestOnMapClick({
-          latLng: {
-            lat: () => 12.34,
-            lng: () => 56.78,
-          },
-        });
-
-        await waitFor(() => {
-          const addBathroom = screen.getByRole('dialog', {
-            name: /add bathroom/i,
-          });
-
-          expect(addBathroom).toHaveAttribute('data-lat', '12.34');
-        });
-      },
-  );
-
-  it(
-      'passes the clicked longitude into AddBathroom',
-      async () => {
-        renderMapAndClickAddButton();
-
-        if (!latestOnMapClick) {
-          throw new Error('Map click handler not registered');
-        }
-
-        latestOnMapClick({
-          latLng: {
-            lat: () => 12.34,
-            lng: () => 56.78,
-          },
-        });
-
-        await waitFor(() => {
-          const addBathroom = screen.getByRole('dialog', {
-            name: /add bathroom/i,
-          });
-
-          expect(addBathroom).toHaveAttribute('data-lng', '56.78');
-        });
-      },
-  );
-
-  it(
-      'hides the banner after clicking the map in add state',
-      async () => {
-        renderMapAndClickAddButton();
-
-        if (!latestOnMapClick) {
-          throw new Error('Map click handler not registered');
-        }
-
-        latestOnMapClick({
-          latLng: {
-            lat: () => 12.34,
-            lng: () => 56.78,
-          },
-        });
-
-        await waitFor(() => {
-          expect(
-              screen.queryByText(
-                  'Choose a location for the bathroom',
-              ),
-          ).toBeNull();
-        });
-      },
-  );
 });

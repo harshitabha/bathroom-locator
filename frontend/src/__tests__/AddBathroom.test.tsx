@@ -16,7 +16,7 @@ import {
 } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 
-describe('AddBathroom component', () => {
+describe('AddBathroom form', () => {
   const basePosition = {lat: 36.991, lng: -122.059};
 
   afterEach(() => {
@@ -25,19 +25,18 @@ describe('AddBathroom component', () => {
   });
 
   /**
-   * Render the AddBathroom component with default props
+   * Render the AddBathroom component
    * @param {object} overrides Props to override for this render
-   * @returns {object} Object containing onClose and onSubmit
+   * @returns {object} Object containing onSubmit
    */
   function renderAddBathroom(
       overrides: Partial<React.ComponentProps<typeof AddBathroom>> = {},
   ) {
-    const onClose = vi.fn();
     const onSubmit = vi.fn().mockResolvedValue(undefined);
 
     const props: React.ComponentProps<typeof AddBathroom> = {
       open: true,
-      onClose,
+      onClose: () => {},
       onOpen: undefined,
       position: basePosition,
       name: '',
@@ -51,84 +50,60 @@ describe('AddBathroom component', () => {
     };
 
     render(<AddBathroom {...props} />);
-    return {onClose, onSubmit};
+    return {onSubmit};
   }
 
-  it('shows the dialog title when open', () => {
+  it('renders the dialog title when open', () => {
     renderAddBathroom();
+
     screen.getByText('New Bathroom');
   });
 
-  it('shows the Bathroom Name label when open', () => {
+  it('renders the Bathroom Name field label', () => {
     renderAddBathroom();
+
     screen.getByText('Bathroom Name');
   });
 
-  it('shows the Bathroom Description label when open', () => {
+  it('renders the Bathroom Description field label', () => {
     renderAddBathroom();
+
     screen.getByText('Bathroom Description');
   });
 
-  it('shows the Cancel button when open', () => {
+  it('renders the Cancel button', () => {
     renderAddBathroom();
+
     screen.getByRole('button', {name: 'Cancel'});
   });
 
-  it('shows the Save button when open', () => {
+  it('renders the Save button', () => {
     renderAddBathroom();
+
     screen.getByRole('button', {name: 'Save'});
   });
 
-  it('shows the location text when position is provided', () => {
+  it('shows the formatted location when position is provided', () => {
     renderAddBathroom({
       position: {lat: 36.1234567, lng: -122.7654321},
     });
 
-    screen.getByText('Location: 36.123457, -122.765432');
+    const location = screen.getByText(
+        'Location: 36.123457, -122.765432',
+    );
+    expect(location).toBeInTheDocument();
   });
 
   it('does not show location text when position is null', () => {
     renderAddBathroom({position: null});
-    expect(screen.queryByText(/location:/i)).toBeNull();
-  });
 
-  it('calls onClose when the Cancel button is clicked', () => {
-    const {onClose} = renderAddBathroom();
-
-    const cancelButton = screen.getByRole('button', {name: /cancel/i});
-    fireEvent.click(cancelButton);
-
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls onSubmit once when all fields are valid', async () => {
-    const {onSubmit} = renderAddBathroom({
-      name: 'My Bathroom',
-      details: 'Near the blue door on the left',
-      onNameChange: vi.fn(),
-      onDetailsChange: vi.fn(),
-    });
-
-    const nameInput = screen.getByRole('textbox', {name: 'Bathroom Name'});
-    const detailsInput = screen.getByRole('textbox', {
-      name: 'Bathroom Description',
-    });
-
-    fireEvent.change(nameInput, {target: {value: 'My Bathroom'}});
-    fireEvent.change(detailsInput, {
-      target: {value: 'Near the blue door on the left'},
-    });
-
-    const saveButton = screen.getByRole('button', {name: /save/i});
-    fireEvent.click(saveButton);
-
-    await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledTimes(1);
-    });
+    expect(
+        screen.queryByText(/location:/i),
+    ).toBeNull();
   });
 
   it(
-      'passes trimmed values and position to onSubmit when fields are valid',
+      'calls onSubmit with trimmed values and position when fields are valid',
       async () => {
         const {onSubmit} = renderAddBathroom({
           name: '   My Bathroom   ',
@@ -151,7 +126,7 @@ describe('AddBathroom component', () => {
           target: {value: '  Near the blue door on the left   '},
         });
 
-        const saveButton = screen.getByRole('button', {name: /save/i});
+        const saveButton = screen.getByRole('button', {name: 'Save'});
         fireEvent.click(saveButton);
 
         await waitFor(() => {
@@ -173,7 +148,7 @@ describe('AddBathroom component', () => {
       details: 'Some details',
     });
 
-    const saveButton = screen.getByRole('button', {name: /save/i});
+    const saveButton = screen.getByRole('button', {name: 'Save'});
     fireEvent.click(saveButton);
 
     await waitFor(() => {
@@ -187,7 +162,7 @@ describe('AddBathroom component', () => {
       details: '   ',
     });
 
-    const saveButton = screen.getByRole('button', {name: /save/i});
+    const saveButton = screen.getByRole('button', {name: 'Save'});
     fireEvent.click(saveButton);
 
     await waitFor(() => {

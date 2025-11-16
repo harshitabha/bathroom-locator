@@ -70,7 +70,6 @@ export default function AddBathroomPrompt(
               'fontWeight': 600,
               'ml': 0.1,
               'px': 1.6,
-              'textTransform': 'none',
               '&:hover': {
                 bgcolor: 'action.hover',
               },

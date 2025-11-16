@@ -107,7 +107,6 @@ function AddBathroomForm(props: AddBathroomFormProps) {
           sx={{
             'color': 'text.primary',
             'fontWeight': 550,
-            'textTransform': 'none',
             'borderColor': 'secondary.main',
             'borderRadius': 2,
             '&:hover': {
@@ -127,7 +126,6 @@ function AddBathroomForm(props: AddBathroomFormProps) {
           sx={{
             'bgcolor': 'primary.main',
             'color': 'common.white',
-            'textTransform': 'none',
             '&:hover': {
               bgcolor: 'primary.dark',
             },

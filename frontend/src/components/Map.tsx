@@ -21,10 +21,20 @@ import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
 
 type Place = {
-  id: number;
+  id: string;
   name: string;
   position: google.maps.LatLngLiteral;
   details?: string;
+  numStalls?: number;
+  amenities?: {
+    toilet_paper?: boolean;
+    soap?: boolean;
+    paper_towel?: boolean;
+    hand_dryer?: boolean;
+    menstrual_products?: boolean;
+    mirror?: boolean;
+  };
+  likes?: number;
 };
 
 /**
@@ -40,6 +50,37 @@ export default function Map() {
   }
 
   return <MapInner apiKey={apiKey} />;
+}
+
+type AddBathroomButtonProps = {
+  onClick: () => void;
+};
+
+/**
+ * Action button to start the add bathroom flow
+ * @param {{ onClick: () => void }} props Component props
+ * @returns {import('react').ReactElement} Action button element
+ */
+function AddBathroomButton(props: AddBathroomButtonProps) {
+  const {onClick} = props;
+  return (
+    <Fab
+      color="primary"
+      aria-label="add"
+      onClick={onClick}
+      sx={{
+        'position': 'fixed',
+        'right': 24,
+        'bottom': 24,
+        'zIndex': (t) => t.zIndex.modal + 1,
+        'bgcolor': 'primary.main',
+        'color': 'common.white',
+        '&:hover': {bgcolor: 'primary.dark'},
+      }}
+    >
+      <AddIcon />
+    </Fab>
+  );
 }
 
 /**
@@ -180,7 +221,7 @@ function MapInner({apiKey}: { apiKey: string }) {
     );
   }, []);
 
-  // center map on user if location is given, else default on santa cruz
+  // center map on user if location is given, else default in santa cruz
   const center = userLocation ?? defaultCenter;
 
   // close info window when clicking off. in add state, click drops draft pin
@@ -208,6 +249,14 @@ function MapInner({apiKey}: { apiKey: string }) {
     setFormDetails('');
   }, []);
 
+  const handleAddButtonClick = useCallback(() => {
+    setAddMode(true);
+    setBannerOpen(true);
+    setSelected(null);
+    setAddOpen(false);
+    setDraftPosition(null);
+  }, [setAddMode, setBannerOpen, setSelected, setAddOpen, setDraftPosition]);
+
   // fetch bathroom pins within the current map view
   const fetchVisiblePins = useCallback(async () => {
     const map = mapRef.current;
@@ -231,22 +280,53 @@ function MapInner({apiKey}: { apiKey: string }) {
     try {
       const res = await fetch(url);
 
-      if (res.ok) {
-        const bathroomData = await res.json();
-        const parsedBathroomData =
-          (bathroomData as Place[]).map((bathroom) => ({
-            id: bathroom.id,
+      if (!res.ok) {
+        if (res.status === 404) {
+          setPlaces([]);
+          return;
+        }
+        console.error('Error fetching bathrooms:', res.status);
+        return;
+      }
+
+      const bathroomData = await res.json();
+
+      if (!Array.isArray(bathroomData)) {
+        console.error('Unexpected bathrooms payload:', bathroomData);
+        setPlaces([]);
+        return;
+      }
+
+      type BathroomApi = {
+        id: string;
+        name: string;
+        description?: string;
+        position: google.maps.LatLngLiteral;
+        num_stalls?: number;
+        amenities?: {
+          toilet_paper?: boolean;
+          soap?: boolean;
+          paper_towel?: boolean;
+          hand_dryer?: boolean;
+          menstrual_products?: boolean;
+          mirror?: boolean;
+        };
+        likes?: number;
+      };
+
+      const parsedBathroomData: Place[] = (bathroomData as BathroomApi[]).map(
+          (bathroom) => ({
+            id: String(bathroom.id),
             name: bathroom.name,
             position: bathroom.position,
-            details: bathroom.details,
-          }));
+            details: bathroom.description ?? '',
+            numStalls: bathroom.num_stalls,
+            amenities: bathroom.amenities,
+            likes: bathroom.likes,
+          }),
+      );
 
-        setPlaces(parsedBathroomData);
-      } else if (res.status === 404) {
-        setPlaces([]);
-      } else {
-        console.error('Error fetching bathrooms:', res.status);
-      }
+      setPlaces(parsedBathroomData);
     } catch (error) {
       console.error('Error fetching bathrooms:', error);
     }
@@ -355,7 +435,6 @@ function MapInner({apiKey}: { apiKey: string }) {
                     'bgcolor': 'primary.main',
                     'color': 'common.white',
                     'fontWeight': 500,
-                    'textTransform': 'none',
                     'borderRadius': '8px',
                     '&:hover': {bgcolor: 'primary.dark'},
                   }}
@@ -369,28 +448,7 @@ function MapInner({apiKey}: { apiKey: string }) {
       </GoogleMap>
 
       {!addMode && (
-        <Fab
-          color="primary"
-          aria-label="add"
-          onClick={() => {
-            setAddMode(true);
-            setBannerOpen(true);
-            setSelected(null);
-            setAddOpen(false);
-            setDraftPosition(null);
-          }}
-          sx={{
-            'position': 'fixed',
-            'right': 24,
-            'bottom': 24,
-            'zIndex': (t) => t.zIndex.modal + 1,
-            'bgcolor': 'primary.main',
-            'color': 'common.white',
-            '&:hover': {bgcolor: 'primary.dark'},
-          }}
-        >
-          <AddIcon />
-        </Fab>
+        <AddBathroomButton onClick={handleAddButtonClick} />
       )}
 
       <AddBathroomPrompt
@@ -423,7 +481,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           setPlaces((prev) => [
             ...prev,
             {
-              id: Date.now(),
+              id: String(Date.now()),
               name: data.name,
               position: data.position,
               details: data.details,
