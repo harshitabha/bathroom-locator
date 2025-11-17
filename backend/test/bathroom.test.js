@@ -128,6 +128,11 @@ describe('GET /bathroom/updates endpoint', async () => {
       'menstrual_products': true,
       'mirror': true,
     },
+    'gender': {
+      'female': true,
+      'male': false,
+      'gender_neutral': false,
+    },
   };
   let res;
   describe('Request doesn\'t timeout', async () => {

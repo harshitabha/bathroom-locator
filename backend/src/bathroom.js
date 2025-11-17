@@ -10,39 +10,29 @@ const LONG_POLL_TIMEOUT = process.env.NODE_ENV === 'test' ? 1000 : 30000;
  * @returns {Array} array of bathrooms in the bounds
  */
 export async function getUpdates(req, res) {
-  console.log('In handler');
-  try {
-    req.setTimeout(0);
-    const client = {res, sent: false};
-    clients.push(client);
+  req.setTimeout(0);
+  const client = {res, sent: false};
+  clients.push(client);
 
-    if (typeof global.clientRegistered === 'function') {
-      global.clientRegistered();
-    }
-
-    const timer = setTimeout(() => {
-      if (!client.sent) {
-        client.sent = true;
-        clients = clients.filter((c) => c !== client);
-        res.json([]); // no updates, send empty
-      }
-    }, LONG_POLL_TIMEOUT);
-
-    res.on('close', () => {
-      if (!client.sent) {
-        client.sent = true;
-        clearTimeout(timer);
-        clients = clients.filter((c) => c !== client);
-      }
-    });
-  } catch (err) {
-    console.log('error', err);
-    console.error('Error in getUpdates:', err);
-    if (!res.headersSent) {
-      res.status(500).json({error: 'Internal Server Error'});
-    }
+  if (typeof global.clientRegistered === 'function') {
+    global.clientRegistered();
   }
-  console.log('after try catch');
+
+  const timer = setTimeout(() => {
+    if (!client.sent) {
+      client.sent = true;
+      clients = clients.filter((c) => c !== client);
+      res.json([]); // no updates, send empty
+    }
+  }, LONG_POLL_TIMEOUT);
+
+  res.on('close', () => {
+    if (!client.sent) {
+      client.sent = true;
+      clearTimeout(timer);
+      clients = clients.filter((c) => c !== client);
+    }
+  });
 }
 
 /**
@@ -71,10 +61,6 @@ export async function getBathroomsInBounds(req, res) {
   // limit # of bathrooms fetched, up to 200
   const lim = limit ?
     Math.max(1, Math.min(parseInt(limit, 10), 200)) : 200;
-
-  if ([minLng, minLat, maxLng, maxLat].some(Number.isNaN)) {
-    return res.status(400).json({error: 'Invalid bounds'});
-  }
 
   // bounds dont cross anti-meridian, return results normally
   if (minLng <= maxLng) {
