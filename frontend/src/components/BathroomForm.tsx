@@ -11,7 +11,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import './AddBathroom.css';
+import './BathroomForm.css';
 
 export type NewBathroomPayload = {
   name: string;

@@ -4,11 +4,13 @@ import {
   it,
   afterEach,
   expect,
+  vi,
 } from 'vitest';
 import {
   render,
   screen,
   cleanup,
+  fireEvent,
 } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 
@@ -17,22 +19,25 @@ import '@testing-library/jest-dom/vitest';
  * @param {object} [options] Optional render options
  * @param {boolean} [options.bannerOpen] Whether the banner is open
  * @param {boolean} [options.showPeekCard] Whether the peek card is shown
+ * @param {() => void} [options.onCancel] Handler for the Cancel button
  * @returns {import('@testing-library/react').RenderResult} Library result
  */
 function renderPrompt(options?: {
   bannerOpen?: boolean;
   showPeekCard?: boolean;
+  onCancel?: () => void;
 }) {
   const {
     bannerOpen = false,
     showPeekCard = false,
+    onCancel = () => {},
   } = options ?? {};
 
   return render(
       <AddBathroomPrompt
         bannerOpen={bannerOpen}
         showPeekCard={showPeekCard}
-        onCancel={() => {}}
+        onCancel={onCancel}
         onPeekTouchStart={() => {}}
         onPeekTouchEnd={() => {}}
         onPeekMouseDown={() => {}}
@@ -51,12 +56,15 @@ describe('AddBathroomPrompt component', () => {
     screen.getByText('Choose a location for the bathroom');
   });
 
-  it('does not render the banner when closed', () => {
-    renderPrompt({bannerOpen: false});
+  it('calls onCancel when the Cancel button is clicked', () => {
+    const onCancel = vi.fn();
 
-    expect(
-        screen.queryByText('Choose a location for the bathroom'),
-    ).toBeNull();
+    renderPrompt({bannerOpen: true, onCancel});
+
+    const cancelButton = screen.getByRole('button', {name: 'Cancel'});
+    fireEvent.click(cancelButton);
+
+    expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
   it('shows the peek card heading when enabled', () => {

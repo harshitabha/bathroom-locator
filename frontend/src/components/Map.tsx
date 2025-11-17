@@ -14,7 +14,7 @@ import {
   useLoadScript,
 } from '@react-google-maps/api';
 import {openWalkingDirections} from '../utils/navigation';
-import AddBathroom from './AddBathroom';
+import AddBathroom from './BathroomForm';
 import AddBathroomPrompt from './AddBathroomPrompt';
 import Button from '@mui/material/Button';
 import Fab from '@mui/material/Fab';
@@ -66,7 +66,7 @@ function AddBathroomButton(props: AddBathroomButtonProps) {
   return (
     <Fab
       color="primary"
-      aria-label="add"
+      aria-label="Add a bathroom"
       onClick={onClick}
       sx={{
         'position': 'fixed',

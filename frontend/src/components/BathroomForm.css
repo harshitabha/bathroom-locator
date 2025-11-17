@@ -57,10 +57,8 @@
   padding: 16px 16px 8px 16px;
 }
 
-.addbathroom-card .MuiTextField-root:not(:first-of-type) {
-  margin-top: 24px;
-}
-
+/* Margin for all text fields except the first */
+.addbathroom-card .MuiTextField-root:not(:first-of-type),
 .addbathroom-dialog-inner .MuiTextField-root:not(:first-of-type) {
   margin-top: 24px;
 }

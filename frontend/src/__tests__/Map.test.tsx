@@ -34,10 +34,7 @@ vi.mock('@react-google-maps/api', () => {
     }) => {
       latestOnMapClick = props.onClick;
       return (
-        <div
-          role="region"
-          aria-label="Bathroom map"
-        >
+        <div role="region" aria-label="Bathroom map">
           {props.children}
         </div>
       );
@@ -64,55 +61,7 @@ vi.mock('@react-google-maps/api', () => {
   };
 });
 
-const mockOpenWalkingDirections = vi.fn();
-
-vi.mock('../utils/navigation', () => ({
-  __esModule: true,
-  openWalkingDirections: (
-      ...args: unknown[]
-  ) => mockOpenWalkingDirections(...args),
-}));
-
-type AddBathroomMockProps = {
-  open: boolean;
-  position?: {lat: number; lng: number} | null;
-  onSubmit: (data: {
-    name: string;
-    details?: string;
-    position: {lat: number; lng: number};
-  }) => void;
-};
-
-vi.mock('../components/AddBathroom', () => ({
-  __esModule: true,
-  default: (props: AddBathroomMockProps) => (
-    <div
-      role="dialog"
-      aria-label="Add bathroom"
-      data-open={props.open ? 'open' : 'closed'}
-      data-lat={props.position?.lat ?? ''}
-      data-lng={props.position?.lng ?? ''}
-    >
-      MockAddBathroom
-      {props.open && props.position && (
-        <button
-          type="button"
-          onClick={() =>
-            props.onSubmit({
-              name: 'Test Bathroom',
-              details: 'Near the blue door',
-              position: props.position!,
-            })
-          }
-        >
-          Save bathroom
-        </button>
-      )}
-    </div>
-  ),
-}));
-
-describe('Map add bathroom button & flow', () => {
+describe('Add bathroom button & flow', () => {
   beforeEach(() => {
     vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', 'test-key');
 
@@ -143,16 +92,16 @@ describe('Map add bathroom button & flow', () => {
     delete (navigator as {geolocation?: unknown}).geolocation;
   });
 
-  it('renders the Add bathroom button', () => {
+  it('renders the add bathroom button', () => {
     render(<Map />);
 
-    screen.getByLabelText('add');
+    screen.getByLabelText('Add a bathroom');
   });
 
-  it('shows the banner after clicking the Add bathroom button', () => {
+  it('shows the banner after clicking the add bathroom button', () => {
     render(<Map />);
 
-    const addButton = screen.getByLabelText('add');
+    const addButton = screen.getByLabelText('Add a bathroom');
     fireEvent.click(addButton);
 
     screen.getByText('Choose a location for the bathroom');
@@ -161,7 +110,7 @@ describe('Map add bathroom button & flow', () => {
   it('adds a new marker after choosing a location and saving', async () => {
     render(<Map />);
 
-    const addButton = screen.getByLabelText('add');
+    const addButton = screen.getByLabelText('Add a bathroom');
     fireEvent.click(addButton);
 
     // Simulate clicking on the map to choose a position
@@ -176,10 +125,25 @@ describe('Map add bathroom button & flow', () => {
       },
     });
 
-    // Click the mocked save button inside AddBathroom
-    const saveButton = await screen.findByText('Save bathroom');
+    // Open the BathroomForm from the peek card
+    const peekCardTitle = await screen.findByText('New Bathroom');
+    fireEvent.click(peekCardTitle);
+
+    // Fill in form
+    const nameInput = screen.getByLabelText(/Bathroom Name/i);
+    const detailsInput = screen.getByLabelText(/Bathroom Description/i);
+
+    fireEvent.change(nameInput, {
+      target: {value: 'Test Bathroom'},
+    });
+    fireEvent.change(detailsInput, {
+      target: {value: 'Near the blue door'},
+    });
+
+    const saveButton = screen.getByRole('button', {name: 'Save'});
     fireEvent.click(saveButton);
 
+    // After saving, a new marker should appear
     await waitFor(() => {
       expect(
           screen.getByText('Test Bathroom'),
