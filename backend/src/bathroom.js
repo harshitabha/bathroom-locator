@@ -7,9 +7,7 @@ import * as db from './db.js';
  */
 export async function getBathrooms(req, res) {
   const bathrooms = await db.getBathrooms();
-  if (bathrooms.length > 0) {
-    res.status(200).json(bathrooms);
-  }
+  res.status(200).json(bathrooms);
 }
 
 export let clients = [];
@@ -108,11 +106,8 @@ export async function getBathroomsInBounds(req, res) {
       const left = await db.getBathroomsInBounds(a, b, 180, d, lim);
       const right = await db.getBathroomsInBounds(-180, b, c, d, lim);
       const bathrooms = [...left, ...right].slice(0, lim);
-      if (bathrooms.length > 0) {
-        return res.status(200).json(bathrooms);
-      } else {
-        return res.status(200).json([]);
-      }
+
+      return res.status(200).json(bathrooms);
     } catch (e) {
       console.error(e);
       return res.status(500).json({error: 'Server error'});
@@ -131,6 +126,25 @@ export async function createBathroom(req, res) {
   notifyNewBathroom(bathroom);
   if (bathroom) {
     res.status(201).send(bathroom);
+  }
+}
+
+/**
+ * update a bathroom
+ * @param {object} req request object
+ * @param {object} res response object
+ */
+export async function updateBathroom(req, res) {
+  try {
+    const bathroom = await db.updateBathroom(req.body);
+    if (bathroom) {
+      notifyNewBathroom(bathroom);
+      res.status(200).send(bathroom);
+    } else {
+      res.status(404).send();
+    }
+  } catch (err) {
+    console.error('Error in updateBathroom:', err);
   }
 }
 
