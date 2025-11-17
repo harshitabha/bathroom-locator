@@ -4,9 +4,9 @@ const theme = createTheme({
   palette: {
     primary: {main: '#576421'},
     secondary: {main: '#845416'},
-    error: {main: '#F44336'},
+    error: {main: '#904A43'},
     background: {default: '#FBFAED'},
-    text: {primary: '#000000'},
+    text: {primary: '#000000', secondary: '#76786B'},
   },
   components: {
     MuiButton: {

@@ -1,18 +1,20 @@
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import {type Place} from './Map';
-import {useState} from 'react';
-import {getCurrentUserId} from '../lib/supabaseClient';
+import {useEffect, useState} from 'react';
 import Chip from '@mui/material/Chip';
+import './Like.css';
+import {Typography} from '@mui/material';
 
 
 interface LikeProps {
   bathroom: Place;
+  userId: string;
 }
 
 /**
  * gets users liked bathrooms
- * @param {string | null} userId user id
+ * @param {string} userId user id
  * @returns {Array} array of liked bathroom ids
  */
 async function getLikedBathrooms(userId: string | null) {
@@ -32,7 +34,7 @@ async function getLikedBathrooms(userId: string | null) {
 
 /**
  * removes the user's like from the bathroom
- * @param {string | null} userId user id
+ * @param {string} userId user id
  * @param {number} bathroomId bathroom id
  */
 async function unlikeBathroom(userId: string | null, bathroomId: number) {
@@ -58,10 +60,10 @@ async function unlikeBathroom(userId: string | null, bathroomId: number) {
 
 /**
  * adds like to the bathroom
- * @param {string | null} userId user id
+ * @param {string} userId user id
  * @param {number} bathroomId bathroom id
  */
-async function likeBathroom(userId: string | null, bathroomId: number) {
+async function likeBathroom(userId: string, bathroomId: number) {
   try {
     const res = await fetch('http://localhost:3000/user/likes', {
       method: 'post',
@@ -82,28 +84,21 @@ async function likeBathroom(userId: string | null, bathroomId: number) {
   return;
 }
 
-const Like = ({bathroom} : LikeProps) => {
+const Like = ({bathroom, userId}: LikeProps) => {
   const [liked, setLiked] = useState(false);
   const [bathroomLikes, setBathroomLikes] = useState(0);
-  const [userId, setUserId] = useState<string | null>('');
 
-  /**
-   * get user id from supabase and checks if user has liked the current bathroom
-   * @returns {string | null} user id
-   */
-  async function isLiked() {
-    if (!userId) {
-      setUserId(await getCurrentUserId());
-    }
-    if (userId) {
-      // get users liked bathrooms
+  useEffect(() => {
+    /**
+     * checks if user has liked the current bathroom
+     */
+    async function isLiked() {
       const likedBathrooms = await getLikedBathrooms(userId);
-
       setLiked(likedBathrooms.includes(bathroom.id));
     }
-  }
 
-  isLiked();
+    isLiked();
+  }, [userId, bathroom.id]);
 
   const handleToggle = async () => {
     // update likes table
@@ -120,11 +115,18 @@ const Like = ({bathroom} : LikeProps) => {
 
   return (
     <div onClick = {handleToggle}>
-      {/* if not liked, favorite border icon, else favorite */}
-      {liked ? <FavoriteIcon/> : <FavoriteBorderIcon/>}
-      {bathroomLikes > 0 && bathroomLikes}
+      <div className='like-button' aria-label='like-button'>
+        {liked ?
+          <FavoriteIcon color="error"/> :
+          <FavoriteBorderIcon/>}
+        <Typography color="textSecondary">
+          {bathroomLikes > 0 && bathroomLikes}
+        </Typography>
+      </div>
       {bathroomLikes >= 5 ?
-        <Chip label="Verified Bathroom" variant="outlined" /> : null}
+        <Chip label="Verified Bathroom" variant="outlined"
+          color="primary"/> :
+        null}
     </div>
   );
 };

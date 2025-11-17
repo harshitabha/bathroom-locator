@@ -14,6 +14,7 @@ import './Map.css';
 import {openWalkingDirections} from '../utils/navigation';
 import Button from '@mui/material/Button';
 import Like from './Like';
+import {getCurrentUserId} from '../lib/supabaseClient';
 
 export type Place = {
   id: number; // id
@@ -40,6 +41,9 @@ function MapInner({apiKey}: { apiKey: string }) {
   const [places, setPlaces] = useState<Place[]>([]); // bathroom info
   // tracks which pin is selected (which info window to show)
   const [selectedBathroom, setSelected] = useState<Place | null>(null);
+
+  const [userId, setUserId] = useState<string | null>('');
+
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -221,6 +225,8 @@ function MapInner({apiKey}: { apiKey: string }) {
   if (loadError) return <p>Failed to load Google Maps.</p>;
   if (!isLoaded) return <p>Loading map…</p>;
 
+  getCurrentUserId().then(setUserId);
+
   return (
     <div className="map-align-center">
       <GoogleMap
@@ -260,7 +266,9 @@ function MapInner({apiKey}: { apiKey: string }) {
           >
             <div>
               <strong>{selectedBathroom.name}</strong>
-              <Like bathroom={selectedBathroom}/>
+              {userId ?
+                <Like bathroom={selectedBathroom} userId={userId}/> :
+                null}
               {selectedBathroom.description}
               {/* TODO: add genders, amenenities, and navigate button here */}
               <Button // Get Directions button
