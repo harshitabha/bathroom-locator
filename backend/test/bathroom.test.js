@@ -1,9 +1,9 @@
-import {describe, it, beforeAll, afterAll, expect} from 'vitest';
+import {describe, it, beforeAll, afterAll, expect, beforeEach} from 'vitest';
 import supertest from 'supertest';
 import http from 'http';
 
 import * as db from './db.js';
-import app from '../src/index.js';
+import app from '../src/app.js';
 
 import {notifyNewBathroom} from '../src/bathroom.js';
 
@@ -22,46 +22,30 @@ afterAll(async () => {
   await server.close();
 });
 
-describe('GET Bathroom Endpoint', async () => {
-  it('should get all bathrooms - status code', async () => {
-    await request.get(`/bathroom`)
-        .then((data) => {
-          expect(200);
-        });
-  });
-
-  it('should return the correct bathroom data', async () => {
-    await request.get(`/bathroom`)
-        .then((data) => {
-          const first = data.body[0];
-          expect(first.id).toBe('5f1169fe-4db2-48a2-b059-f05cfe63588b');
-          expect(first.name).toBe('Namaste Lounge Bathroom');
-          expect(first.position.lat).toBe(37.00076576303953);
-          expect(first.position.lng).toBe(-122.05719563060227);
-          expect(first.description).toBe('more details');
-          expect(first.num_stalls).toBe(1);
-          expect(first.amenities.toilet_paper).toBe(true);
-          expect(first.amenities.hand_dryer).toBe(false);
-        });
-  });
-});
-
 describe('GET bathroom with bounds', async () => {
-  const position = {
+  const validBounds = {
     minLng: 2.33,
     minLat: 48.85,
-    maxtLgn: 2.34,
+    maxLng: 2.34,
     maxLat: 48.86,
+    limit: 50,
+  };
+
+  const noBathroomBounds = {
+    minLng: 0,
+    minLat: 0,
+    maxLng: 0.001,
+    maxLat: 0.001,
   };
 
   it('status code', async () => {
-    await request.get('/bathroom')
-        .query({...position})
+    await request.get(`/bathroom`)
+        .query(validBounds)
         .expect(200);
   });
   it('number of bathrooms returned', async () => {
     await request.get('/bathroom')
-        .query({...position})
+        .query({...validBounds})
         .then((data) => {
           expect(data.body.length).toBe(2);
         });
@@ -69,72 +53,64 @@ describe('GET bathroom with bounds', async () => {
 
   it('Min latitute is within bounds', async () => {
     await request.get('/bathroom')
-        .query({...position})
+        .query({...validBounds})
         .then((data) => {
-          const minLatInBounds = data.body[0].position.lat >= position.minLat &&
-              data.body[1].position.lat >= position.minLat;
+          const minLatInBounds =
+            data.body[0].position.lat >= validBounds.minLat &&
+            data.body[1].position.lat >= validBounds.minLat;
           expect(minLatInBounds).toBe(true);
         });
   });
 
   it('Max latitute is within bounds', async () => {
     await request.get('/bathroom')
-        .query({...position})
+        .query({...validBounds})
         .then((data) => {
-          const maxLatInBounds = data.body[0].position.lat <= position.maxLat &&
-              data.body[1].position.lat <= position.maxLat;
+          const maxLatInBounds =
+            data.body[0].position.lat <= validBounds.maxLat &&
+            data.body[1].position.lat <= validBounds.maxLat;
           expect(maxLatInBounds).toBe(true);
         });
   });
 
   it('Min logitude is within bounds', async () => {
     await request.get('/bathroom')
-        .query({...position})
+        .query({...validBounds})
         .then((data) => {
-          const maxLatInBounds = data.body[0].position.lat >= position.minLng &&
-              data.body[1].position.lat >= position.minLng;
+          const maxLatInBounds =
+            data.body[0].position.lng >= validBounds.minLng &&
+            data.body[1].position.lng >= validBounds.minLng;
           expect(maxLatInBounds).toBe(true);
         });
   });
 
-  it('Min logitude is within bounds', async () => {
+  it('Max logitude is within bounds', async () => {
     await request.get('/bathroom')
-        .query({...position})
+        .query({...validBounds})
         .then((data) => {
-          const inBounds = data.body[0].position.lat <= position.maxtLgn &&
-              data.body[1].position.lat <= position.maxtLgn;
+          const inBounds =
+            data.body[0].position.lng <= validBounds.maxLng &&
+            data.body[1].position.lng <= validBounds.maxLng;
           expect(inBounds).toBe(true);
         });
   });
 
   it('Status code - no bathrooms recieved if not in bounds', async () => {
     await request.get('/bathroom')
-        .query({
-          minLng: 0,
-          minLat: 0,
-          maxLng: 0.001,
-          maxLat: 0.001,
-        })
+        .query(noBathroomBounds)
         .expect(200);
   });
 
   it('Content length - no bathrooms recieved if not in bounds', async () => {
     await request.get('/bathroom')
-        .query({
-          minLng: 0,
-          minLat: 0,
-          maxLng: 0.001,
-          maxLat: 0.001,
-        })
+        .query(noBathroomBounds)
         .then((data) => {
           expect(data.body.length).toBe(0);
         });
   });
 });
 
-describe('GET /bathroom/updates endpoint', () => {
-  // TODO: Check in with Cheryl why web sockets weren't used
-  // simulate new bathroom
+describe('GET /bathroom/updates endpoint', async () => {
   const newBathroom = {
     'id': 'cf0c26a5-fa2e-4685-8120-feafc76eb009',
     'name': 'New Bathroom',
@@ -153,25 +129,43 @@ describe('GET /bathroom/updates endpoint', () => {
       'mirror': true,
     },
   };
+  let res;
+  describe('Request doesn\'t timeout', async () => {
+    beforeEach(async () => {
+      const getUpdates = request.get('/bathroom/updates');
 
-  it('should wait and receive new bathroom updates', async () => {
-    const getUpdates = request.get('/bathroom/updates');
+      setTimeout(() => {
+        notifyNewBathroom(newBathroom);
+      }, 100);
 
-    setTimeout(() => {
-      notifyNewBathroom(newBathroom);
-    }, 100);
+      res = await getUpdates;
+    });
 
-    const response = await getUpdates;
-    // Assertions
-    expect(response.status).toBe(200);
-    expect(response.body.length).toBe(1);
-    expect(response.body[0]).toEqual(newBathroom);
-  }, 5000);
-  it('should timeout and return empty after 30 seconds', async () => {
-    const response = await request.get('/bathroom/updates');
-    // Assertions
-    expect(response.status).toBe(200);
-    expect(response.body.length).toBe(0);
+    it('Success Status code', async () => {
+      expect(res.status).toBe(200);
+    });
+
+    it('Returns only the bathroom that was added', async () => {
+      expect(res.body.length).toBe(1);
+    });
+
+    it('response should contain the new bathroom added', async () => {
+      // Assertions
+      expect(res.body[0]).toEqual(newBathroom);
+    });
+  });
+
+  describe('Request times out', async () => {
+    beforeEach(async () => {
+      res = await request.get('/bathroom/updates');
+    });
+    it('Status code', async () => {
+      expect(res.status).toBe(200);
+    });
+
+    it('Nothing is returned in the res', async () => {
+      expect(res.body.length).toBe(0);
+    });
   });
 });
 
@@ -197,12 +191,18 @@ describe('Creating a bathroom', () => {
       await request.post(`/bathroom`)
           .send(basicBathroom)
           .then((data) => {
-            bathroomId = data.body[0].id;
+            bathroomId = data.body.id;
           });
       await request.get('/bathroom')
+          .query({
+            minLat: basicBathroom.position.lat - 0.01,
+            minLng: basicBathroom.position.lng - 0.01,
+            maxLat: basicBathroom.position.lat + 0.01,
+            maxLng: basicBathroom.position.lng + 0.01,
+          })
           .then((data) => {
-            const inGet = data.body.some((b) => b.id == bathroomId);
-            expect(inGet).toBe(true);
+            const inDatabase = data.body.some((b) => b.id == bathroomId);
+            expect(inDatabase).toBe(true);
           });
     });
 
@@ -243,7 +243,7 @@ describe('Creating a bathroom', () => {
     it('Status code', async () => {
       await request.post(`/bathroom`)
           .send(complexBathroom)
-          .expect(200);
+          .expect(201);
     });
   });
 });

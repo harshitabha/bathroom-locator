@@ -1,16 +1,5 @@
-import * as db from './db.js';
+import * as db from './model/db.js';
 
-/**
- * returns all the bathrooms in the database
- * @param {object} req request object
- * @param {object} res response object
- */
-export async function getBathrooms(req, res) {
-  const bathrooms = await db.getBathrooms();
-  if (bathrooms.length > 0) {
-    res.status(200).json(bathrooms);
-  }
-}
 
 export let clients = [];
 // use shorter timeout for tests
@@ -21,6 +10,7 @@ const LONG_POLL_TIMEOUT = process.env.NODE_ENV === 'test' ? 1000 : 30000;
  * @returns {Array} array of bathrooms in the bounds
  */
 export async function getUpdates(req, res) {
+  console.log('In handler');
   try {
     req.setTimeout(0);
     const client = {res, sent: false};
@@ -46,11 +36,13 @@ export async function getUpdates(req, res) {
       }
     });
   } catch (err) {
+    console.log('error', err);
     console.error('Error in getUpdates:', err);
     if (!res.headersSent) {
       res.status(500).json({error: 'Internal Server Error'});
     }
   }
+  console.log('after try catch');
 }
 
 /**
@@ -76,48 +68,37 @@ export async function notifyNewBathroom(newBathroom) {
 export async function getBathroomsInBounds(req, res) {
   const {minLng, minLat, maxLng, maxLat, limit} = req.query;
 
-  const hasBounds =
-    minLng !== undefined && minLat !== undefined &&
-    maxLng !== undefined && maxLat !== undefined;
+  // limit # of bathrooms fetched, up to 200
+  const lim = limit ?
+    Math.max(1, Math.min(parseInt(limit, 10), 200)) : 200;
 
-  if (hasBounds) {
-    const a = parseFloat(minLng);
-    const b = parseFloat(minLat);
-    const c = parseFloat(maxLng);
-    const d = parseFloat(maxLat);
-    // limit # of bathrooms fetched, up to 200
-    const lim = limit ?
-      Math.max(1, Math.min(parseInt(limit, 10), 200)) : 200;
+  if ([minLng, minLat, maxLng, maxLat].some(Number.isNaN)) {
+    return res.status(400).json({error: 'Invalid bounds'});
+  }
 
-    if ([a, b, c, d].some(Number.isNaN)) {
-      return res.status(400).json({error: 'Invalid bounds'});
-    }
-
-    try {
-      // bounds dont cross anti-meridian, return results normally
-      if (a <= c) {
-        const bathrooms = await db.getBathroomsInBounds(a, b, c, d, lim);
-        if (bathrooms.length > 0) {
-          return res.status(200).json(bathrooms);
-        } else {
-          return res.status(200).json([]);
-        }
-      }
-
-      // bounds cross anti-meridian, split into two before returning results
-      const left = await db.getBathroomsInBounds(a, b, 180, d, lim);
-      const right = await db.getBathroomsInBounds(-180, b, c, d, lim);
-      const bathrooms = [...left, ...right].slice(0, lim);
-      if (bathrooms.length > 0) {
-        return res.status(200).json(bathrooms);
-      } else {
-        return res.status(200).json([]);
-      }
-    } catch (e) {
-      console.error(e);
-      return res.status(500).json({error: 'Server error'});
+  // bounds dont cross anti-meridian, return results normally
+  if (minLng <= maxLng) {
+    const bathrooms = await db.getBathroomsInBounds(
+        minLng,
+        minLat,
+        maxLng,
+        maxLat,
+        lim,
+    );
+    if (bathrooms.length > 0) {
+      return res.status(200).json(bathrooms);
+    } else {
+      return res.status(200).json([]);
     }
   }
+
+  // bounds cross anti-meridian, split into two before returning results
+  const left =
+    await db.getBathroomsInBounds(minLng, minLat, 180, maxLat, lim);
+  const right =
+    await db.getBathroomsInBounds(-180, minLat, maxLng, maxLat, lim);
+  const bathrooms = [...left, ...right].slice(0, lim);
+  return res.status(200).json(bathrooms);
 }
 
 /**

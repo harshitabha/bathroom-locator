@@ -15,27 +15,31 @@ paths:
       parameters:
         - in: query
           name: minLng
-          required: false
+          required: true
           schema:
             type: number
+            format: double
         - in: query
           name: minLat
-          required: false
+          required: true
           schema:
             type: number
+            format: double
         - in: query
           name: maxLng
-          required: false
+          required: true
           schema:
             type: number
+            format: double
         - in: query
           name: maxLat
-          required: false
+          required: true
           schema:
             type: number
+            format: double
         - in: query
           name: limit
-          required: false
+          required: true
           schema:
             type: integer
             minimum: 1
