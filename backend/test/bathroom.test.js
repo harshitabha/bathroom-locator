@@ -45,7 +45,7 @@ describe('GET bathroom with bounds', async () => {
   });
   it('number of bathrooms returned', async () => {
     await request.get('/bathroom')
-        .query({...validBounds})
+        .query(validBounds)
         .then((data) => {
           expect(data.body.length).toBe(2);
         });
@@ -53,7 +53,7 @@ describe('GET bathroom with bounds', async () => {
 
   it('Min latitute is within bounds', async () => {
     await request.get('/bathroom')
-        .query({...validBounds})
+        .query(validBounds)
         .then((data) => {
           const minLatInBounds =
             data.body[0].position.lat >= validBounds.minLat &&

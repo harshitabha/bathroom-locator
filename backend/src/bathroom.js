@@ -1,4 +1,4 @@
-import * as db from './model/db.js';
+import * as db from './db.js';
 
 
 export let clients = [];
@@ -83,8 +83,8 @@ export async function getBathroomsInBounds(req, res) {
     await db.getBathroomsInBounds(minLng, minLat, 180, maxLat, lim);
   const right =
     await db.getBathroomsInBounds(-180, minLat, maxLng, maxLat, lim);
-  const bathrooms = [...left, ...right].slice(0, lim);
-  return res.status(200).json(bathrooms);
+  const bathroomsInBounds = [...left, ...right].slice(0, lim);
+  return res.status(200).json(bathroomsInBounds);
 }
 
 /**
