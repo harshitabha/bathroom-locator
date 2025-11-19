@@ -6,6 +6,7 @@ import * as db from './db.js';
 import app from '../src/app.js';
 
 import {notifyNewBathroom} from '../src/bathroom.js';
+import {validBounds} from './consts.js';
 
 let server;
 let request;
@@ -23,14 +24,6 @@ afterAll(async () => {
 });
 
 describe('GET bathroom with bounds', async () => {
-  const validBounds = {
-    minLng: 2.33,
-    minLat: 48.85,
-    maxLng: 2.34,
-    maxLat: 48.86,
-    limit: 50,
-  };
-
   const noBathroomBounds = {
     minLng: 0,
     minLat: 0,
@@ -43,6 +36,7 @@ describe('GET bathroom with bounds', async () => {
         .query(validBounds)
         .expect(200);
   });
+
   it('number of bathrooms returned', async () => {
     await request.get('/bathroom')
         .query(validBounds)
@@ -64,7 +58,7 @@ describe('GET bathroom with bounds', async () => {
 
   it('Max latitute is within bounds', async () => {
     await request.get('/bathroom')
-        .query({...validBounds})
+        .query(validBounds)
         .then((data) => {
           const maxLatInBounds =
             data.body[0].position.lat <= validBounds.maxLat &&
@@ -75,7 +69,7 @@ describe('GET bathroom with bounds', async () => {
 
   it('Min logitude is within bounds', async () => {
     await request.get('/bathroom')
-        .query({...validBounds})
+        .query(validBounds)
         .then((data) => {
           const maxLatInBounds =
             data.body[0].position.lng >= validBounds.minLng &&
@@ -86,7 +80,7 @@ describe('GET bathroom with bounds', async () => {
 
   it('Max logitude is within bounds', async () => {
     await request.get('/bathroom')
-        .query({...validBounds})
+        .query(validBounds)
         .then((data) => {
           const inBounds =
             data.body[0].position.lng <= validBounds.maxLng &&
@@ -133,6 +127,7 @@ describe('GET /bathroom/updates endpoint', async () => {
       'male': false,
       'gender_neutral': false,
     },
+    'likes': 0,
   };
   let res;
   describe('Request doesn\'t timeout', async () => {
@@ -174,7 +169,7 @@ describe('GET /bathroom/updates endpoint', async () => {
   });
 });
 
-describe('Creating a bathroom', () => {
+describe('POST /bathroom - creating a new bathroom', () => {
   describe('Basic Bathroom', async () => {
     const basicBathroom = {
       'name': 'Basic Bathroom',
@@ -250,5 +245,58 @@ describe('Creating a bathroom', () => {
           .send(complexBathroom)
           .expect(201);
     });
+  });
+});
+
+describe('PUT Bathroom Endpoint', () => {
+  /**
+   * returns an arbitrary bathroom object
+   * @returns {object} a bathroom object
+   */
+  async function getBathroom() {
+    let bathroom;
+    await request.get(`/bathroom`)
+        .query(validBounds)
+        .then((data) => {
+          bathroom = data.body[0];
+        });
+    return bathroom;
+  }
+
+  it('Status code - success', async () => {
+    const bathroom = await getBathroom();
+    bathroom.name = 'STATUS CODE TEST';
+    await request.put(`/bathroom`)
+        .send(bathroom)
+        .expect(204);
+  });
+
+  it('should update the bathroom details', async () => {
+    const bathroom = await getBathroom();
+    bathroom.name = 'UPDATED TEST';
+    await request.put(`/bathroom`)
+        .send(bathroom);
+    await request.get(`/bathroom`)
+        .query(validBounds)
+        .then((data) => {
+          const updatedBathroom = data.body.find((b) => b.id === bathroom.id);
+          expect(updatedBathroom.name).toBe(bathroom.name);
+        });
+  });
+
+  it('should return a 400 status code on an invalid input', async () => {
+    const bathroom = await getBathroom();
+    bathroom.num_stalls = 'invalid input';
+    await request.put(`/bathroom`)
+        .send(bathroom)
+        .expect(400);
+  });
+
+  it('should return a 404 status code if bathroom doesn\'t exist', async () => {
+    const bathroom = await getBathroom();
+    bathroom.id = '6d6a6a5f-217d-4fea-9ab4-1f21ea2c1b0b';
+    await request.put(`/bathroom`)
+        .send(bathroom)
+        .expect(404);
   });
 });

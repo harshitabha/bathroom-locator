@@ -7,7 +7,6 @@ import {
   expect,
   vi,
   type MockedFunction,
-  beforeAll,
 } from 'vitest';
 import {
   render,
@@ -23,6 +22,7 @@ import type {
   AuthResponse,
   SignInWithPasswordCredentials,
 } from '@supabase/supabase-js';
+import {AuthError} from '@supabase/supabase-js';
 
 // mock supabase
 vi.mock('../lib/supabaseClient', () => {
@@ -50,17 +50,22 @@ function mockUserSignUp(
     error: string): MockedFunction<
       (credentials: SignInWithPasswordCredentials) =>
       Promise<AuthResponse>> {
+  const user = {
+    id: '123',
+    email: email,
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString()};
+
+  // mock signUp
   const mockSignUp = vi.mocked(supabase.auth.signUp);
-  // TODO: @ravikavya could you also update this function
-  console.log(error);
-  // mockSignUp.mockResolvedValueOnce({
-  //   data: {user: {
-  //     email: email,
-  //     password: password,
-  //     confirmPassword: confirmPassword,
-  //   }},
-  //   error: error.length === 0 ? null : {message: error},
-  // });
+  mockSignUp.mockResolvedValueOnce({
+    data: {
+      user: user,
+    },
+    error: error.length === 0 ? null : new AuthError(error),
+  } as AuthResponse);
 
   // fill in sign up form
   fireEvent.change(screen.getByLabelText('Email'), {
@@ -118,12 +123,12 @@ describe('Renders Sign up', async () => {
     screen.getByLabelText('location-icon');
     screen.getByText('Bathroom');
     screen.getByText('Locator');
-    screen.getByText('Create an account to add new bathroom locations' +
+    screen.getByText('Create an account to add new bathroom locations ' +
       'to the map or add details to existing bathrooms.');
   });
 
   it('renders auth form', async () => {
-    screen.getByText('Sign Up', {selector: 'div'});
+    screen.getByText('Sign Up', {selector: 'h4'});
 
     screen.getByLabelText('Email');
     screen.getByLabelText('Password');
@@ -149,7 +154,7 @@ describe('Email provide and passwords match', async () => {
   let email: string;
   let password: string;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     // mock signInWithPassword
     email = 'test@example.com';
     password = 'password123';
@@ -193,7 +198,7 @@ describe('Passwords don\'t match', async () => {
   let password: string;
   let error: string;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     // mock signInWithPassword
     email = 'test@example.com';
     password = 'password123';
@@ -232,7 +237,7 @@ describe('No input provided', async () => {
   let password: string;
   let error: string;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     // mock signInWithPassword
     email = '';
     password = '';
@@ -273,7 +278,7 @@ describe('Only email is provided', async () => {
   let password: string;
   let error: string;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     // mock signInWithPassword
     email = 'test@example.com';
     password = '';
@@ -313,7 +318,7 @@ describe('Only password is provided', async () => {
   let password: string;
   let error: string;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     // mock signInWithPassword
     email = '';
     password = 'password123';
@@ -353,7 +358,7 @@ describe('Confirm password is missing', async () => {
   let password: string;
   let error: string;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     // mock signInWithPassword
     email = 'test@example.com';
     password = 'password123';
@@ -393,7 +398,7 @@ describe('Only confirm password is provided', async () => {
   let password: string;
   let error: string;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     // mock signInWithPassword
     email = '';
     password = '';
@@ -433,7 +438,7 @@ describe('Password missing', async () => {
   let password: string;
   let error: string;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     // mock signInWithPassword
     email = 'test@example.com';
     password = '';
@@ -473,7 +478,7 @@ describe('Email missing', async () => {
   let password: string;
   let error: string;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     // mock signInWithPassword
     email = '';
     password = 'password123';
@@ -537,31 +542,46 @@ it('stays on the sign up screen if the user is already' +
   });
 });
 
-it('displays error message when email is of the wrong format', async () => {
-  // mock signInWithPassword
-  const email = 'badEmailFormat';
-  const password = 'password123';
-  const confirmPassword = 'password123';
-  const error = 'Invalid email format';
-  mockUserSignUp(email, password, confirmPassword, error);
+describe('Email is of the wrong format', async () => {
+  let mockSignUp : MockedFunction<
+      (credentials: SignInWithPasswordCredentials) =>
+      Promise<AuthResponse>>;
+  let email: string;
+  let password: string;
+  let error: string;
 
-  await waitFor(() => {
-    // check for error message to appear
-    const errorMessage = screen.queryByRole('alert');
-    expect(errorMessage?.textContent).toBe(error);
+  beforeEach(async () => {
+    // mock signInWithPassword
+    email = 'badEmailFormat';
+    password = 'password123';
+    const confirmPassword = 'password123';
+    error = 'Invalid email format';
+    mockSignUp = mockUserSignUp(email, password, confirmPassword, error);
   });
-});
 
-it('stays on sign up screen when email is of the wrong format', async () => {
-  // mock signInWithPassword
-  const email = 'badEmailFormat';
-  const password = 'password123';
-  const confirmPassword = 'password123';
-  const error = 'Invalid email format';
-  mockUserSignUp(email, password, confirmPassword, error);
+  it('attempts signs up', async () => {
+    await waitFor(() => {
+      expect(mockSignUp).toHaveBeenCalledWith(
+          expect.objectContaining({
+            email: email,
+            password: password,
+          }),
+      );
+    });
+  });
 
-  await waitFor(() => {
-    // ensure navigation was not called
-    expect(mockNavigate).not.toHaveBeenCalled();
+  it('shows an error', async () => {
+    await waitFor(() => {
+      // check for error message to appear
+      const errorMessage = screen.queryByRole('alert');
+      expect(errorMessage?.textContent).toBe(error);
+    });
+  });
+
+  it('stays on the sign up screen', async () => {
+    await waitFor(() => {
+      // ensure navigation was not called
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
   });
 });

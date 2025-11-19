@@ -76,6 +76,23 @@ paths:
                 $ref: '#/components/schemas/Bathroom'
         400:
           description: Unexpected properties
+    
+    put:
+      description: Edit a bathroom
+      requestBody:
+        description: The updated bathroom details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bathroom'
+      responses:
+        204:
+          description: Bathroom successfully updated
+        400:
+          description: Bad request
+        404:
+          description: Bathroom not found
 
   /bathroom/updates:
     get:
@@ -90,7 +107,54 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Bathroom'
-
+  /user/likes:
+    get:
+      summary: Get a user's liked bathrooms
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Successfully got user's liked bathrooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: uuid
+    post:
+      description: Add a like to a bathroom
+      requestBody:
+        description: User Id and Bathroom Id
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLike'
+      responses:
+        201:
+          description: Like added successfully
+        400:
+          description: Bad request
+    delete:
+      description: Unlike a bathroom
+      requestBody:
+        description: User Id and Bathroom Id
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLike'
+      responses:
+        200:
+          description: Removed like successfully
+        404:
+          description: Bathroom not found
+      
 components:
   schemas:
     BathroomBase:
@@ -122,6 +186,9 @@ components:
           $ref: '#/components/schemas/Gender'
         amenities:
           $ref: '#/components/schemas/Amenities'
+        likes:
+          type: integer
+          default: 0
       required:
         - name
         - position
@@ -144,6 +211,7 @@ components:
             - num_stalls
             - gender
             - amenities
+            - likes
         - $ref: '#/components/schemas/BathroomBase'
       description: "Full bathroom resource returned by the API."
     
@@ -156,6 +224,7 @@ components:
           type: boolean
         gender_neutral:
           type: boolean
+
     Amenities:
       type: object
       properties:
@@ -178,3 +247,16 @@ components:
         - hand_dryer
         - menstrual_products
         - mirror
+  
+    UserLike:
+      type : object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        bathroomId:
+          type: string
+          format: uuid
+      required:
+        - userId
+        - bathroomId

@@ -1,4 +1,4 @@
-import {Button, useTheme} from '@mui/material';
+import {Button, useTheme, Box, Typography} from '@mui/material';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import LocationPinIcon from '@mui/icons-material/LocationPin';
 import {useNavigate} from 'react-router-dom';
@@ -6,21 +6,27 @@ import React from 'react';
 
 
 interface AuthHeaderProps {
-    description: string;
+  description: string;
 }
 
 const AuthHeader : React.FC<AuthHeaderProps> = ({description}) => {
   const navigate = useNavigate();
   const theme = useTheme();
-
   return (
-    <div>
+    <Box
+      sx={{p: {xs: 2, sm: 2}}}
+    >
       <Button
-        variant="text"
+        variant='text'
         className='back-button'
-        sx={{color: theme.palette.text.primary}}
-        onClick={() => navigate('/')}>
-        <ArrowLeftIcon data-testid="back-arrow"/>
+        sx={{
+          color: theme.palette.text.primary,
+          p: {xs: 0, sm: 1},
+          marginBottom: 1,
+        }}
+        onClick={() => navigate('/')}
+      >
+        <ArrowLeftIcon data-testid='back-arrow'/>
         Back to map
       </Button>
       <div className='auth-header'>
@@ -28,20 +34,25 @@ const AuthHeader : React.FC<AuthHeaderProps> = ({description}) => {
           <LocationPinIcon
             aria-label="location-icon"
             className='location-icon'
-            sx={{color: theme.palette.secondary.main}}/>
-          <span>
+            sx={{color: theme.palette.secondary.main}}
+          />
+          <Typography
+            variant='h3'
+          >
             <strong>Bathroom</strong>
             <br/>
-            Locator
-          </span>
+              Locator
+          </Typography>
         </div>
-        <div className='description'>
-          {description}
-          to add new bathroom locations to the map or add details
-          to existing bathrooms.
-        </div>
+        <Typography
+          className='description'
+          variant='body2'
+        >
+          {description} to add new bathroom locations
+           to the map or add details to existing bathrooms.
+        </Typography>
       </div>
-    </div>
+    </Box>
   );
 };
 
