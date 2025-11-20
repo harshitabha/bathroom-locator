@@ -251,7 +251,7 @@ export default function AddBathroomPage(props: Props) {
       slotProps={{
         paper: {
           className: 'addbathroom-drawer-paper',
-          sx: {bgcolor: 'background.paper'},
+          sx: {bgcolor: (theme) => theme.palette.background.default},
         },
       }}
     >
@@ -266,11 +266,11 @@ export default function AddBathroomPage(props: Props) {
 
       <Box
         className="addbathroom-mobile-wrapper"
-        sx={{bgcolor: 'background.paper'}}
+        sx={{bgcolor: (theme) => theme.palette.background.default}}
       >
         <Box
           className="addbathroom-card"
-          sx={{bgcolor: 'background.paper'}}
+          sx={{bgcolor: (theme) => theme.palette.background.default}}
         >
           <Typography
             variant="h5"

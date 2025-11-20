@@ -77,14 +77,14 @@ export default function AddBathroomPrompt(
         slotProps={{
           content: {
             sx: {
-              bgcolor: 'background.paper',
-              color: 'text.primary',
+              bgcolor: (theme) => theme.palette.background.default,
+              color: (theme) => theme.palette.text.primary,
               borderRadius: '12px',
               boxShadow: 3,
               display: 'flex',
               alignItems: 'center',
               px: 3,
-              py: 0.85,
+              py: 0.5,
             },
           },
         }}
@@ -98,13 +98,15 @@ export default function AddBathroomPrompt(
             size="small"
             onClick={onCancel}
             sx={{
-              'color': 'text.primary',
+              'color': (theme) => theme.palette.text.primary,
               'border': 1,
-              'borderColor': 'secondary.main',
+              'borderColor': '#CAC4D0',
               'borderRadius': '8px',
               'fontWeight': 600,
               'ml': 0.1,
+              'mr': 0.2,
               'px': 1.6,
+              'py': 0.6,
               '&:hover': {
                 bgcolor: 'action.hover',
               },
@@ -130,7 +132,7 @@ export default function AddBathroomPrompt(
             onTouchEnd={onPeekTouchEnd}
             onMouseDown={onPeekMouseDown}
             sx={{
-              bgcolor: 'background.paper',
+              bgcolor: (theme) => theme.palette.background.default,
               borderTopLeftRadius: 16,
               borderTopRightRadius: 16,
               px: 2,
@@ -154,8 +156,10 @@ export default function AddBathroomPrompt(
             <Typography
               variant="h6"
               fontWeight={600}
-              color="text.primary"
-              sx={{alignSelf: 'flex-start'}}
+              sx={{
+                alignSelf: 'flex-start',
+                color: (theme) => theme.palette.text.primary,
+              }}
             >
               New Bathroom
             </Typography>

@@ -2,7 +2,7 @@ import {useMemo} from 'react';
 import {useTheme} from '@mui/material/styles';
 
 /**
- *
+ * Custom pin
  * @param {boolean} isLoaded if google maps is loaded
  * @returns {object} pin
  */
