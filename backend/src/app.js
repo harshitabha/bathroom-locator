@@ -32,13 +32,8 @@ app.get('/bathroom', bathroom.getBathroomsInBounds);
 
 app.post('/bathroom', bathroom.createBathroom);
 app.put('/bathroom', bathroom.updateBathroom);
-app.put('/bathroom', bathroom.updateBathroom);
 
 app.get('/bathroom/updates', bathroom.getUpdates);
-
-app.get('/user/likes', bathroom.getUserLikes);
-app.post('/user/likes', bathroom.likeBathroom);
-app.delete('/user/likes', bathroom.unlikeBathroom);
 
 app.get('/user/likes', bathroom.getUserLikes);
 app.post('/user/likes', bathroom.likeBathroom);

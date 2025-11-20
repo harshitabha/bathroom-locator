@@ -64,10 +64,10 @@ export async function getBathroomsInBounds(
         b.id,
         b.data->>'name' AS name,
         b.data->>'description' AS description,
-        data->>'position' AS position,
+        (data->'position') AS position,
         (b.data->>'num_stalls')::int AS num_stalls,
-        b.data->>'amenities' AS amenities,
-        b.data->>'gender' AS gender,
+        (b.data->'amenities') AS amenities,
+        (b.data->'gender') AS gender,
         COALESCE((b.data->>'likes')::int, 0) AS likes
       FROM bathrooms b
       WHERE
@@ -79,11 +79,6 @@ export async function getBathroomsInBounds(
     values: [minLng, minLat, maxLng, maxLat, limit],
   });
 
-  rows.forEach((bathroom) => {
-    bathroom.position = JSON.parse(bathroom.position);
-    bathroom.amenities = JSON.parse(bathroom.amenities);
-    bathroom.gender = JSON.parse(bathroom.gender);
-  });
   return rows;
 }
 
@@ -98,8 +93,7 @@ export async function updateBathroom(bathroom) {
     text: `
       UPDATE bathrooms
       SET data = data || $1
-      WHERE id = $2
-      RETURNING id;
+      WHERE id = $2;
     `,
     values: [bathroomBase, id],
   });
