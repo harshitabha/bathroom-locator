@@ -3,11 +3,30 @@ import {useNavigate} from 'react-router-dom';
 import {useState, useEffect} from 'react';
 import SearchBar from './SearchBar';
 import Logout from './Logout';
-import {getCurrentUserId} from '../lib/supabaseClient';
+import {supabase} from '../lib/supabaseClient';
 
 type Props = {
   map: google.maps.Map | null;
 };
+
+/**
+ * gets id of user currently logged in
+ * @returns {string} user id of logged in user
+ */
+export async function getCurrentUserId() {
+  const {data: {user}, error} = await supabase.auth.getUser();
+
+  if (error) {
+    console.error('Error getting current user: ', error.message);
+    return null;
+  }
+
+  if (user) {
+    return user.id;
+  } else {
+    return null;
+  }
+}
 
 const MapHeader = ({map}: Props) => {
   const navigate = useNavigate();
