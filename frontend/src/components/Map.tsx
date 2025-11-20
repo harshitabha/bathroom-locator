@@ -17,7 +17,7 @@ import AddBathroomButton from './AddBathroomButton';
 import AddBathroomPrompt from './AddBathroomPrompt';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
-
+import MapHeader from './MapHeader';
 
 type Place = {
   id: string;
@@ -278,6 +278,7 @@ function MapInner({apiKey}: { apiKey: string }) {
 
   return (
     <div className="map-align-center">
+      {isLoaded && <MapHeader map={mapRef.current} />}
       <GoogleMap
         onLoad={onMapLoad}
         onIdle={handleIdle}
