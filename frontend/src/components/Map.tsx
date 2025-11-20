@@ -7,19 +7,17 @@ import {
 import {
   GoogleMap,
   Marker,
-  InfoWindow,
   useLoadScript,
 } from '@react-google-maps/api';
 import './Map.css';
-import {openWalkingDirections} from '../utils/navigation';
-import Button from '@mui/material/Button';
+import BathroomDetails from './BathroomDetails/BathroomDetails';
 
 
 type Place = {
-  id: number; // id
-  name: string; // name of location
-  position: google.maps.LatLngLiteral; // position on map
-  description?: string; // description if needed
+  id: string;
+  name: string;
+  position: google.maps.LatLngLiteral;
+  description?: string;
 };
 
 const Map = () => {
@@ -36,7 +34,16 @@ export default Map;
  * @returns {object} JSX compoent for the inner map content
  */
 function MapInner({apiKey}: { apiKey: string }) {
-  const [places, setPlaces] = useState<Place[]>([]); // bathroom info
+  // *** COMMENTING OUT FOR TESTING PURPOSES
+  //const [places, setPlaces] = useState<Place[]>([]); // bathroom info
+  const [places, setPlaces] = useState<Place[]>([
+    {
+      id: "5f1169fe-4db2-48a2-b059-f05cfe63588b",
+      name: "Namaste Lounge Bathroom",
+      position: {"lat": 37.00076576303953, "lng": -122.05719563060227},
+      description: "more details",
+    }
+  ]); // bathroom info
   // tracks which pin is selected (which info window to show)
   const [selected, setSelected] = useState<Place | null>(null);
 
@@ -127,7 +134,7 @@ function MapInner({apiKey}: { apiKey: string }) {
               id: bathroom.id,
               name: bathroom.name,
               position: bathroom.position,
-              details: bathroom.description,
+              description: bathroom.description,
             }));
 
         setPlaces(parsedBathroomData);
@@ -249,30 +256,12 @@ function MapInner({apiKey}: { apiKey: string }) {
             onClick={() => setSelected(p)}
           />
         ))}
-
+        
         {selected && (
-          <InfoWindow
-            position={selected.position}
-            // close info window by clicking x
-            onCloseClick={() => setSelected(null)}
-          >
-            <div>
-              <strong>{selected.name}</strong>
-              {selected.description && <p>{selected.description}</p>}
-              {/* TODO: add genders, amenenities, and navigate button here */}
-              <Button // Get Directions button
-                variant="contained"
-                color="primary" // default blue unless we manually change it
-                size="small"
-                onClick={() => openWalkingDirections(
-                    selected.position.lat,
-                    selected.position.lng,
-                )}
-              >
-                Get Directions
-              </Button>
-            </div>
-          </InfoWindow>
+          <BathroomDetails
+            bathroom={selected}
+            setBathroom={setSelected}
+          />
         )}
       </GoogleMap>
     </div>
