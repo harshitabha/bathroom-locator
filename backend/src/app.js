@@ -14,32 +14,22 @@ app.use(cors({
   origin: 'http://localhost:5173',
 }));
 
-const swaggerDocument = YAML.load('./docs/openapi.yaml');
+const swaggerDocument = YAML.load('./api/openapi.yaml');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api/v0/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(
     OpenApiValidator.middleware({
-      apiSpec: './docs/openapi.yaml',
+      apiSpec: './api/openapi.yaml',
       validateRequests: true,
       validateResponses: true,
     }),
 );
 
+app.get('/bathroom', bathroom.getBathroomsInBounds);
 
-app.get('/bathroom', (req, res) => {
-  const {minLng, minLat, maxLng, maxLat} = req.query;
-  const hasBound =
-    minLng !== undefined && minLat !== undefined &&
-    maxLng !== undefined && maxLat !== undefined;
-
-  if (hasBound) {
-    return bathroom.getBathroomsInBounds(req, res);
-  }
-  return bathroom.getBathrooms(req, res);
-});
 app.post('/bathroom', bathroom.createBathroom);
 app.put('/bathroom', bathroom.updateBathroom);
 
@@ -51,6 +41,7 @@ app.delete('/user/likes', bathroom.unlikeBathroom);
 
 app.listen(port, () => {
   console.log(`App running on port ${port}.`);
+  console.log('API Testing UI is at: http://localhost:3000/api/v0/docs/');
 });
 
 export default app;
