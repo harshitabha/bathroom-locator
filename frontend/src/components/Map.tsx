@@ -14,7 +14,7 @@ import './Map.css';
 import {openWalkingDirections} from '../utils/navigation';
 import Button from '@mui/material/Button';
 import AddBathroomButton from './AddBathroomButton';
-import AddBathroomPrompt from './AddBathroomPrompt';
+import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
 import MapHeader from './MapHeader';
@@ -278,7 +278,13 @@ function MapInner({apiKey}: { apiKey: string }) {
 
   return (
     <div className="map-align-center">
-      {isLoaded && <MapHeader map={mapRef.current} />}
+      {isLoaded &&
+        <MapHeader
+          map={mapRef.current}
+          bannerOpen={bannerOpen}
+          onCancelBanner={cancelAddFlow}
+        />
+      }
       <GoogleMap
         onLoad={onMapLoad}
         onIdle={handleIdle}
@@ -343,9 +349,7 @@ function MapInner({apiKey}: { apiKey: string }) {
         <AddBathroomButton onClick={handleAddButtonClick} />
       )}
 
-      <AddBathroomPrompt
-        bannerOpen={bannerOpen}
-        onCancel={cancelAddFlow}
+      <AddBathroomPeekCard
         showPeekCard={addMode && !addOpen}
         onExpand={() => {
           setAddOpen(true);

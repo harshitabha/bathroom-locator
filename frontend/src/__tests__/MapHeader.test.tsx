@@ -41,7 +41,11 @@ beforeEach(() => {
 
   render(
       <MemoryRouter>
-        <MapHeader map={null} />
+        <MapHeader
+          map={null}
+          bannerOpen={false}
+          onCancelBanner={() => {}}
+        />
       </MemoryRouter>,
   );
 });
