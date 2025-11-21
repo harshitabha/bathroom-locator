@@ -3,7 +3,8 @@ import supertest from 'supertest';
 import http from 'http';
 
 import * as db from './db.js';
-import app from '../src/index.js';
+import app from '../src/app.js';
+import {validBounds} from './consts.js';
 
 let server;
 let request;
@@ -26,6 +27,7 @@ afterAll(async () => {
  */
 async function getSampleLike() {
   const bathroomId = await request.get(`/bathroom`)
+      .query(validBounds)
       .then((bathrooms) => {
         const bathroomId = bathrooms.body[0].id;
         return bathroomId;
@@ -92,6 +94,7 @@ describe('POST Like Endpoint', () => {
     await request.post(`/user/likes`)
         .send(like);
     await request.get(`/bathroom`)
+        .query(validBounds)
         .then((data) => {
           const bathroom = data.body.find((b) => b.id === like.bathroomId);
           expect(bathroom.id).toBe(like.bathroomId);
@@ -115,6 +118,7 @@ describe('POST Like Endpoint', () => {
     await request.post(`/user/likes`)
         .send(like);
     await request.get(`/bathroom`)
+        .query(validBounds)
         .then((data) => {
           const bathroom = data.body.find((b) => b.id === like.bathroomId);
           expect(bathroom.likes).toBe(1);
@@ -132,6 +136,7 @@ describe('POST Like Endpoint', () => {
     await request.post(`/user/likes`)
         .send(like2);
     await request.get(`/bathroom`)
+        .query(validBounds)
         .then((data) => {
           const bathroom = data.body.find((b) => b.id === like.bathroomId);
           expect(bathroom.likes).toBe(2);
@@ -172,6 +177,7 @@ describe('DELETE Like Endpoint', () => {
     await request.delete('/user/likes')
         .send(like);
     await request.get(`/bathroom`)
+        .query(validBounds)
         .then((data) => {
           const bathroom = data.body.find((b) => b.id === like.bathroomId);
           expect(bathroom.likes).toBe(1);
@@ -183,6 +189,7 @@ describe('DELETE Like Endpoint', () => {
     await request.delete('/user/likes')
         .send(like);
     await request.get(`/bathroom`)
+        .query(validBounds)
         .then((data) => {
           const bathroom = data.body.find((b) => b.id === like.bathroomId);
           expect(bathroom.likes).toBe(0);

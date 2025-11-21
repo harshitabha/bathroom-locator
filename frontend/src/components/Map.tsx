@@ -9,7 +9,9 @@ import {
   Marker,
   useLoadScript,
 } from '@react-google-maps/api';
+
 import './Map.css';
+import MapHeader from './MapHeader';
 import BathroomDetails from './BathroomDetails/BathroomDetails';
 import type {Place} from '../types';
 
@@ -212,6 +214,7 @@ function MapInner({apiKey}: { apiKey: string }) {
 
   return (
     <div className="map-align-center">
+      {isLoaded && <MapHeader map={mapRef.current} />}
       <GoogleMap
         onLoad={onMapLoad}
         onIdle={handleIdle}
@@ -225,12 +228,9 @@ function MapInner({apiKey}: { apiKey: string }) {
           // prevents clicking on locations other than pins
           clickableIcons: false,
           disableDoubleClickZoom: true, // prevents accidental zoom
-          mapTypeControl: false, // prevents going to satellite mode
           // locks map type to simple map
-          streetViewControl: false, // prevents going to streetview
           mapTypeId: google.maps.MapTypeId.ROADMAP,
-          zoomControl: true, // allows zooming buttons
-          
+          disableDefaultUI: true,
         }}
       >
         {places.map((p) => (
