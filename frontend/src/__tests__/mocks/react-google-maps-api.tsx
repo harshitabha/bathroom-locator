@@ -25,7 +25,13 @@ export const useLoadScript = () => ({
   loadError: null as Error | null,
 });
 
-(globalThis as any).google = {
+(globalThis as unknown as {
+  google: {
+    maps: {
+      MapTypeId: Record<string, string>;
+    };
+  };
+}).google = {
   maps: {
     MapTypeId: {
       ROADMAP: "ROADMAP",
