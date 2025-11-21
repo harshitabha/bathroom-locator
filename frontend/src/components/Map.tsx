@@ -227,7 +227,6 @@ function MapInner({apiKey}: { apiKey: string }) {
           disableDoubleClickZoom: true, // prevents accidental zoom
           mapTypeControl: false, // prevents going to satellite mode
           // locks map type to simple map
-          mapTypeId: google.maps.MapTypeId.ROADMAP,
           streetViewControl: false, // prevents going to streetview
           zoomControl: true, // allows zooming buttons
         }}
