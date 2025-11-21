@@ -34,10 +34,10 @@ export const useLoadScript = () => ({
 }).google = {
   maps: {
     MapTypeId: {
-      ROADMAP: "ROADMAP",
-      SATELLITE: "SATELLITE",
-      HYBRID: "HYBRID",
-      TERRAIN: "TERRAIN",
-    }
-  }
+      ROADMAP: 'ROADMAP',
+      SATELLITE: 'SATELLITE',
+      HYBRID: 'HYBRID',
+      TERRAIN: 'TERRAIN',
+    },
+  },
 };
