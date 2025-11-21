@@ -28,16 +28,7 @@ export default Map;
  * @returns {object} JSX compoent for the inner map content
  */
 function MapInner({apiKey}: { apiKey: string }) {
-  // *** COMMENTING OUT FOR TESTING PURPOSES
-  // const [places, setPlaces] = useState<Place[]>([]); // bathroom info
-  const [places, setPlaces] = useState<Place[]>([
-    {
-      id: '5f1169fe-4db2-48a2-b059-f05cfe63588b',
-      name: 'Namaste Lounge Bathroom',
-      position: {'lat': 37.00076576303953, 'lng': -122.05719563060227},
-      description: 'more details',
-    },
-  ]); // bathroom info
+  const [places, setPlaces] = useState<Place[]>([]); // bathroom info
   // tracks which pin is selected (which info window to show)
   const [selected, setSelected] = useState<Place | null>(null);
 
@@ -129,6 +120,8 @@ function MapInner({apiKey}: { apiKey: string }) {
               name: bathroom.name,
               position: bathroom.position,
               description: bathroom.description,
+              num_stalls: bathroom.num_stalls,
+              gender: bathroom.gender,
             }));
 
         setPlaces(parsedBathroomData);
@@ -250,12 +243,12 @@ function MapInner({apiKey}: { apiKey: string }) {
           />
         ))}
 
-        {selected && (
+        {
+          selected ?
           <BathroomDetails
             bathroom={selected}
-            setBathroom={setSelected}
-          />
-        )}
+            setBathroom={setSelected} /> : null
+        }
       </GoogleMap>
     </div>
   );

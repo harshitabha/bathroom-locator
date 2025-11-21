@@ -11,7 +11,8 @@ import {styled} from '@mui/material/styles';
 
 import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
-import type {Place} from '../../types';
+import type {GenderOptions, Place} from '../../types';
+import Detail from '../Detail';
 
 interface bathroomDetailsProps {
   bathroom: Place,
@@ -23,6 +24,11 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
     bathroom,
     setBathroom,
   } = props;
+  const gender = Object.keys(bathroom.gender)
+      .filter((val) => bathroom.gender[val as GenderOptions] == true)
+      .map((key) => {
+        return {name: key, selected: true};
+      });
   const theme = useTheme();
 
   const DetailsButton = styled(Button)(() => ({
@@ -96,9 +102,16 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
           {bathroom.description}
         </Typography>
 
-        <Typography variant="h6" className="details-subheader">
-            Additional Details
-        </Typography>
+        {
+          gender.length > 0 ?
+          <Box>
+            <Typography variant="h6" className="details-subheader">
+              Additional Details
+            </Typography>
+            <Detail name='Gender' values={gender}/>
+          </Box> : null
+        }
+
 
       </Box>
     </SwipeableDrawer>
