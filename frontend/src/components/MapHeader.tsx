@@ -1,36 +1,18 @@
 import {Box, Button, Avatar, Menu, MenuItem} from '@mui/material';
 import {useNavigate} from 'react-router-dom';
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useContext} from 'react';
 import SearchBar from './SearchBar';
 import Logout from './Logout';
-import {supabase} from '../lib/supabaseClient';
+import AppContext from '../context/AppContext';
 
 type Props = {
   map: google.maps.Map | null;
 };
 
-/**
- * gets id of user currently logged in
- * @returns {string} user id of logged in user
- */
-export async function getCurrentUserId() {
-  const {data: {user}, error} = await supabase.auth.getUser();
-
-  if (error) {
-    console.error('Error getting current user: ', error.message);
-    return null;
-  }
-
-  if (user) {
-    return user.id;
-  } else {
-    return null;
-  }
-}
-
 const MapHeader = ({map}: Props) => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>('');
+  const appContext = useContext(AppContext);
 
   // handling dropdown menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -41,7 +23,7 @@ const MapHeader = ({map}: Props) => {
   const handleClose = () => setAnchorEl(null);
 
   useEffect(() => {
-    getCurrentUserId().then(setUserId);
+    appContext?.getCurrentUserId().then(setUserId);
   }, []);
 
 
