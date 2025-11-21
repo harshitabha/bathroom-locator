@@ -24,3 +24,14 @@ export const useLoadScript = () => ({
   isLoaded: true,
   loadError: null as Error | null,
 });
+
+(globalThis as any).google = {
+  maps: {
+    MapTypeId: {
+      ROADMAP: "ROADMAP",
+      SATELLITE: "SATELLITE",
+      HYBRID: "HYBRID",
+      TERRAIN: "TERRAIN",
+    }
+  }
+};

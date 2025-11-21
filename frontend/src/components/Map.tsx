@@ -228,7 +228,9 @@ function MapInner({apiKey}: { apiKey: string }) {
           mapTypeControl: false, // prevents going to satellite mode
           // locks map type to simple map
           streetViewControl: false, // prevents going to streetview
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
           zoomControl: true, // allows zooming buttons
+          
         }}
       >
         {places.map((p) => (
