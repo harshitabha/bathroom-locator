@@ -17,6 +17,21 @@ describe('Bathroom Details component content', () => {
               'lng': -122.05719563060227,
             },
             description: 'more details',
+            num_stalls: 1,
+            amenities: {
+              'soap': true,
+              'mirror': true,
+              'hand_dryer': false,
+              'paper_towel': true,
+              'toilet_paper': true,
+              'menstrual_products': true,
+            },
+            gender: {
+              'male': false,
+              'female': true,
+              'gender_neutral': false,
+            },
+            likes: 0,
           }}
           setBathroom={() => {}}
         />,
@@ -34,7 +49,7 @@ describe('Bathroom Details component content', () => {
   });
 
   it('renders the navigate button', () => {
-    expect(screen.getByRole('button', {name: 'Navigate'}));
+    expect(screen.getByText('Navigate'));
   });
 
   it('calls openWalkingDirections when you click on Navigate button', () => {

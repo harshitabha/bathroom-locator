@@ -28,6 +28,12 @@ h6.details-subheader {
   margin-top: 15px;
 }
 
+.details-button {
+  border-radius: 30px !important;
+  padding: 10px 20px !important;
+  font-weight: 'normal' !important;
+}
+
 /* Margin for all text fields except the first */
 .addbathroom-card .MuiTextField-root:not(:first-of-type),
 .addbathroom-dialog-inner .MuiTextField-root:not(:first-of-type) {
