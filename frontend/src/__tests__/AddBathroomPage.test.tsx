@@ -25,10 +25,10 @@ describe('AddBathroomPage', () => {
     onOpen: vi.fn(),
     onCreated: vi.fn(),
     name: '',
-    details: '',
+    description: '',
     position: {lat: 36.123456, lng: -122.654321},
     onNameChange: vi.fn(),
-    onDetailsChange: vi.fn(),
+    onDescriptionChange: vi.fn(),
   };
 
   it('renders content when open', () => {
@@ -52,7 +52,7 @@ describe('AddBathroomPage', () => {
         <AddBathroomPage
           {...defaultProps}
           name=""
-          details="Details"
+          description="Description"
           onCreated={onCreated}
         />,
     );
@@ -63,14 +63,14 @@ describe('AddBathroomPage', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('does NOT submit when details are empty', () => {
+  it('does NOT submit when description is empty', () => {
     const onCreated = vi.fn();
 
     render(
         <AddBathroomPage
           {...defaultProps}
           name="Valid"
-          details=""
+          description=""
           onCreated={onCreated}
         />,
     );
@@ -88,7 +88,7 @@ describe('AddBathroomPage', () => {
         <AddBathroomPage
           {...defaultProps}
           name="Valid"
-          details="Details"
+          description="Description"
           position={null}
           onCreated={onCreated}
         />,
@@ -112,7 +112,7 @@ describe('AddBathroomPage', () => {
         <AddBathroomPage
           {...defaultProps}
           name="Valid Name"
-          details="Valid Description"
+          description="Valid Description"
           onCreated={onCreated}
         />,
     );
@@ -137,7 +137,7 @@ describe('AddBathroomPage', () => {
         <AddBathroomPage
           {...defaultProps}
           name="Valid Name"
-          details="Valid Description"
+          description="Valid Description"
           onCreated={onCreated}
         />,
     );

@@ -66,18 +66,18 @@ type Props = {
   onOpen?: () => void;
   position: { lat: number; lng: number } | null;
   name: string;
-  details: string;
+  description: string;
   onNameChange: (newName: string) => void;
-  onDetailsChange: (newDetails: string) => void;
+  onDescriptionChange: (newDescription: string) => void;
   onCreated: () => Promise<void> | void;
 };
 
 type AddBathroomFormProps = {
   name: string;
-  details: string;
+  description: string;
   position: { lat: number; lng: number } | null;
   onNameChange: (v: string) => void;
-  onDetailsChange: (v: string) => void;
+  onDescriptionChange: (v: string) => void;
   onSubmit: () => void;
   onCancel: () => void;
   isMobile?: boolean;
@@ -91,10 +91,10 @@ type AddBathroomFormProps = {
 export function AddBathroomForm(props: AddBathroomFormProps) {
   const {
     name,
-    details,
+    description,
     position,
     onNameChange,
-    onDetailsChange,
+    onDescriptionChange,
     onSubmit,
     onCancel,
     isMobile,
@@ -116,8 +116,8 @@ export function AddBathroomForm(props: AddBathroomFormProps) {
         minRows={3}
         required
         label="Bathroom Description"
-        value={details}
-        onChange={(e) => onDetailsChange(e.target.value)}
+        value={description}
+        onChange={(e) => onDescriptionChange(e.target.value)}
         helperText={
           'Please add details on how to find the bathroom, ' +
           'and anything else to note.'
@@ -188,17 +188,17 @@ export default function AddBathroomPage(props: Props) {
     position,
     onCreated,
     name,
-    details,
+    description,
     onNameChange,
-    onDetailsChange,
+    onDescriptionChange,
   } = props;
 
   const handleSubmit = async () => {
-    if (!position || !name.trim() || !details.trim()) return;
+    if (!position || !name.trim() || !description.trim()) return;
 
     const payload = {
       name: name.trim(),
-      description: details.trim(),
+      description: description.trim(),
       position,
       num_stalls: 1,
       amenities: {
@@ -282,10 +282,10 @@ export default function AddBathroomPage(props: Props) {
 
           <AddBathroomForm
             name={name}
-            details={details}
+            description={description}
             position={position}
             onNameChange={onNameChange}
-            onDetailsChange={onDetailsChange}
+            onDescriptionChange={onDescriptionChange}
             onSubmit={handleSubmit}
             onCancel={onClose}
             isMobile
