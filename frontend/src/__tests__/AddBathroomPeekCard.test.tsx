@@ -41,7 +41,7 @@ describe('AddBathroomPeekCard', () => {
         />,
     );
 
-    const card = screen.getByText('New Bathroom').parentElement!;
+    const card = screen.getByLabelText('Expand drawer by dragging');
 
     // mouse drag up
     fireEvent.mouseDown(card, {clientY: 200});

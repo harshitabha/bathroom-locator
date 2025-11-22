@@ -12,7 +12,7 @@ describe('AddBathroomButton', () => {
   it('renders the button', () => {
     render(<AddBathroomButton onClick={() => {}} />);
 
-    const button = screen.getByRole('button', {name: 'Add a bathroom'});
+    const button = screen.getByLabelText('Add a bathroom');
     expect(button).toBeInTheDocument();
   });
 
@@ -21,7 +21,7 @@ describe('AddBathroomButton', () => {
 
     render(<AddBathroomButton onClick={onClick} />);
 
-    const button = screen.getByRole('button', {name: 'Add a bathroom'});
+    const button = screen.getByLabelText('Add a bathroom');
     fireEvent.click(button);
 
     expect(onClick).toHaveBeenCalledTimes(1);

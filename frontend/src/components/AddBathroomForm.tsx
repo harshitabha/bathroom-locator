@@ -88,7 +88,7 @@ type AddBathroomFormProps = {
  * @param {object} props Component props
  * @returns {object} JSX form fields
  */
-export function AddBathroomForm(props: AddBathroomFormProps) {
+function AddBathroomForm(props: AddBathroomFormProps) {
   const {
     name,
     description,

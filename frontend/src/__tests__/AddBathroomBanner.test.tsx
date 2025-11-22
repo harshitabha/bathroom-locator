@@ -20,7 +20,7 @@ describe('AddBathroomBanner', () => {
         screen.getByText('Choose a location for the bathroom'),
     ).toBeInTheDocument();
 
-    expect(screen.getByRole('button', {name: 'Cancel'})).toBeInTheDocument();
+    expect(screen.getByText('Cancel')).toBeInTheDocument();
   });
 
   it('does not render when bannerOpen is false', () => {
@@ -46,7 +46,7 @@ describe('AddBathroomBanner', () => {
         />,
     );
 
-    const cancelButton = screen.getByRole('button', {name: 'Cancel'});
+    const cancelButton = screen.getByText('Cancel');
     fireEvent.click(cancelButton);
 
     expect(onCancel).toHaveBeenCalledTimes(1);

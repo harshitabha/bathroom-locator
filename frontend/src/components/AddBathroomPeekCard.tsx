@@ -69,6 +69,7 @@ export default function AddBathroomPeekCard(props: AddBathroomPromptProps) {
         >
           <Paper
             elevation={3}
+            aria-label="Expand drawer by dragging"
             onTouchStart={onPeekTouchStart}
             onTouchEnd={onPeekTouchEnd}
             onMouseDown={onPeekMouseDown}
