@@ -12,7 +12,7 @@ import {
 
 import './Map.css';
 import MapHeader from './MapHeader';
-import BathroomDetails from './BathroomDetails/BathroomDetails';
+import InfoWindow from './InfoWindow';
 import type {Bathroom} from '../types';
 
 const Map = () => {
@@ -246,12 +246,17 @@ function MapInner({apiKey}: { apiKey: string }) {
           />
         ))}
 
-        {selected && (
+        <InfoWindow
+          bathroom={selected}
+          setBathroom={setSelected}
+        />
+
+        {/* {selected && (
           <BathroomDetails
             bathroom={selected}
             setBathroom={setSelected}
           />
-        )}
+        )} */}
       </GoogleMap>
     </div>
   );
