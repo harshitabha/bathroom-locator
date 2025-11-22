@@ -9,9 +9,10 @@ import {
   Marker,
   useLoadScript,
 } from '@react-google-maps/api';
+
 import './Map.css';
-import BathroomDetails from './BathroomDetails/BathroomDetails';
 import MapHeader from './MapHeader';
+import BathroomDetails from './BathroomDetails/BathroomDetails';
 import type {Place} from '../types';
 
 const Map = () => {
