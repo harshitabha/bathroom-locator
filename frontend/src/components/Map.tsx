@@ -13,7 +13,7 @@ import {
 import './Map.css';
 import {openWalkingDirections} from '../utils/navigation';
 import Button from '@mui/material/Button';
-import Like from './Like';
+import MapHeader from './MapHeader'; import Like from './Like';
 import {getCurrentUserId} from '../lib/supabaseClient';
 
 export type Place = {
@@ -229,6 +229,7 @@ function MapInner({apiKey}: { apiKey: string }) {
 
   return (
     <div className="map-align-center">
+      {isLoaded && <MapHeader map={mapRef.current} />}
       <GoogleMap
         onLoad={onMapLoad}
         onIdle={handleIdle}
@@ -242,11 +243,9 @@ function MapInner({apiKey}: { apiKey: string }) {
           // prevents clicking on locations other than pins
           clickableIcons: false,
           disableDoubleClickZoom: true, // prevents accidental zoom
-          mapTypeControl: false, // prevents going to satellite mode
           // locks map type to simple map
           mapTypeId: google.maps.MapTypeId.ROADMAP,
-          streetViewControl: false, // prevents going to streetview
-          zoomControl: true, // allows zooming buttons
+          disableDefaultUI: true,
         }}
       >
         {places.map((p) => (

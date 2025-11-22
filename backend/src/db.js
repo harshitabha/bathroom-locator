@@ -1,46 +1,4 @@
-import pg from 'pg';
-import dotenv from 'dotenv';
-
-dotenv.config();
-const pool = new pg.Pool({
-  host: 'localhost',
-  port: 5432,
-  database: process.env.POSTGRES_DB,
-  user: 'postgres',
-  password: process.env.DB_PASSWORD,
-});
-
-
-/**
- * returns list of all bathrooms in database
- * @returns {object} array of bathroom objects
- */
-export async function getBathrooms() {
-  try {
-    const {rows} = await pool.query({
-      text: `
-        SELECT
-          b.id,
-          b.data->>'name' AS name, 
-          b.data->>'description' AS description, 
-          b.data->>'position' AS position,
-          (b.data->>'num_stalls')::int AS num_stalls,
-          b.data->>'amenities' AS amenities,
-          COALESCE((b.data->>'likes')::int, 0) AS likes
-        FROM bathrooms b;
-      `,
-      values: [],
-    });
-    rows.forEach((bathroom) => {
-      bathroom.position = JSON.parse(bathroom.position);
-      bathroom.amenities = JSON.parse(bathroom.amenities);
-    });
-    return rows;
-  } catch (error) {
-    console.error('Database query error:', error);
-    throw error;
-  }
-}
+import {pool} from './pool.js';
 
 /**
  * creates a new bathroom in the database
@@ -48,26 +6,44 @@ export async function getBathrooms() {
  * @returns {object} the newly created bathroom
  */
 export async function createBathroom(bathroom) {
-  try {
-    const {rows} = await pool.query({
-      text: `
-        INSERT INTO bathrooms(data) 
-        VALUES ($1)
-        RETURNING id;
-      `,
-      values: [bathroom],
-    });
+  const defaultAmenities = {
+    toilet_paper: false,
+    soap: false,
+    paper_towel: false,
+    hand_dryer: false,
+    menstrual_products: false,
+    mirror: false,
+  };
 
-    const newBathroom = {
-      ...bathroom,
-      id: rows[0].id,
-    };
+  const defaultGender = {
+    female: false,
+    male: false,
+    gender_neutral: false,
+  };
 
-    return newBathroom;
-  } catch (error) {
-    console.error('Database query error:', error);
-    throw error;
-  }
+  const bathroomToInsert = {
+    ...bathroom,
+    // treat 0 as nothing is selected
+    'num_stalls': bathroom['num_stalls'] || 0,
+    'amenities': bathroom.amenities || defaultAmenities,
+    'gender': bathroom.gender || defaultGender,
+  };
+
+  const {rows} = await pool.query({
+    text: `
+      INSERT INTO bathrooms(data) 
+      VALUES ($1)
+      RETURNING id;
+    `,
+    values: [bathroomToInsert],
+  });
+
+  const newBathroom = {
+    ...bathroomToInsert,
+    id: rows[0].id,
+  };
+
+  return newBathroom;
 }
 
 /**
@@ -82,35 +58,45 @@ export async function createBathroom(bathroom) {
 export async function getBathroomsInBounds(
     minLng, minLat, maxLng, maxLat, limit = 200,
 ) {
-  try {
-    const {rows} = await pool.query({
-      text: `
-        SELECT
-          b.id,
-          b.data->>'name' AS name,
-          b.data->>'description' AS description,
-          b.data->>'position' AS position,
-          (b.data->>'num_stalls')::int AS num_stalls,
-          b.data->>'amenities' AS amenities
-        FROM bathrooms b
-        WHERE
-          ((b.data->'position'->>'lng')::double precision BETWEEN $1 AND $3)
-          AND
-          ((b.data->'position'->>'lat')::double precision BETWEEN $2 AND $4)
-        LIMIT $5;
-      `,
-      values: [minLng, minLat, maxLng, maxLat, limit],
-    });
+  const {rows} = await pool.query({
+    text: `
+      SELECT
+        b.id,
+        b.data->>'name' AS name,
+        b.data->>'description' AS description,
+        (data->'position') AS position,
+        (b.data->>'num_stalls')::int AS num_stalls,
+        (b.data->'amenities') AS amenities,
+        (b.data->'gender') AS gender,
+        COALESCE((b.data->>'likes')::int, 0) AS likes
+      FROM bathrooms b
+      WHERE
+        ((b.data->'position'->>'lng')::double precision BETWEEN $1 AND $3)
+        AND
+        ((b.data->'position'->>'lat')::double precision BETWEEN $2 AND $4)
+      LIMIT $5;
+    `,
+    values: [minLng, minLat, maxLng, maxLat, limit],
+  });
 
-    rows.forEach((bathroom) => {
-      bathroom.position = JSON.parse(bathroom.position);
-      bathroom.amenities = JSON.parse(bathroom.amenities);
-    });
-    return rows;
-  } catch (error) {
-    console.error('Database query error:', error);
-    throw error;
-  }
+  return rows;
+}
+
+/**
+ * merges the fields of the bathroom object with the new values
+ * @param {object} bathroom object
+ * @returns {object} the newly editted bathroom object
+ */
+export async function updateBathroom(bathroom) {
+  const {id, ...bathroomBase} = bathroom;
+  await pool.query({
+    text: `
+      UPDATE bathrooms
+      SET data = data || $1
+      WHERE id = $2;
+    `,
+    values: [bathroomBase, id],
+  });
 }
 
 /**
@@ -170,9 +156,9 @@ export async function likeBathroom(userId, bathroomId) {
 /**
  * get bathroom
  * @param {string} bathroomId bathroom id
- * @returns {object | undefined} bathroom if exists
+ * @returns {object} list of bathrooms
  */
-async function getBathroom(bathroomId) {
+export async function getBathroom(bathroomId) {
   const {rows} = await pool.query({
     text: `
       SELECT *
@@ -182,7 +168,7 @@ async function getBathroom(bathroomId) {
     values: [bathroomId],
   });
 
-  return rows.length > 0 ? rows[0] : undefined;
+  return rows[0];
 }
 
 /**
