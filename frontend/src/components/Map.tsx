@@ -4,28 +4,17 @@ import {
   useState,
   useCallback,
   useRef,
-  useContext,
 } from 'react';
 import {
   GoogleMap,
   Marker,
-  InfoWindow,
   useLoadScript,
 } from '@react-google-maps/api';
-import './Map.css';
-import {openWalkingDirections} from '../utils/navigation';
-import Button from '@mui/material/Button';
-import MapHeader from './MapHeader';
-import Like from './Like';
-import AppContext from '../context/AppContext';
 
-export type Place = {
-  id: number; // id
-  name: string; // name of location
-  position: google.maps.LatLngLiteral; // position on map
-  description?: string; // description if needed
-  likes: number;
-};
+import './Map.css';
+import MapHeader from './MapHeader';
+import InfoWindow from './InfoWindow';
+import type {Bathroom} from '../types';
 
 const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -41,13 +30,9 @@ export default Map;
  * @returns {object} JSX compoent for the inner map content
  */
 function MapInner({apiKey}: { apiKey: string }) {
-  const [places, setPlaces] = useState<Place[]>([]); // bathroom info
+  const [bathrooms, setBathrooms] = useState<Bathroom[]>([]); // bathroom info
   // tracks which pin is selected (which info window to show)
-  const [selectedBathroom, setSelected] = useState<Place | null>(null);
-
-  const [userId, setUserId] = useState<string | null>('');
-  const appContext = useContext(AppContext);
-
+  const [selected, setSelected] = useState<Bathroom | null>(null);
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -131,18 +116,21 @@ function MapInner({apiKey}: { apiKey: string }) {
         const bathroomData = await res.json();
 
         // ensure data is of correct type
-        const parsedBathroomData = (bathroomData as Place[])
+        const parsedBathroomData = (bathroomData as Bathroom[])
             .map((bathroom) => ({
               id: bathroom.id,
               name: bathroom.name,
               position: bathroom.position,
-              details: bathroom.description,
+              description: bathroom.description,
+              num_stalls: bathroom.num_stalls,
+              amenities: bathroom.amenities,
+              gender: bathroom.gender,
               likes: bathroom.likes,
             }));
 
-        setPlaces(parsedBathroomData);
+        setBathrooms(parsedBathroomData);
       } else if (res.status === 404) {
-        setPlaces([]); // handle empty response
+        setBathrooms([]); // handle empty response
       } else {
         console.error('Error fetching bathrooms:', res.status);
       }
@@ -188,7 +176,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           console.error('Polling error:', res.status);
         }
 
-        const newBathrooms: Place[] = await res.json();
+        const newBathrooms: Bathroom[] = await res.json();
 
         if (newBathrooms.length > 0 && mapRef.current) {
           const bounds = mapRef.current.getBounds();
@@ -202,10 +190,10 @@ function MapInner({apiKey}: { apiKey: string }) {
               return bounds.contains(pos);
             });
             if (visibleNewBathrooms.length > 0) {
-              setPlaces((prevPlaces) => [
-                ...prevPlaces,
+              setBathrooms((prevBathrooms) => [
+                ...prevBathrooms,
                 ...visibleNewBathrooms.filter((nb) =>
-                  !prevPlaces.some((p) => p.id === nb.id),
+                  !prevBathrooms.some((p) => p.id === nb.id),
                 ),
               ]);
             }
@@ -229,8 +217,6 @@ function MapInner({apiKey}: { apiKey: string }) {
   if (loadError) return <p>Failed to load Google Maps.</p>;
   if (!isLoaded) return <p>Loading map…</p>;
 
-  appContext?.getCurrentUserId().then(setUserId);
-
   return (
     <div className="map-align-center">
       {isLoaded && <MapHeader map={mapRef.current} />}
@@ -252,7 +238,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           disableDefaultUI: true,
         }}
       >
-        {places.map((p) => (
+        {bathrooms.map((p) => (
           <Marker
             key={p.id}
             position={p.position} // position of pin
@@ -261,33 +247,10 @@ function MapInner({apiKey}: { apiKey: string }) {
           />
         ))}
 
-        {selectedBathroom && (
-          <InfoWindow
-            position={selectedBathroom.position}
-            // close info window by clicking x
-            onCloseClick={() => setSelected(null)}
-          >
-            <div>
-              <strong>{selectedBathroom.name}</strong>
-              {userId ?
-                <Like bathroom={selectedBathroom} userId={userId}/> :
-                null}
-              {selectedBathroom.description}
-              {/* TODO: add genders, amenenities, and navigate button here */}
-              <Button // Get Directions button
-                variant="contained"
-                color="primary" // default blue unless we manually change it
-                size="small"
-                onClick={() => openWalkingDirections(
-                    selectedBathroom.position.lat,
-                    selectedBathroom.position.lng,
-                )}
-              >
-                Get Directions
-              </Button>
-            </div>
-          </InfoWindow>
-        )}
+        <InfoWindow
+          bathroom={selected}
+          setBathroom={setSelected}
+        />
       </GoogleMap>
     </div>
   );
