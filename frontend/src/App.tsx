@@ -12,7 +12,7 @@ import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
  * gets id of user currently logged in
  * @returns {string | null} user id of logged in user
  */
-async function getCurrentUserId() : Promise<string | null> {
+export async function getCurrentUserId() : Promise<string | null> {
   const {data: {user}, error} = await supabase.auth.getUser();
 
   if (error) {
