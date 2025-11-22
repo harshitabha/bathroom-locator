@@ -7,10 +7,11 @@ import {
 } from '@mui/material';
 import NearMeIcon from '@mui/icons-material/NearMe';
 import type {Dispatch, SetStateAction} from 'react';
+import {styled} from '@mui/material/styles';
 
 import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
-import type {GenderOptions, Bathroom} from '../../types';
+import type {AmenitieOptions, GenderOptions, Bathroom} from '../../types';
 import Detail from '../Detail';
 
 interface bathroomDetailsProps {
@@ -28,7 +29,19 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
       .map((key) => {
         return {name: key, selected: true};
       }) : [];
+  const amenities = bathroom.amenities ? Object.keys(bathroom.amenities)
+      .filter((val) => bathroom.amenities![val as AmenitieOptions] == true)
+      .map((key) => {
+        return {name: key, selected: true};
+      }) : [];
+
   const theme = useTheme();
+
+  const DetailsButton = styled(Button)(() => ({
+    borderRadius: '30px',
+    padding: '10px 20px',
+    fontWeight: 'normal',
+  }));
 
   return (
     <SwipeableDrawer
@@ -74,11 +87,10 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             display: 'flex',
           }}
         >
-          <Button
+          <DetailsButton
             variant="contained"
             color="secondary"
             size="small"
-            className="details-button"
             endIcon={<NearMeIcon />}
             onClick={() => openWalkingDirections(
                 bathroom.position.lat,
@@ -86,7 +98,7 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             )}
           >
               Navigate
-          </Button>
+          </DetailsButton>
         </Box>
 
         <Typography variant="h6" className="details-subheader">
@@ -97,12 +109,19 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
         </Typography>
 
         {
-          gender.length > 0 ?
+          gender.length > 0 || amenities.length > 0 ?
           <Box>
             <Typography variant="h6" className="details-subheader">
               Additional Details
             </Typography>
-            <Detail name='Gender' values={gender}/>
+            {
+              gender.length > 0 ?
+              <Detail name='Gender' values={gender}/> : null
+            }
+            {
+              amenities.length > 0 ?
+              <Detail name='Amenities' values={amenities}/> : null
+            }
           </Box> : null
         }
 
