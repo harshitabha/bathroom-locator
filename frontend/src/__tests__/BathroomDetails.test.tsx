@@ -7,6 +7,8 @@ import BathroomDetails from '../components/BathroomDetails/BathroomDetails';
 import {basicBathroom} from './constants';
 import type {Bathroom} from '../types';
 
+afterEach(() => cleanup());
+
 describe('Bathroom Details common content', () => {
   beforeEach(() => {
     render(
