@@ -7,6 +7,7 @@ import {
   afterEach,
   expect,
   vi,
+  type MockedFunction,
 } from 'vitest';
 import {
   render,
@@ -18,7 +19,6 @@ import {
 import {MemoryRouter} from 'react-router-dom';
 import '@testing-library/jest-dom/vitest';
 import {AuthError, type User, type UserResponse} from '@supabase/supabase-js';
-import userEvent from '@testing-library/user-event';
 import AppContext from '../context/AppContext';
 import {getCurrentUserId} from '../App';
 
@@ -28,10 +28,26 @@ vi.mock('../lib/supabaseClient', () => {
     supabase: {
       auth: {
         getUser: vi.fn(),
+        signOut: vi.fn(),
       },
     },
   };
 });
+
+/**
+ * Mocks sign out
+ * @param {string | null} error error message
+ * @returns {MockedFunction} mocked sign out function
+ */
+function mockSignOut(error: string | null) :
+MockedFunction<() => Promise<{ error: AuthError | null }>> {
+  const mockLogout = vi.mocked(supabase.auth.signOut);
+  mockLogout.mockResolvedValueOnce(
+      {error: error ? new AuthError(error) : null},
+  );
+
+  return mockLogout;
+}
 
 /**
  * Mocks supabase get user id
@@ -162,15 +178,114 @@ describe('Map Header component when logged in', () => {
   });
 
   it('renders the profile picture', async () => {
-    const profilePicture = screen.queryByLabelText('profile-picture');
-    expect(profilePicture);
+    await waitFor(() => {
+      expect(screen.getByLabelText('profile-picture'));
+    });
   });
 
   it('displays menu when profile picture is clicked', async () => {
-    const profilePicture = 
-      screen.queryByLabelText('profile-picture') as HTMLElement;
-    userEvent.click(profilePicture);
-    expect(screen.queryByRole('menu'));
+    const profilePicture = await waitFor(() => {
+      return screen.getByLabelText('profile-picture');
+    });
+
+    fireEvent.click(profilePicture);
+
+    expect(screen.getByRole('menuitem', {name: 'Logout'}));
+  });
+
+  it('hides menu when clicking escape button', async () => {
+    const profilePicture = await waitFor(() => {
+      return screen.getByLabelText('profile-picture');
+    });
+
+    await fireEvent.click(profilePicture);
+
+    // click escape button
+    const menu = screen.getByRole('menu');
+    await fireEvent.keyDown(menu, {key: 'Escape', code: 'Escape'});
+
+    await waitFor(() => {
+      expect(
+          screen.queryByRole('menuitem', {name: 'Logout'}),
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it('calls sign out when when logout is clicked', async () => {
+    const profilePicture = await waitFor(() => {
+      return screen.getByLabelText('profile-picture');
+    });
+
+    fireEvent.click(profilePicture);
+
+    const logoutButton = screen.getByRole('menuitem', {name: 'Logout'});
+    // mock succesful sign out
+    const mockLogout = mockSignOut(null);
+    fireEvent.click(logoutButton);
+    expect(mockLogout).toHaveBeenCalled();
+  });
+});
+
+describe('Map Header component on sign out failure', async () => {
+  beforeEach(() => {
+    const userId = '123';
+    const error = null;
+    (globalThis as unknown as { google: GoogleWithMaps }).google = {
+      maps: {
+        importLibrary: importLibraryMock,
+      },
+    };
+
+    importLibraryMock.mockResolvedValue({
+      AutocompleteSessionToken: vi.fn(),
+      AutocompleteSuggestion: {
+        fetchAutocompleteSuggestions: vi
+            .fn()
+            .mockResolvedValue({suggestions: []}),
+      },
+    });
+
+    mockGetUserId(userId, error);
+
+    mockSignOut('Error signing user out');
+
+    render(
+        <MemoryRouter>
+          <AppContext value={{getCurrentUserId}}>
+            <MapHeader map={null} />
+          </AppContext>
+        </MemoryRouter>,
+    );
+  });
+
+  it('doesn\'t display login button', async () => {
+    const profilePicture = await waitFor(() => {
+      return screen.getByLabelText('profile-picture');
+    });
+
+    fireEvent.click(profilePicture);
+
+    const logoutButton = screen.getByRole('menuitem', {name: 'Logout'});
+    fireEvent.click(logoutButton);
+
+    await waitFor(() => {
+      expect(screen.queryByText('Login')).not.toBeInTheDocument();
+    });
+  });
+
+  it('keeps profile pic display', async () => {
+    const profilePicture = await waitFor(() => {
+      return screen.getByLabelText('profile-picture');
+    });
+
+    fireEvent.click(profilePicture);
+
+    const logoutButton = screen.getByRole('menuitem', {name: 'Logout'});
+    fireEvent.click(logoutButton);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('profile-picture'));
+    });
   });
 });
 

@@ -2,8 +2,8 @@ import {Box, Button, Avatar, Menu, MenuItem} from '@mui/material';
 import {useNavigate} from 'react-router-dom';
 import {useState, useEffect, useContext} from 'react';
 import SearchBar from './SearchBar';
-import Logout from './Logout';
 import AppContext from '../context/AppContext';
+import {supabase} from '../lib/supabaseClient';
 
 type Props = {
   map: google.maps.Map | null;
@@ -25,6 +25,19 @@ const MapHeader = ({map}: Props) => {
   useEffect(() => {
     appContext?.getCurrentUserId().then(setUserId);
   }, []);
+
+  /**
+   * signs out current user
+   */
+  async function signOutUser() {
+    const {error} = await supabase.auth.signOut();
+
+    if (error) {
+      console.error('Error signing out:', error.message);
+    } else {
+      setUserId(null);
+    }
+  }
 
 
   return (
@@ -55,8 +68,8 @@ const MapHeader = ({map}: Props) => {
             open={open}
             onClose={handleClose}
           >
-            <MenuItem>
-              <Logout setUserId={setUserId}/>
+            <MenuItem onClick={signOutUser}>
+              Logout
             </MenuItem>
           </Menu>
         </> ):
