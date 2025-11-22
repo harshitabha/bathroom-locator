@@ -13,7 +13,7 @@ import {
 import './Map.css';
 import MapHeader from './MapHeader';
 import BathroomDetails from './BathroomDetails/BathroomDetails';
-import type {Place} from '../types';
+import type {Bathroom} from '../types';
 
 const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -29,9 +29,9 @@ export default Map;
  * @returns {object} JSX compoent for the inner map content
  */
 function MapInner({apiKey}: { apiKey: string }) {
-  const [places, setPlaces] = useState<Place[]>([]); // bathroom info
+  const [bathrooms, setBathrooms] = useState<Bathroom[]>([]); // bathroom info
   // tracks which pin is selected (which info window to show)
-  const [selected, setSelected] = useState<Place | null>(null);
+  const [selected, setSelected] = useState<Bathroom | null>(null);
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -115,19 +115,21 @@ function MapInner({apiKey}: { apiKey: string }) {
         const bathroomData = await res.json();
 
         // ensure data is of correct type
-        const parsedBathroomData = (bathroomData as Place[])
+        const parsedBathroomData = (bathroomData as Bathroom[])
             .map((bathroom) => ({
               id: bathroom.id,
               name: bathroom.name,
               position: bathroom.position,
               description: bathroom.description,
               num_stalls: bathroom.num_stalls,
+              amenities: bathroom.amenities,
               gender: bathroom.gender,
+              likes: bathroom.likes,
             }));
 
-        setPlaces(parsedBathroomData);
+        setBathrooms(parsedBathroomData);
       } else if (res.status === 404) {
-        setPlaces([]); // handle empty response
+        setBathrooms([]); // handle empty response
       } else {
         console.error('Error fetching bathrooms:', res.status);
       }
@@ -173,7 +175,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           console.error('Polling error:', res.status);
         }
 
-        const newBathrooms: Place[] = await res.json();
+        const newBathrooms: Bathroom[] = await res.json();
 
         if (newBathrooms.length > 0 && mapRef.current) {
           const bounds = mapRef.current.getBounds();
@@ -187,10 +189,10 @@ function MapInner({apiKey}: { apiKey: string }) {
               return bounds.contains(pos);
             });
             if (visibleNewBathrooms.length > 0) {
-              setPlaces((prevPlaces) => [
-                ...prevPlaces,
+              setBathrooms((prevBathrooms) => [
+                ...prevBathrooms,
                 ...visibleNewBathrooms.filter((nb) =>
-                  !prevPlaces.some((p) => p.id === nb.id),
+                  !prevBathrooms.some((p) => p.id === nb.id),
                 ),
               ]);
             }
@@ -235,7 +237,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           disableDefaultUI: true,
         }}
       >
-        {places.map((p) => (
+        {bathrooms.map((p) => (
           <Marker
             key={p.id}
             position={p.position} // position of pin

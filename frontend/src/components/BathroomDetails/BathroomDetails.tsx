@@ -7,16 +7,15 @@ import {
 } from '@mui/material';
 import NearMeIcon from '@mui/icons-material/NearMe';
 import type {Dispatch, SetStateAction} from 'react';
-import {styled} from '@mui/material/styles';
 
 import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
-import type {GenderOptions, Place} from '../../types';
+import type {GenderOptions, Bathroom} from '../../types';
 import Detail from '../Detail';
 
 interface bathroomDetailsProps {
-  bathroom: Place,
-  setBathroom: Dispatch<SetStateAction<Place | null>>;
+  bathroom: Bathroom,
+  setBathroom: Dispatch<SetStateAction<Bathroom | null>>;
 };
 
 const BathroomDetails = (props: bathroomDetailsProps) => {
@@ -30,12 +29,6 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
         return {name: key, selected: true};
       }) : [];
   const theme = useTheme();
-
-  const DetailsButton = styled(Button)(() => ({
-    borderRadius: '30px',
-    padding: '10px 20px',
-    fontWeight: 'normal',
-  }));
 
   return (
     <SwipeableDrawer
@@ -81,10 +74,11 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             display: 'flex',
           }}
         >
-          <DetailsButton
+          <Button
             variant="contained"
             color="secondary"
             size="small"
+            className="details-button"
             endIcon={<NearMeIcon />}
             onClick={() => openWalkingDirections(
                 bathroom.position.lat,
@@ -92,7 +86,7 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             )}
           >
               Navigate
-          </DetailsButton>
+          </Button>
         </Box>
 
         <Typography variant="h6" className="details-subheader">

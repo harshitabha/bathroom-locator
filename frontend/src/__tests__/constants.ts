@@ -1,6 +1,6 @@
-import type {Place} from '../types';
+import type {Bathroom} from '../types';
 
-export const bathroom: Place = {
+export const basicBathroom: Bathroom = {
   id: crypto.randomUUID(),
   name: 'Namaste Lounge Bathroom',
   position: {
@@ -8,4 +8,5 @@ export const bathroom: Place = {
     'lng': -122.05719563060227,
   },
   description: 'more details',
+  likes: 0,
 };

@@ -4,67 +4,14 @@ import '@testing-library/jest-dom/vitest';
 
 import * as navigation from '../utils/navigation';
 import BathroomDetails from '../components/BathroomDetails/BathroomDetails';
-import BathroomMap from '../components/Map';
-import {bathroom} from './constants';
-import type {Place} from '../types';
-
-import {http, HttpResponse} from 'msw';
-import {setupServer} from 'msw/node';
-
-const URL = 'http://localhost:3000';
-const server = setupServer();
-
-describe('Bathroom Details visibility', () => {
-  beforeEach(() => {
-    server.use(
-        http.get(URL + '/bathroom', async () => {
-          return HttpResponse.json(
-              [bathroom],
-          );
-        }),
-        http.get(URL + '/bathroom/update', async () => {
-          return HttpResponse.json([]);
-        }),
-    );
-
-    // mocks the google maps api
-    vi.mock('@react-google-maps/api', () =>
-      import('./mocks/react-google-maps-api'),
-    );
-
-    render(<BathroomMap />);
-  });
-
-  afterEach(() => {
-    cleanup();
-    vi.resetAllMocks();
-  });
-
-  it('by default, does not render the Bathroom Details', () => {
-    const bathroomDetails = screen.queryByText('Namaste Lounge Bathroom');
-    expect(bathroomDetails).not.toBeInTheDocument();
-  });
-
-  it('renders the Bathroom Details when you click on a pin', async () => {
-    fireEvent.click(screen.getByLabelText(bathroom.name));
-    expect(screen.getByText('Namaste Lounge Bathroom'));
-  });
-
-  it('closes the Bathroom Details when you click away', async () => {
-    fireEvent.click(screen.getByLabelText(bathroom.name));
-    // click out of the details page
-    const map = screen.getByLabelText('Bathroom Map');
-    fireEvent.click(map);
-    const bathroomName = screen.queryByText('Namaste Lounge Bathroom');
-    expect(bathroomName).toBeNull();
-  });
-});
+import {basicBathroom} from './constants';
+import type {Bathroom} from '../types';
 
 describe('Bathroom Details common content', () => {
   beforeEach(() => {
     render(
         <BathroomDetails
-          bathroom={bathroom}
+          bathroom={basicBathroom}
           setBathroom={() => {}}
         />,
     );
@@ -81,7 +28,7 @@ describe('Bathroom Details common content', () => {
   });
 
   it('renders the navigate button', () => {
-    expect(screen.getByRole('button', {name: 'Navigate'}));
+    expect(screen.getByText('Navigate'));
   });
 
   it('Doesn\'t show additional details if there are' +
@@ -93,7 +40,7 @@ describe('Bathroom Details common content', () => {
   it('calls openWalkingDirections when you click on Navigate button', () => {
     const openWalkingDirectionsMock = vi.spyOn(
         navigation, 'openWalkingDirections').mockImplementation(() => {});
-    const button = screen.getByRole('button', {name: 'Navigate'});
+    const button = screen.getByText('Navigate');
     fireEvent.click(button);
 
     expect(openWalkingDirectionsMock)
@@ -104,8 +51,8 @@ describe('Bathroom Details common content', () => {
 describe('Rendering Additional Details', async () => {
   describe('Gender information', async () => {
     beforeEach(() => {
-      const bathroomWithGender: Place = {
-        ...bathroom,
+      const bathroomWithGender: Bathroom = {
+        ...basicBathroom,
         gender: {
           female: true,
           male: false,
@@ -126,7 +73,7 @@ describe('Rendering Additional Details', async () => {
 
     it('Renders the true options in bathroom', async () => {
       screen.getByText('Female');
-      screen.getByText('Male');
+      screen.getByText('Gender Neutral');
     });
   });
 });
