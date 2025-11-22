@@ -8,5 +8,8 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     css: true,
+    env: {
+      VITE_GOOGLE_MAPS_API_KEY: "FAKE_KEY_FOR_TESTS",
+    },
   },
 });

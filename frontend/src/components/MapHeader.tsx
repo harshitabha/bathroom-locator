@@ -29,7 +29,7 @@ const MapHeader = ({map}: Props) => {
           bgcolor: 'primary.main',
           color: 'background.default',
         }}
-        aria-label='profile-picture'
+        aria-label='Profile Picture'
       /> :
       <Button
         variant="contained"
