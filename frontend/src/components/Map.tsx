@@ -215,7 +215,7 @@ function MapInner({apiKey}: { apiKey: string }) {
   if (!isLoaded) return <p>Loading map…</p>;
 
   return (
-    <div className="map-align-center">
+    <div className="map-align-center" aria-label='Bathroom Map'>
       {isLoaded && <MapHeader map={mapRef.current} />}
       <GoogleMap
         onLoad={onMapLoad}
@@ -240,6 +240,7 @@ function MapInner({apiKey}: { apiKey: string }) {
             key={p.id}
             position={p.position} // position of pin
             title={p.name} // shows location name when hovering pins
+            aria-title={p.name}
             onClick={() => setSelected(p)}
           />
         ))}

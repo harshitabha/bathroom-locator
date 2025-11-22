@@ -2,7 +2,6 @@ import {Box, Chip, Paper, Typography} from '@mui/material';
 import './Detail.css';
 
 const Detail = (props: DetailProps) => {
-  console.log(props.values);
   return (
     <Box className='flex'>
       <Typography variant='body1' className='details-label'>

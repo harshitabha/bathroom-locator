@@ -2,9 +2,9 @@ export interface Place {
   id: string;
   name: string;
   position: google.maps.LatLngLiteral;
-  description?: string;
-  num_stalls: number,
-  gender: Gender,
+  description: string;
+  num_stalls?: number,
+  gender?: Gender,
 };
 
 export interface Gender {

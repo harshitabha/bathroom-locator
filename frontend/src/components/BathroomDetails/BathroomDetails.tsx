@@ -24,11 +24,11 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
     bathroom,
     setBathroom,
   } = props;
-  const gender = Object.keys(bathroom.gender)
-      .filter((val) => bathroom.gender[val as GenderOptions] == true)
+  const gender = bathroom.gender ? Object.keys(bathroom.gender)
+      .filter((val) => bathroom.gender![val as GenderOptions] == true)
       .map((key) => {
         return {name: key, selected: true};
-      });
+      }) : [];
   const theme = useTheme();
 
   const DetailsButton = styled(Button)(() => ({

@@ -5,6 +5,8 @@ import '@testing-library/jest-dom/vitest';
 import * as navigation from '../utils/navigation';
 import BathroomDetails from '../components/BathroomDetails/BathroomDetails';
 import BathroomMap from '../components/Map';
+import {bathroom} from './constants';
+import type {Place} from '../types';
 
 import {http, HttpResponse} from 'msw';
 import {setupServer} from 'msw/node';
@@ -17,14 +19,7 @@ describe('Bathroom Details visibility', () => {
     server.use(
         http.get(URL + '/bathroom', async () => {
           return HttpResponse.json(
-              [{
-                id: '5f1169fe-4db2-48a2-b059-f05cfe63588b',
-                name: 'Namaste Lounge Bathroom',
-                position: {
-                  'lat': 37.00076576303953,
-                  'lng': -122.05719563060227},
-                description: 'more details',
-              }],
+              [bathroom],
           );
         }),
         http.get(URL + '/bathroom/update', async () => {
@@ -51,33 +46,25 @@ describe('Bathroom Details visibility', () => {
   });
 
   it('renders the Bathroom Details when you click on a pin', async () => {
-    fireEvent.click(screen.getByTestId('marker'));
+    fireEvent.click(screen.getByLabelText(bathroom.name));
     expect(screen.getByText('Namaste Lounge Bathroom'));
   });
 
   it('closes the Bathroom Details when you click away', async () => {
-    fireEvent.click(screen.getByTestId('marker'));
+    fireEvent.click(screen.getByLabelText(bathroom.name));
     // click out of the details page
-    const backdrop = document.querySelector('.MuiBackdrop-root')!;
-    fireEvent.click(backdrop);
-    expect(screen.queryByText('Namaste Lounge Bathroom'))
-        .not.toBeInTheDocument();
+    const map = screen.getByLabelText('Bathroom Map');
+    fireEvent.click(map);
+    const bathroomName = screen.queryByText('Namaste Lounge Bathroom');
+    expect(bathroomName).toBeNull();
   });
 });
 
-describe('Bathroom Details component content', () => {
+describe('Bathroom Details common content', () => {
   beforeEach(() => {
     render(
         <BathroomDetails
-          bathroom={{
-            id: '5f1169fe-4db2-48a2-b059-f05cfe63588b',
-            name: 'Namaste Lounge Bathroom',
-            position: {
-              'lat': 37.00076576303953,
-              'lng': -122.05719563060227,
-            },
-            description: 'more details',
-          }}
+          bathroom={bathroom}
           setBathroom={() => {}}
         />,
     );
@@ -97,6 +84,12 @@ describe('Bathroom Details component content', () => {
     expect(screen.getByRole('button', {name: 'Navigate'}));
   });
 
+  it('Doesn\'t show additional details if there are' +
+    'no additional details', async () => {
+    const addtionalDetailsHeader = screen.queryByText('Additional Details');
+    expect(addtionalDetailsHeader).toBeNull();
+  });
+
   it('calls openWalkingDirections when you click on Navigate button', () => {
     const openWalkingDirectionsMock = vi.spyOn(
         navigation, 'openWalkingDirections').mockImplementation(() => {});
@@ -105,5 +98,35 @@ describe('Bathroom Details component content', () => {
 
     expect(openWalkingDirectionsMock)
         .toHaveBeenCalledWith(37.00076576303953, -122.05719563060227);
+  });
+});
+
+describe('Rendering Additional Details', async () => {
+  describe('Gender information', async () => {
+    beforeEach(() => {
+      const bathroomWithGender: Place = {
+        ...bathroom,
+        gender: {
+          female: true,
+          male: false,
+          gender_neutral: true,
+        },
+      };
+      render(
+          <BathroomDetails
+            bathroom={bathroomWithGender}
+            setBathroom={() => {}}
+          />,
+      );
+    });
+
+    it('Renders gender label', async () => {
+      screen.getByText('Gender:');
+    });
+
+    it('Renders the true options in bathroom', async () => {
+      screen.getByText('Female');
+      screen.getByText('Male');
+    });
   });
 });
