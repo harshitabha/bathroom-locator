@@ -17,10 +17,11 @@ export default function AddBathroomBanner(props: AddBathroomBannerProps) {
 
   return (
     <Paper
+      aria-label="Bathroom banner"
       elevation={3}
       sx={{
-        bgcolor: (theme) => theme.palette.background.default,
-        color: (theme) => theme.palette.text.primary,
+        bgcolor: 'background.default',
+        color: 'text.primary',
         borderRadius: '12px',
         boxShadow: 3,
         display: 'flex',
@@ -39,7 +40,7 @@ export default function AddBathroomBanner(props: AddBathroomBannerProps) {
         size="small"
         onClick={onCancel}
         sx={{
-          'color': (theme) => theme.palette.text.primary,
+          'color': 'text.primary',
           'border': 1,
           'borderColor': '#CAC4D0',
           'borderRadius': '8px',

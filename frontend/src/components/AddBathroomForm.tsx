@@ -163,6 +163,7 @@ function AddBathroomForm(props: AddBathroomFormProps) {
           sx={{
             'bgcolor': 'primary.main',
             'color': 'common.white',
+            'borderRadius': 2,
             '&:hover': {
               bgcolor: 'primary.dark',
             },
@@ -251,7 +252,7 @@ export default function AddBathroomPage(props: Props) {
       slotProps={{
         paper: {
           className: 'addbathroom-drawer-paper',
-          sx: {bgcolor: (theme) => theme.palette.background.default},
+          sx: {bgcolor: 'background.default'},
         },
       }}
     >
@@ -266,11 +267,11 @@ export default function AddBathroomPage(props: Props) {
 
       <Box
         className="addbathroom-mobile-wrapper"
-        sx={{bgcolor: (theme) => theme.palette.background.default}}
+        sx={{bgcolor: 'background.default'}}
       >
         <Box
           className="addbathroom-card"
-          sx={{bgcolor: (theme) => theme.palette.background.default}}
+          sx={{bgcolor: 'background.default'}}
         >
           <Typography
             variant="h5"
