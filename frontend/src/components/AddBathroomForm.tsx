@@ -61,6 +61,7 @@ function useDragToCloseDrawer(onClose: () => void, threshold = 10) {
 }
 
 type Props = {
+  mode: 'add' | 'edit';
   open: boolean;
   onClose: () => void;
   onOpen?: () => void;
@@ -69,7 +70,9 @@ type Props = {
   details: string;
   onNameChange: (newName: string) => void;
   onDetailsChange: (newDetails: string) => void;
-  onCreated: () => Promise<void> | void;
+  onCreated?: () => Promise<void> | void; // for add
+  onUpdated?: () => Promise<void> | void; // for edit
+  bathroomId?: string;
 };
 
 type AddBathroomFormProps = {
@@ -182,15 +185,18 @@ export function AddBathroomForm(props: AddBathroomFormProps) {
  */
 export default function AddBathroomPage(props: Props) {
   const {
+    mode,
     open,
     onClose,
     onOpen,
     position,
     onCreated,
+    onUpdated,
     name,
     details,
     onNameChange,
     onDetailsChange,
+    bathroomId,
   } = props;
 
   const handleSubmit = async () => {
@@ -212,23 +218,31 @@ export default function AddBathroomPage(props: Props) {
     };
 
     try {
-      const res = await fetch('http://localhost:3000/bathroom', {
-        method: 'POST',
+      const url =
+      mode === 'add' ?
+        'http://localhost:3000/bathroom' :
+        `http://localhost:3000/bathroom/${bathroomId}`;
+
+      const method = mode === 'add' ? 'POST' : 'PUT';
+
+      const res = await fetch(url, {
+        method: method,
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
         const errorBody = await res.text();
-        console.error('Failed to create bathroom:', res.status, errorBody);
+        console.error(`Failed to ${mode} bathroom:`, res.status, errorBody);
         return;
       }
 
       await res.json();
 
-      await onCreated();
+      if (mode === 'add') await onCreated?.();
+      else await onUpdated?.();
     } catch (err) {
-      console.error('Error creating bathroom:', err);
+      console.error(`Error ${mode}ing bathroom:`, err);
     }
   };
 
@@ -277,7 +291,7 @@ export default function AddBathroomPage(props: Props) {
             fontWeight={600}
             className="addbathroom-title"
           >
-            New Bathroom
+            {mode === 'add' ? 'New Bathroom' : 'Edit Bathroom'}
           </Typography>
 
           <AddBathroomForm
