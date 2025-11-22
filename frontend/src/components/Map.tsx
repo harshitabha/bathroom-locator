@@ -250,13 +250,6 @@ function MapInner({apiKey}: { apiKey: string }) {
           bathroom={selected}
           setBathroom={setSelected}
         />
-
-        {/* {selected && (
-          <BathroomDetails
-            bathroom={selected}
-            setBathroom={setSelected}
-          />
-        )} */}
       </GoogleMap>
     </div>
   );
