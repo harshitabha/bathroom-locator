@@ -3,7 +3,9 @@ import {
   useMemo,
   useState,
   useCallback,
-  useRef} from 'react';
+  useRef,
+  useContext,
+} from 'react';
 import {
   GoogleMap,
   Marker,
@@ -13,8 +15,9 @@ import {
 import './Map.css';
 import {openWalkingDirections} from '../utils/navigation';
 import Button from '@mui/material/Button';
-import MapHeader from './MapHeader'; import Like from './Like';
-import {getCurrentUserId} from '../lib/supabaseClient';
+import MapHeader from './MapHeader';
+import Like from './Like';
+import AppContext from '../context/AppContext';
 
 export type Place = {
   id: number; // id
@@ -43,6 +46,7 @@ function MapInner({apiKey}: { apiKey: string }) {
   const [selectedBathroom, setSelected] = useState<Place | null>(null);
 
   const [userId, setUserId] = useState<string | null>('');
+  const appContext = useContext(AppContext);
 
 
   // used to get map bounds
@@ -225,7 +229,7 @@ function MapInner({apiKey}: { apiKey: string }) {
   if (loadError) return <p>Failed to load Google Maps.</p>;
   if (!isLoaded) return <p>Loading map…</p>;
 
-  getCurrentUserId().then(setUserId);
+  appContext?.getCurrentUserId().then(setUserId);
 
   return (
     <div className="map-align-center">
