@@ -69,7 +69,7 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
           }}
         >
           <Button
-            variant="contained"
+            variant="outlined"
             color="secondary"
             size="small"
             className="details-button"
