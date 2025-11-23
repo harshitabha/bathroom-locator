@@ -23,7 +23,6 @@ function useDragToCloseDrawer(onClose: () => void, threshold = 10) {
       (e) => {
         if (e.button !== 0) return;
 
-        e.stopPropagation();
         startYRef.current = e.clientY;
         draggingRef.current = true;
         closedDuringDragRef.current = false;
@@ -43,8 +42,7 @@ function useDragToCloseDrawer(onClose: () => void, threshold = 10) {
         };
 
         // cleanup after finish dragging
-        const handleMouseUp = (ev: MouseEvent) => {
-          ev.stopPropagation?.();
+        const handleMouseUp = () => {
           draggingRef.current = false;
           startYRef.current = null;
           window.removeEventListener('mousemove', handleMouseMove);
@@ -72,116 +70,12 @@ type Props = {
   onCreated: () => Promise<void> | void;
 };
 
-type AddBathroomFormProps = {
-  name: string;
-  description: string;
-  position: { lat: number; lng: number } | null;
-  onNameChange: (v: string) => void;
-  onDescriptionChange: (v: string) => void;
-  onSubmit: () => void;
-  onCancel: () => void;
-  isMobile?: boolean;
-};
-
 /**
- * Form for entering bathroom info
- * @param {object} props Component props
- * @returns {object} JSX form fields
- */
-function AddBathroomForm(props: AddBathroomFormProps) {
-  const {
-    name,
-    description,
-    position,
-    onNameChange,
-    onDescriptionChange,
-    onSubmit,
-    onCancel,
-    isMobile,
-  } = props;
-
-  return (
-    <>
-      <TextField
-        fullWidth
-        required
-        label="Bathroom Name"
-        value={name}
-        onChange={(e) => onNameChange(e.target.value)}
-      />
-
-      <TextField
-        fullWidth
-        multiline
-        minRows={3}
-        required
-        label="Bathroom Description"
-        value={description}
-        onChange={(e) => onDescriptionChange(e.target.value)}
-        helperText={
-          'Please add details on how to find the bathroom, ' +
-          'and anything else to note.'
-        }
-        className="addbathroom-description"
-      />
-
-      {position && (
-        <Typography
-          variant="caption"
-          className="addbathroom-location"
-        >
-          Location: {position.lat.toFixed(6)}, {position.lng.toFixed(6)}
-        </Typography>
-      )}
-
-      <Box className="addbathroom-actions-row">
-        <Button
-          type="button"
-          fullWidth={!!isMobile}
-          onClick={onCancel}
-          className="addbathroom-btn-cancel"
-          variant="outlined"
-          sx={{
-            'color': 'text.primary',
-            'fontWeight': 550,
-            'borderColor': 'secondary.main',
-            'borderRadius': 2,
-            '&:hover': {
-              bgcolor: 'action.hover',
-              borderColor: 'secondary.main',
-            },
-          }}
-        >
-          Cancel
-        </Button>
-
-        <Button
-          fullWidth={!!isMobile}
-          variant="contained"
-          onClick={onSubmit}
-          className="addbathroom-btn-save"
-          sx={{
-            'bgcolor': 'primary.main',
-            'color': 'common.white',
-            'borderRadius': 2,
-            '&:hover': {
-              bgcolor: 'primary.dark',
-            },
-          }}
-        >
-          Save
-        </Button>
-      </Box>
-    </>
-  );
-}
-
-/**
- * Add bathroom UI wrapper
+ * Add bathroom form for adding bathroom
  * @param {object} props Component props
  * @returns {object} JSX container for the component
  */
-export default function AddBathroomPage(props: Props) {
+export default function AddBathroomForm(props: Props) {
   const {
     open,
     onClose,
@@ -282,16 +176,73 @@ export default function AddBathroomPage(props: Props) {
             New Bathroom
           </Typography>
 
-          <AddBathroomForm
-            name={name}
-            description={description}
-            position={position}
-            onNameChange={onNameChange}
-            onDescriptionChange={onDescriptionChange}
-            onSubmit={handleSubmit}
-            onCancel={onClose}
-            isMobile
+          <TextField
+            fullWidth
+            required
+            label="Bathroom Name"
+            value={name}
+            onChange={(e) => onNameChange(e.target.value)}
           />
+
+          <TextField
+            fullWidth
+            multiline
+            minRows={3}
+            required
+            label="Bathroom Description"
+            value={description}
+            onChange={(e) => onDescriptionChange(e.target.value)}
+            helperText={
+              'Please add details on how to find the bathroom, ' +
+              'and anything else to note.'
+            }
+            className="addbathroom-description"
+          />
+
+          {position && (
+            <Typography
+              variant="caption"
+              className="addbathroom-location"
+            >
+              Location: {position.lat.toFixed(6)}, {position.lng.toFixed(6)}
+            </Typography>
+          )}
+
+          <Box className="addbathroom-actions-row">
+            <Button
+              type="button"
+              fullWidth={true}
+              onClick={onClose}
+              className="addbathroom-btn-cancel"
+              variant="outlined"
+              sx={{
+                'color': 'text.primary',
+                'borderColor': 'secondary.main',
+                '&:hover': {
+                  bgcolor: 'action.hover',
+                  borderColor: 'secondary.main',
+                },
+              }}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              fullWidth={true}
+              variant="contained"
+              onClick={handleSubmit}
+              className="addbathroom-btn-save"
+              sx={{
+                'bgcolor': 'primary.main',
+                'color': 'common.white',
+                '&:hover': {
+                  bgcolor: 'primary.dark',
+                },
+              }}
+            >
+              Save
+            </Button>
+          </Box>
         </Box>
       </Box>
     </SwipeableDrawer>

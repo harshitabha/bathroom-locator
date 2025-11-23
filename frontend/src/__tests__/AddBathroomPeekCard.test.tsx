@@ -44,7 +44,7 @@ describe('AddBathroomPeekCard', () => {
   it('renders when showPeekCard is true', () => {
     render(<AddBathroomPeekCard showPeekCard={true} onExpand={() => {}} />);
 
-    expect(screen.getByText('New Bathroom'));
+    screen.getByText('New Bathroom');
   });
 
   it('does not render when showPeekCard is false', () => {
@@ -62,7 +62,7 @@ describe('AddBathroomPeekCard', () => {
     fireEvent.mouseDown(card, {clientY: 200});
     fireEvent.mouseUp(window, {clientY: 100});
 
-    expect(screen.getByText('Bathroom Name'));
+    screen.getByText('Bathroom Name');
   });
 
   it('does not show add bathroom form on small drag on desktop', () => {
@@ -86,7 +86,7 @@ describe('AddBathroomPeekCard', () => {
     fireEvent.touchStart(card, {touches: [{clientY: 200}]});
     fireEvent.touchEnd(card, {changedTouches: [{clientY: 100}]});
 
-    expect(screen.getByText('Bathroom Name'));
+    screen.getByText('Bathroom Name');
   });
 
   it('does not show add bathroom form on small drag on mobile', () => {

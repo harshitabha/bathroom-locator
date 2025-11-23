@@ -62,3 +62,12 @@
 .addbathroom-dialog-inner .MuiTextField-root:not(:first-of-type) {
   margin-top: 24px;
 }
+
+/* Save and Cancel Buttons*/
+.addbathroom-btn-cancel.MuiButton-outlined {
+  border-radius: 8px;
+}
+
+.addbathroom-btn-save.MuiButton-contained {
+  border-radius: 8px;
+}

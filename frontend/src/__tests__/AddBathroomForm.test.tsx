@@ -59,27 +59,27 @@ describe('AddBathroomPage', () => {
   it('renders title when open', () => {
     render(<PageWrapper />);
 
-    expect(screen.getByText('New Bathroom'));
+    screen.getByText('New Bathroom');
   });
 
   it('renders input fields when open', () => {
     render(<PageWrapper />);
 
-    expect(screen.getByText('Bathroom Name'));
-    expect(screen.getByText('Bathroom Description'));
+    screen.getByText('Bathroom Name');
+    screen.getByText('Bathroom Description');
   });
 
   it('renders buttons when open', () => {
     render(<PageWrapper />);
 
-    expect(screen.getByText('Cancel'));
-    expect(screen.getByText('Save'));
+    screen.getByText('Cancel');
+    screen.getByText('Save');
   });
 
   it('renders the location', () => {
     render(<PageWrapper />);
 
-    expect(screen.getByText('Location: 36.123456, -122.654321'));
+    screen.getByText('Location: 36.123456, -122.654321');
   });
 
   it('does not render content when closed', () => {
@@ -93,7 +93,7 @@ describe('AddBathroomPage', () => {
 
     fireEvent.click(screen.getByText('Save'));
     // form should still be open
-    expect(screen.queryByText('New Bathroom'));
+    screen.queryByText('New Bathroom');
   });
 
   it('does not submit when description is empty', () => {
@@ -101,7 +101,7 @@ describe('AddBathroomPage', () => {
 
     fireEvent.click(screen.getByText('Save'));
     // form should still be open
-    expect(screen.queryByText('New Bathroom'));
+    screen.queryByText('New Bathroom');
   });
 
   it('submits correctly and form is closed', async () => {
@@ -128,7 +128,7 @@ describe('AddBathroomPage', () => {
 
     fireEvent.click(screen.getByText('Save'));
     // form should still be open
-    expect(screen.queryByText('New Bathroom'));
+    screen.queryByText('New Bathroom');
   });
 
   it('closes when cancel button clicked', async () => {
@@ -166,7 +166,7 @@ describe('AddBathroomPage', () => {
     fireEvent.mouseUp(window, {clientY: 105});
 
     await waitFor(() =>
-      expect(screen.queryByText('New Bathroom')),
+      screen.queryByText('New Bathroom'),
     );
   });
 });

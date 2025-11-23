@@ -26,7 +26,7 @@ describe('AddBathroomButton', () => {
   it('renders the button', () => {
     render(<AddBathroomButton onClick={() => {}} />);
 
-    expect(screen.getByLabelText('Add a bathroom'));
+    screen.getByLabelText('Add a bathroom');
   });
 
   it('no banner when not pressed', () => {
@@ -39,6 +39,6 @@ describe('AddBathroomButton', () => {
     render(<ButtonBannerWrapper />);
 
     fireEvent.click(screen.getByLabelText('Add a bathroom'));
-    expect(screen.getByText('Choose a location for the bathroom'));
+    screen.getByText('Choose a location for the bathroom');
   });
 });

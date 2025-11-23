@@ -24,12 +24,12 @@ afterEach(() => {
 
 describe('AddBathroomBanner', () => {
   it('renders when opened', () => {
-    expect(screen.getByLabelText('Bathroom banner'));
-    expect(screen.getByText('Cancel'));
+    screen.getByLabelText('Bathroom banner');
+    screen.getByText('Cancel');
   });
 
   it('renders the message when opened', () => {
-    expect(screen.getByText('Choose a location for the bathroom'));
+    screen.getByText('Choose a location for the bathroom');
   });
 
   it('does not render when bannerOpen is false', () => {
