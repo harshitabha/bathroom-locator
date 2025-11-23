@@ -388,7 +388,7 @@ function MapInner({apiKey}: { apiKey: string }) {
       )}
 
       <AddBathroomPeekCard
-        showPeekCard={placePinMode && !addOpen}
+        showPeekCard={placePinMode && !addOpen && draftPosition !== null}
         onExpand={() => {
           setAddOpen(true);
           setBannerOpen(false);
@@ -410,12 +410,7 @@ function MapInner({apiKey}: { apiKey: string }) {
         bathroomId={editBathroom?.id}
         onCreated={async () => {
           await fetchVisiblePins();
-          setAddOpen(false);
-          setPlacePinMode(false);
-          setBannerOpen(false);
-          setDraftPosition(null);
-          setFormName('');
-          setFormDescription('');
+          cancelAddFlow();
         }}
         onUpdated={async () => {
           await fetchVisiblePins();
