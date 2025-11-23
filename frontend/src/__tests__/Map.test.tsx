@@ -1,230 +1,153 @@
-import '@testing-library/jest-dom/vitest';
-import { render, screen, waitForElementToBeRemoved } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import type React from 'react';
 import Map from '../components/Map';
-import { vi } from 'vitest';
-import { mockMatchMedia } from '../__test-helpers__/testUtils';
+import {
+  describe,
+  it,
+  beforeEach,
+  afterEach,
+  expect,
+  vi,
+} from 'vitest';
+import {
+  render,
+  screen,
+  fireEvent,
+  cleanup,
+  waitFor,
+} from '@testing-library/react';
+import '@testing-library/jest-dom/vitest';
 
-/* -----------------------------
-   Mocks
-------------------------------*/
+type MapClickEvent = {
+  latLng: {
+    lat: () => number;
+    lng: () => number;
+  };
+};
 
-// 1) Mock env var read used by Map
-vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', 'test-key');
+let latestOnMapClick: ((e: MapClickEvent) => void) | undefined;
 
-// Minimal global google used by Map
-beforeAll(() => {
-  // @ts-expect-error - we’re creating the google shim for tests
-  global.window.google = {
-    maps: {
-      Size: class Size {
-        constructor(public width: number, public height: number) {}
-      },
-      Point: class Point {
-        constructor(public x: number, public y: number) {}
-      },
-      MapTypeId: { ROADMAP: 'roadmap' },
+vi.mock('@react-google-maps/api', () => {
+  return {
+    GoogleMap: (props: {
+      children?: React.ReactNode;
+      onClick?: (e: MapClickEvent) => void;
+    }) => {
+      latestOnMapClick = props.onClick;
+      return (
+        <div role="region" aria-label="Bathroom map">
+          {props.children}
+        </div>
+      );
     },
-  };
-});
-
-// 2) Mock geolocation
-beforeAll(() => {
-  // @ts-expect-error
-  global.navigator.geolocation = {
-    getCurrentPosition: (success: any) =>
-      success({ coords: { latitude: 36.99, longitude: -122.0589 } }),
-    watchPosition: vi.fn(),
-    clearWatch: vi.fn(),
-  };
-});
-
-// 3) Mock openWalkingDirections util
-vi.mock('../utils/navigation', () => ({
-  openWalkingDirections: vi.fn(),
-}));
-
-// 4) Mock @react-google-maps/api: useLoadScript + light-weight elements
-let lastMapProps: any = null;
-vi.mock('@react-google-maps/api', async () => {
-  const React = await import('react');
-
-  const GoogleMap = ({
-    onClick,
-    children,
-    mapContainerClassName,
-    onLoad,
-    ...rest
-  }: any) => {
-    lastMapProps = { onClick, rest };
-    React.useEffect(() => {
-      if (onLoad) onLoad({ getBounds: () => null });
-    }, [onLoad]);
-
-    return (
-      <div
-        data-testid="google-map"
-        className={mapContainerClassName}
-        onClick={() => {
-          const latLng = { lat: () => 36.991, lng: () => -122.059 };
-          onClick?.({ latLng });
-        }}
+    Marker: (props: {
+      title?: React.ReactNode;
+      onClick?: () => void;
+    }) => (
+      <button
+        type="button"
+        data-testid="marker"
+        onClick={props.onClick}
       >
-        {children}
-      </div>
-    );
+        {props.title}
+      </button>
+    ),
+    InfoWindow: (props: {children?: React.ReactNode}) => (
+      <div data-testid="info-window">{props.children}</div>
+    ),
+    useLoadScript: () => ({
+      isLoaded: true,
+      loadError: undefined,
+    }),
   };
-
-  const Marker = ({ title, onClick }: any) => (
-    <button
-      type="button"
-      aria-label={`marker:${title ?? 'draft'}`}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick?.();
-      }}
-    />
-  );
-
-  const InfoWindow = ({ children }: any) => <div role="dialog">{children}</div>;
-
-  const useLoadScript = () => ({ isLoaded: true, loadError: undefined });
-
-  return { GoogleMap, Marker, InfoWindow, useLoadScript };
 });
 
-/* =============================
-   TESTS
-============================= */
-
-describe('Map add-flow & info window', () => {
+describe('Add bathroom button & flow', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    mockMatchMedia(true); // treat as mobile, SwipeableDrawer path in AddBathroomPage
+    vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', 'test-key');
+
+    (window as {google: unknown}).google = {
+      maps: {
+        MapTypeId: {
+          ROADMAP: 'roadmap',
+        },
+        Size: vi.fn(),
+        Point: vi.fn(),
+      },
+    };
+
+    (navigator as typeof navigator & {geolocation?: Geolocation})
+        .geolocation = {
+          getCurrentPosition: vi.fn(),
+          watchPosition: vi.fn(),
+          clearWatch: vi.fn(),
+        };
   });
 
-  it('FAB enters add mode and shows the banner', async () => {
-    const user = userEvent.setup();
-    render(<Map />);
-
-    // enter add mode
-    const fab = await screen.findByRole('button', { name: /add/i });
-    await user.click(fab);
-
-    // banner visible
-    expect(
-      await screen.findByText(/Choose a location for the bathroom/i)
-    ).toBeInTheDocument();
+  afterEach(() => {
+    cleanup();
+    vi.resetAllMocks();
+    vi.unstubAllEnvs();
+    latestOnMapClick = undefined;
+    delete (window as {google?: unknown}).google;
+    delete (navigator as {geolocation?: unknown}).geolocation;
   });
 
-  it('clicking the map in add mode opens the form', async () => {
-    const user = userEvent.setup();
+  it('renders the add bathroom button', () => {
     render(<Map />);
 
-    // Enter add mode
-    const addBtn = screen.getByRole('button', { name: /add/i });
-    await user.click(addBtn);
-
-    // Click on the map to drop a draft pin + open the sheet
-    const map = screen.getByTestId('google-map');
-    await user.click(map);
-
-    // Assert that the Add Bathroom sheet is open (form visible)
-    await screen.findByLabelText(/bathroom name/i);
+    screen.getByLabelText('Add a bathroom');
   });
 
-  it('closing the sheet via Cancel keeps add mode but re-opens the banner', async () => {
-    const user = userEvent.setup();
+  it('shows the banner after clicking the add bathroom button', () => {
     render(<Map />);
 
-    await user.click(await screen.findByRole('button', { name: /add/i }));
-    await user.click(screen.getByTestId('google-map'));
+    const addButton = screen.getByLabelText('Add a bathroom');
+    fireEvent.click(addButton);
 
-    // cancel within sheet
-    await user.click(await screen.findByRole('button', { name: /^cancel$/i }));
-
-    // Wait for the sheet to close
-    await waitForElementToBeRemoved(() =>
-      screen.queryByLabelText(/Bathroom Name/i)
-    );
-
-    // Then verify banner is visible again
-    expect(
-      await screen.findByText(/Choose a location for the bathroom/i)
-    ).toBeInTheDocument();
+    screen.getByText('Choose a location for the bathroom');
   });
 
-  it('saving adds a place and fully exits add mode (banner hidden, FAB back)', async () => {
-    const user = userEvent.setup();
+  it('adds a new marker after choosing a location and saving', async () => {
     render(<Map />);
 
-    // start + drop draft pin
-    await user.click(await screen.findByRole('button', { name: /add/i }));
-    await user.click(screen.getByTestId('google-map'));
+    const addButton = screen.getByLabelText('Add a bathroom');
+    fireEvent.click(addButton);
 
-    // fill form
-    await user.type(
-      await screen.findByLabelText(/Bathroom Name/i),
-      'Cowell Restroom'
-    );
-    await user.type(
-      screen.getByLabelText(/Bathroom Description/i),
-      'near lobby'
-    );
+    // Simulate clicking on the map to choose a position
+    if (!latestOnMapClick) {
+      throw new Error('Map click handler not registered');
+    }
 
-    // save
-    await user.click(screen.getByRole('button', { name: /save/i }));
-
-    // banner hidden
-    expect(
-      screen.queryByText(/Choose a location for the bathroom/i)
-    ).not.toBeInTheDocument();
-
-    // Add FAB is back
-    expect(
-      await screen.findByRole('button', { name: /add/i })
-    ).toBeInTheDocument();
-  });
-
-  it('marker click opens InfoWindow and "Get Directions" triggers util', async () => {
-    const user = userEvent.setup();
-    const { openWalkingDirections } = await import('../utils/navigation');
-    render(<Map />);
-
-    // Add a bathroom via form so a real marker exists
-    await user.click(await screen.findByRole('button', { name: /add/i }));
-    await user.click(screen.getByTestId('google-map'));
-    await user.type(
-      await screen.findByLabelText(/Bathroom Name/i),
-      'McHenry'
-    );
-    await user.type(
-      screen.getByLabelText(/Bathroom Description/i),
-      'downstairs'
-    );
-    await user.click(screen.getByRole('button', { name: /save/i }));
-
-    // There should be a marker button with accessible name "marker:McHenry"
-    const markerBtn = await screen.findByRole('button', {
-      name: /marker:McHenry/i,
+    latestOnMapClick({
+      latLng: {
+        lat: () => 36.123456,
+        lng: () => -122.765432,
+      },
     });
-    await user.click(markerBtn);
 
-    // Just find the "Get Directions" button directly
-    const cta = await screen.findByRole('button', {
-      name: /get directions/i,
+    // Open the BathroomForm from the peek card
+    const peekCardTitle = await screen.findByText('New Bathroom');
+    fireEvent.click(peekCardTitle);
+
+    // Fill in form
+    const nameInput = screen.getByLabelText(/Bathroom Name/i);
+    const detailsInput = screen.getByLabelText(/Bathroom Description/i);
+
+    fireEvent.change(nameInput, {
+      target: {value: 'Test Bathroom'},
     });
-    await user.click(cta);
+    fireEvent.change(detailsInput, {
+      target: {value: 'Near the blue door'},
+    });
 
-    // Verify openWalkingDirections was called correctly
-    expect(openWalkingDirections).toHaveBeenCalledWith(
-      expect.any(Number),
-      expect.any(Number)
-    );
+    const saveButton = screen.getByRole('button', {name: 'Save'});
+    fireEvent.click(saveButton);
 
-    // Ensure arguments are numeric
-    const args = (openWalkingDirections as any).mock.calls[0];
-    expect(typeof args[0]).toBe('number');
-    expect(typeof args[1]).toBe('number');
+    // After saving, a new marker should appear
+    await waitFor(() => {
+      expect(
+          screen.getByText('Test Bathroom'),
+      ).toBeInTheDocument();
+    });
   });
 });

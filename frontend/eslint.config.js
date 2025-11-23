@@ -5,6 +5,7 @@ delete google.rules['require-jsdoc'];
 import jsdoc from 'eslint-plugin-jsdoc';
 import globals from 'globals';
 import js from '@eslint/js';
+import ts from 'typescript-eslint';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 delete reactHooks.configs.recommended.rules['react-hooks/exhaustive-deps'];
@@ -13,6 +14,7 @@ import {fixupPluginRules} from '@eslint/compat';
 export default [
   google,
   js.configs.recommended,
+  ...ts.configs.recommended,
   jsdoc.configs['flat/recommended'],
   react.configs.flat.recommended,
   // react.configs.flat.all,
@@ -25,8 +27,8 @@ export default [
     },
   },
   {
-    files: ['src/**/*.jsx'],
-    ignores: ['coverage/'],
+    files: ['src/**/*.tsx'],
+    ignores: ['coverage/**'],
     plugins: {
       jsdoc,
       react,
@@ -39,7 +41,7 @@ export default [
       ...react.configs.flat.recommended.languageOptions,
       parserOptions: {
         ecmaFeatures: {
-          jsx: true,
+          tsx: true,
         },
       },
       ecmaVersion: 2024,

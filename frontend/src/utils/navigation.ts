@@ -1,6 +1,11 @@
-// Opens Google Maps with walking directions to the specified latitude and longitude
-// Opens app if on mobile device
-// Otherwise opens maps in new tab
+/**
+ * Opens Google Maps with walking directions to the
+ * specified latitude and longitude
+ * Opens app if on mobile device
+ * Otherwise opens maps in new tab
+ * @param {number} lat latitute to get directions to
+ * @param {number} lng logitute to get directions to
+ */
 export function openWalkingDirections(lat: number, lng: number) {
   const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
   window.open(url, '_blank');

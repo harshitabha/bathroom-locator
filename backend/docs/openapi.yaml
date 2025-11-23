@@ -49,8 +49,6 @@ paths:
                   $ref: '#/components/schemas/Bathroom'
         400:
           description: Invalid parameters
-        404:
-          description: No results
     
     post:
       description: Add a new bathroom
@@ -69,6 +67,67 @@ paths:
               schema:
                 $ref: '#/components/schemas/Bathroom'
 
+  /bathroom/updates:
+    get:
+      summary: Get new bathroom updates (long polling)
+      description: Returns newly added bathrooms for clients waiting for updates
+      responses:
+        '200':
+          description: Array of new bathrooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Bathroom'
+  /user/likes:
+    get:
+      summary: Get a user's liked bathrooms
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Successfully got user's liked bathrooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: uuid
+    post:
+      description: Add a like to a bathroom
+      requestBody:
+        description: User Id and Bathroom Id
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLike'
+      responses:
+        201:
+          description: Like added successfully
+        400:
+          description: Bad request
+    delete:
+      description: Unlike a bathroom
+      requestBody:
+        description: User Id and Bathroom Id
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLike'
+      responses:
+        200:
+          description: Removed like successfully
+        404:
+          description: Bathroom not found
+      
 components:
   schemas:
     BathroomBase:
@@ -92,12 +151,21 @@ components:
           required:
             - lat
             - lng
-        details:
+        description:
           type: string
+        num_stalls:
+          type: number
+        amenities:
+          $ref: '#/components/schemas/Amenities'
+        likes:
+          type: integer
+          default: 0
       required:
         - name
         - position
-        - details
+        - description
+        - num_stalls
+        - amenities
    
     NewBathroom:
       allOf:
@@ -115,3 +183,33 @@ components:
             - id
         - $ref: '#/components/schemas/BathroomBase'
       description: "Full bathroom resource returned by the API."
+    
+    Amenities:
+      type: object
+      properties:
+        toilet_paper: { type: boolean }
+        soap: { type: boolean }
+        paper_towel: { type: boolean }
+        hand_dryer: { type: boolean }
+        menstrual_products: { type: boolean }
+        mirror: { type: boolean }
+      required:
+        - toilet_paper
+        - soap
+        - paper_towel
+        - hand_dryer
+        - menstrual_products
+        - mirror
+  
+    UserLike:
+      type : object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        bathroomId:
+          type: string
+          format: uuid
+      required:
+        - userId
+        - bathroomId
