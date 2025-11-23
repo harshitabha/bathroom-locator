@@ -1,13 +1,14 @@
-// filter state details of pin instead of using an API call to the backend
-
 import React, {useState, useEffect} from 'react';
 import {
   Box,
   Button,
-  Menu,
+  Popper,
+  Paper,
+  List,
   MenuItem,
   ListItemIcon,
   ListItemText,
+  ClickAwayListener,
   Typography,
 } from '@mui/material';
 import {useTheme, darken} from '@mui/material/styles';
@@ -73,15 +74,6 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
     }
   }, [isActive, anchorEl]);
 
-  const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (anchorEl && isActive) {
-      setAnchorEl(null);
-      onRequestClose?.();
-    } else {
-      onActivated();
-      setAnchorEl(event.currentTarget);
-    }
-  };
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -98,6 +90,18 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
 
   const labelText =
     selected.length === 0 ? label : `${selected.length} Selected`;
+
+  const handleButtonClick = (
+      event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    if (open && isActive) {
+      setAnchorEl(null);
+      onRequestClose?.();
+    } else {
+      onActivated();
+      setAnchorEl(event.currentTarget);
+    }
+  };
 
   return (
     <>
@@ -116,9 +120,9 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
         sx={{
           'textTransform': 'none',
           'borderRadius': 3,
-          'px': 1.5,
-          'py': 0.5,
-          'mr': 1,
+          'px': 1,
+          'py': 0.25,
+          'mr': 0.75,
           'bgcolor': 'background.paper',
           'color': 'text.primary',
           'boxShadow': btnShadow,
@@ -127,66 +131,81 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
           '&:active': {bgcolor: activeBg, boxShadow: btnShadow},
         }}
       >
-        <Typography variant='body2' sx={{color: 'inherit', fontWeight: 500}}>
+        <Typography
+          variant='caption'
+          sx={{
+            color: 'inherit',
+            fontWeight: 500,
+            fontSize: 12,
+            lineHeight: 1,
+            whiteSpace: 'nowrap',
+          }}
+        >
           {labelText}
         </Typography>
       </Button>
 
-      <Menu
-        anchorEl={anchorEl}
+      <Popper
         open={open}
-        onClose={handleClose}
-        anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
-        transformOrigin={{vertical: 'top', horizontal: 'left'}}
-        slotProps={{
-          paper: {
-            sx: {
+        anchorEl={anchorEl}
+        placement='bottom-start'
+        modifiers={[
+          {name: 'offset', options: {offset: [0, 6]}},
+        ]}
+        sx={{zIndex: 80}}
+      >
+        <ClickAwayListener
+          onClickAway={(event: MouseEvent | TouchEvent) => {
+            if (anchorEl && anchorEl.contains(event.target as Node)) {
+              return;
+            }
+            handleClose();
+          }}
+        >
+          <Paper
+            sx={{
               'bgcolor': 'background.paper',
               'color': 'text.primary',
               'borderRadius': 3,
               'boxShadow': theme.shadows[4],
-              'mt': 0.5,
               'minWidth': 180,
-            },
-          },
-          list: {
-            sx: {
-              'py': 0.5,
-            },
-          },
-        }}
-      >
-        {options.map((option) => (
-          <MenuItem
-            key={option}
-            onClick={() => handleToggle(option)}
-            dense
-            selected={selected.includes(option)}
-            sx={{
-              'px': 1.5,
-              'py': 1.25,
-              '&.Mui-selected': {
-                bgcolor: darken(theme.palette.background.paper, 0.06),
-              },
-              '&.Mui-selected:hover': {
-                bgcolor: darken(theme.palette.background.paper, 0.1),
-              },
             }}
           >
-            <ListItemIcon sx={{minWidth: 28}}>
-              {selected.includes(option) && (
-                <CheckIcon fontSize='small' />
-              )}
-            </ListItemIcon>
-            <ListItemText
-              primary={option}
-              slotProps={{
-                primary: {sx: {fontWeight: 500}},
-              }}
-            />
-          </MenuItem>
-        ))}
-      </Menu>
+            <List dense sx={{py: 0.5}}>
+              {options.map((option) => (
+                <MenuItem
+                  key={option}
+                  onClick={() => handleToggle(option)}
+                  dense
+                  selected={selected.includes(option)}
+                  sx={{
+                    'px': 1.5,
+                    'py': 1.25,
+                    '&.Mui-selected': {
+                      bgcolor: darken(theme.palette.background.paper, 0.06),
+                    },
+                    '&.Mui-selected:hover': {
+                      bgcolor: darken(theme.palette.background.paper, 0.1),
+                    },
+                  }}
+                >
+                  <ListItemIcon sx={{minWidth: 28}}>
+                    {selected.includes(option) && (
+                      <CheckIcon fontSize='small' />
+                    )}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={option}
+                    slotProps={{
+                      primary: {sx: {fontWeight: 500}},
+                    }}
+                  />
+                </MenuItem>
+              ))}
+            </List>
+          </Paper>
+        </ClickAwayListener>
+      </Popper>
     </>
   );
 };
@@ -221,8 +240,8 @@ const MapFilters: React.FC<MapFiltersProps> = ({
         position: 'fixed',
         left: 8,
         right: 8,
-        top: 8,
-        zIndex: (t) => t.zIndex.modal + 1,
+        top: 55,
+        zIndex: 90,
         display: 'flex',
         justifyContent: 'flex-start',
         pointerEvents: 'none',
@@ -236,7 +255,7 @@ const MapFilters: React.FC<MapFiltersProps> = ({
           maxWidth: 600,
           width: 'auto',
           overflowX: 'auto',
-          px: 1,
+          px: 0,
           py: 0.5,
           pointerEvents: 'auto',
         }}

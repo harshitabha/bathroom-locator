@@ -15,23 +15,31 @@ paths:
       parameters:
         - in: query
           name: minLng
-          required: false
-          schema: { type: number }
+          required: true
+          schema:
+            type: number
+            format: double
         - in: query
           name: minLat
-          required: false
-          schema: { type: number }
+          required: true
+          schema:
+            type: number
+            format: double
         - in: query
           name: maxLng
-          required: false
-          schema: { type: number }
+          required: true
+          schema:
+            type: number
+            format: double
         - in: query
           name: maxLat
-          required: false
-          schema: { type: number }
+          required: true
+          schema:
+            type: number
+            format: double
         - in: query
           name: limit
-          required: false
+          required: true
           schema:
             type: integer
             minimum: 1
@@ -46,10 +54,10 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Bathroom'
+                  $ref: "#/components/schemas/Bathroom"
         400:
           description: Invalid parameters
-    
+
     post:
       description: Add a new bathroom
       requestBody:
@@ -58,28 +66,47 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewBathroom'
+              $ref: "#/components/schemas/NewBathroom"
       responses:
         201:
           description: Bathroom successfully added
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Bathroom'
+                $ref: "#/components/schemas/Bathroom"
+        400:
+          description: Unexpected properties
+
+    put:
+      description: Edit a bathroom
+      requestBody:
+        description: The updated bathroom details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Bathroom"
+      responses:
+        204:
+          description: Bathroom successfully updated
+        400:
+          description: Bad request
+        404:
+          description: Bathroom not found
 
   /bathroom/updates:
     get:
       summary: Get new bathroom updates (long polling)
       description: Returns newly added bathrooms for clients waiting for updates
       responses:
-        '200':
+        200:
           description: Array of new bathrooms
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Bathroom'
+                  $ref: "#/components/schemas/Bathroom"
   /user/likes:
     get:
       summary: Get a user's liked bathrooms
@@ -107,7 +134,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserLike'
+              $ref: "#/components/schemas/UserLike"
       responses:
         201:
           description: Like added successfully
@@ -121,13 +148,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserLike'
+              $ref: "#/components/schemas/UserLike"
       responses:
         200:
           description: Removed like successfully
         404:
           description: Bathroom not found
-      
+
 components:
   schemas:
     BathroomBase:
@@ -155,8 +182,15 @@ components:
           type: string
         num_stalls:
           type: number
+        gender:
+          $ref: "#/components/schemas/Gender"
         amenities:
-          $ref: '#/components/schemas/Amenities'
+          $ref: "#/components/schemas/Amenities"
+        cleanliness:
+          type: integer
+          minimum: 0
+          maximum: 5
+          description: Cleanliness rating from 1 (low) to 5 (high). 0 means unknown.
         likes:
           type: integer
           default: 0
@@ -164,12 +198,10 @@ components:
         - name
         - position
         - description
-        - num_stalls
-        - amenities
-   
+
     NewBathroom:
       allOf:
-        - $ref: '#/components/schemas/BathroomBase'
+        - $ref: "#/components/schemas/BathroomBase"
       description: "Schema for creating a new bathroom (no id)."
 
     Bathroom:
@@ -181,18 +213,38 @@ components:
               format: uuid
           required:
             - id
-        - $ref: '#/components/schemas/BathroomBase'
+            - num_stalls
+            - gender
+            - amenities
+            - likes
+        - $ref: "#/components/schemas/BathroomBase"
       description: "Full bathroom resource returned by the API."
-    
+
+    Gender:
+      type: object
+      properties:
+        female:
+          type: boolean
+        male:
+          type: boolean
+        gender_neutral:
+          type: boolean
+
     Amenities:
       type: object
       properties:
-        toilet_paper: { type: boolean }
-        soap: { type: boolean }
-        paper_towel: { type: boolean }
-        hand_dryer: { type: boolean }
-        menstrual_products: { type: boolean }
-        mirror: { type: boolean }
+        toilet_paper:
+          type: boolean
+        soap:
+          type: boolean
+        paper_towel:
+          type: boolean
+        hand_dryer:
+          type: boolean
+        menstrual_products:
+          type: boolean
+        mirror:
+          type: boolean
       required:
         - toilet_paper
         - soap
@@ -200,9 +252,9 @@ components:
         - hand_dryer
         - menstrual_products
         - mirror
-  
+
     UserLike:
-      type : object
+      type: object
       properties:
         userId:
           type: string

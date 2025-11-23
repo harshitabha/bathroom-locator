@@ -1,24 +1,19 @@
-import './Map.css';
-import {useTheme} from '@mui/material/styles';
-import React, {
-  useCallback,
+import {
   useEffect,
   useMemo,
-  useRef,
   useState,
-} from 'react';
+  useCallback,
+  useRef} from 'react';
 import {
   GoogleMap,
   Marker,
   InfoWindow,
   useLoadScript,
 } from '@react-google-maps/api';
+import './Map.css';
 import {openWalkingDirections} from '../utils/navigation';
-import AddBathroom from './BathroomForm';
-import AddBathroomPrompt from './AddBathroomPrompt';
 import Button from '@mui/material/Button';
-import Fab from '@mui/material/Fab';
-import AddIcon from '@mui/icons-material/Add';
+import MapHeader from './MapHeader';
 import MapFilters, {
   type GenderFilter,
   type StallsFilter,
@@ -27,10 +22,10 @@ import MapFilters, {
 } from './MapFilters';
 
 type Place = {
-  id: string;
+  id: number;
   name: string;
   position: google.maps.LatLngLiteral;
-  details?: string;
+  description?: string;
   numStalls?: number;
   amenities?: {
     toilet_paper?: boolean;
@@ -40,74 +35,31 @@ type Place = {
     menstrual_products?: boolean;
     mirror?: boolean;
   };
-  likes?: number;
+  gender?: {
+    female?: boolean;
+    male?: boolean;
+    gender_neutral?: boolean;
+  };
+  cleanliness?: number;
 };
 
-/**
- * Map component that loads the API key
- * @returns {object} JSX for the map wrapper
- */
-export default function Map() {
-  const apiKey =
-    import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
-
-  if (!apiKey) {
-    return <p>Missing VITE_GOOGLE_MAPS_API_KEY</p>;
-  }
-
+const Map = () => {
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
+  if (!apiKey) return <p>Missing VITE_GOOGLE_MAPS_API_KEY</p>;
+  // makes sure all react hooks are called before returning
   return <MapInner apiKey={apiKey} />;
-}
-
-type AddBathroomButtonProps = {
-  onClick: () => void;
 };
-
-/**
- * Action button to start the add bathroom flow
- * @param {{ onClick: () => void }} props Component props
- * @returns {import('react').ReactElement} Action button element
- */
-function AddBathroomButton(props: AddBathroomButtonProps) {
-  const {onClick} = props;
-  return (
-    <Fab
-      color="primary"
-      aria-label="Add a bathroom"
-      onClick={onClick}
-      sx={{
-        'position': 'fixed',
-        'right': 24,
-        'bottom': 24,
-        'zIndex': (t) => t.zIndex.modal + 1,
-        'bgcolor': 'primary.main',
-        'color': 'common.white',
-        '&:hover': {bgcolor: 'primary.dark'},
-      }}
-    >
-      <AddIcon />
-    </Fab>
-  );
-}
+export default Map;
 
 /**
  * Renders the actual content of the map
  * @param {string} apiKey api key for the map
- * @returns {object} JSX component for the map
+ * @returns {object} JSX compoent for the inner map content
  */
 function MapInner({apiKey}: { apiKey: string }) {
-  const theme = useTheme();
-  const [places, setPlaces] = useState<Place[]>([]);
+  const [places, setPlaces] = useState<Place[]>([]); // bathroom info
+  // tracks which pin is selected (which info window to show)
   const [selected, setSelected] = useState<Place | null>(null);
-  const [addMode, setAddMode] = useState(false);
-  const [addOpen, setAddOpen] = useState(false);
-  const [bannerOpen, setBannerOpen] = useState(false);
-  const [draftPosition, setDraftPosition] =
-    useState<google.maps.LatLngLiteral | null>(null);
-  const [formName, setFormName] = useState('');
-  const [formDetails, setFormDetails] = useState('');
-  const [resetToken, setResetToken] = useState(0);
-  const startYRef = useRef<number | null>(null);
-  const draggingRef = useRef(false);
   const [selectedGenders, setSelectedGenders] = useState<GenderFilter[]>([]);
   const [selectedStalls, setSelectedStalls] = useState<StallsFilter[]>([]);
   const [selectedAmenities, setSelectedAmenities] =
@@ -115,50 +67,13 @@ function MapInner({apiKey}: { apiKey: string }) {
   const [selectedCleanliness, setSelectedCleanliness] =
     useState<CleanlinessFilter[]>([]);
 
-  const onPeekTouchStart: React.TouchEventHandler<HTMLDivElement> = (e) => {
-    e.stopPropagation();
-    startYRef.current = e.touches[0].clientY;
-    draggingRef.current = true;
-  };
-
-  const onPeekTouchEnd: React.TouchEventHandler<HTMLDivElement> = (e) => {
-    e.stopPropagation();
-    if (!draggingRef.current || startYRef.current == null) return;
-    const dy = startYRef.current - e.changedTouches[0].clientY;
-    if (dy > 20) {
-      setAddOpen(true);
-      setBannerOpen(false);
-    }
-    startYRef.current = null;
-    draggingRef.current = false;
-  };
-
-  const onPeekMouseDown: React.MouseEventHandler<HTMLDivElement> = (e) => {
-    e.stopPropagation();
-    startYRef.current = e.clientY;
-    draggingRef.current = true;
-    const onUp = (ev: MouseEvent) => {
-      ev.stopPropagation?.();
-      if (draggingRef.current && startYRef.current != null) {
-        const dy = startYRef.current - ev.clientY;
-        if (dy > 20) {
-          setAddOpen(true);
-          setBannerOpen(false);
-        }
-      }
-      startYRef.current = null;
-      draggingRef.current = false;
-      window.removeEventListener('mouseup', onUp);
-    };
-    window.addEventListener('mouseup', onUp);
-  };
-
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
   const onMapLoad = (map: google.maps.Map) => {
     mapRef.current = map;
   };
 
+  //
   const idleTimer = useRef<number | null>(null);
 
   // load map using api key
@@ -166,40 +81,8 @@ function MapInner({apiKey}: { apiKey: string }) {
     googleMapsApiKey: apiKey,
   });
 
-  const pinIcon = React.useMemo(() => {
-    if (!isLoaded || !window.google) return null;
-    const g = window.google;
-    const pinColor = theme.palette.secondary.main;
-    const innerColor = theme.palette.common.white;
-    return {
-      url:
-        'data:image/svg+xml;charset=UTF-8,' +
-        encodeURIComponent(`
-          <svg
-            width="30"
-            height="45"
-            viewBox="0 0 30 45"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M15 0C7 0 0 7 0 15c0 11.25 15 30 15 30
-              s15-18.75 15-30C30 7 23 0 15 0z"
-              fill="${pinColor}"
-            />
-            <circle
-              cx="15"
-              cy="15"
-              r="6"
-              fill="${innerColor}"
-            />
-          </svg>
-        `),
-      scaledSize: new g.maps.Size(20, 30),
-      anchor: new g.maps.Point(10, 30),
-    } as google.maps.Icon;
-  }, [isLoaded, theme]);
-
-  // default center when user does not allow location (in santa cruz)
+  // default center coords when user doesn't provide location
+  // (somewhere in santa cruz)
   const defaultCenter = useMemo<google.maps.LatLngLiteral>(
       () => ({lat: 36.99034408117155, lng: -122.05891223939057}),
       [],
@@ -227,49 +110,19 @@ function MapInner({apiKey}: { apiKey: string }) {
         },
         {
           enableHighAccuracy: true,
-          timeout: 10_000,
-          maximumAge: 60_000,
+          timeout: 10_000, // times out after 10s
+          maximumAge: 60_000, // saves location for 60s in browser cache
         },
     );
   }, []);
 
-  // center map on user if location is given, else default in santa cruz
+  // center map on user if location is given, else default on santa cruz
   const center = userLocation ?? defaultCenter;
 
-  // close info window when clicking off. in add state, click drops draft pin
-  const handleMapClick = useCallback(
-      (e?: google.maps.MapMouseEvent) => {
-        setSelected(null);
-        if (addMode && e?.latLng) {
-          setDraftPosition({
-            lat: e.latLng.lat(),
-            lng: e.latLng.lng(),
-          });
-          setAddOpen(true);
-          setBannerOpen(false);
-        }
-      },
-      [addMode],
-  );
+  // close info window when clicking off
+  const handleMapClick = useCallback(() => setSelected(null), []);
 
-  const cancelAddFlow = useCallback(() => {
-    setAddOpen(false);
-    setBannerOpen(false);
-    setAddMode(false);
-    setDraftPosition(null);
-    setFormName('');
-    setFormDetails('');
-  }, []);
-
-  const handleAddButtonClick = useCallback(() => {
-    setAddMode(true);
-    setBannerOpen(true);
-    setSelected(null);
-    setAddOpen(false);
-    setDraftPosition(null);
-  }, [setAddMode, setBannerOpen, setSelected, setAddOpen, setDraftPosition]);
-
-  // fetch bathroom pins within the current map view
+  // fetch bathroom pins within the current map view + some padding
   const fetchVisiblePins = useCallback(async () => {
     const map = mapRef.current;
     if (!map) return;
@@ -279,72 +132,47 @@ function MapInner({apiKey}: { apiKey: string }) {
 
     const ne = bounds.getNorthEast();
     const sw = bounds.getSouthWest();
-    const pad = 0.1;
+
+    // small padding so tiny movements dont refetch
+    const pad = 0.1; // about 5 to 7 miles
     const minLng = sw.lng() - pad;
     const minLat = sw.lat() - pad;
     const maxLng = ne.lng() + pad;
     const maxLat = ne.lat() + pad;
 
-    const url =
-      `http://localhost:3000/bathroom?minLng=${minLng}` +
-      `&minLat=${minLat}&maxLng=${maxLng}&maxLat=${maxLat}`;
-
     try {
-      const res = await fetch(url);
-
-      if (!res.ok) {
-        if (res.status === 404) {
-          setPlaces([]);
-          return;
-        }
-        console.error('Error fetching bathrooms:', res.status);
-        return;
-      }
-
-      const bathroomData = await res.json();
-
-      if (!Array.isArray(bathroomData)) {
-        console.error('Unexpected bathrooms payload:', bathroomData);
-        setPlaces([]);
-        return;
-      }
-
-      type BathroomApi = {
-        id: string;
-        name: string;
-        description?: string;
-        position: google.maps.LatLngLiteral;
-        num_stalls?: number;
-        amenities?: {
-          toilet_paper?: boolean;
-          soap?: boolean;
-          paper_towel?: boolean;
-          hand_dryer?: boolean;
-          menstrual_products?: boolean;
-          mirror?: boolean;
-        };
-        likes?: number;
-      };
-
-      const parsedBathroomData: Place[] = (bathroomData as BathroomApi[]).map(
-          (bathroom) => ({
-            id: String(bathroom.id),
-            name: bathroom.name,
-            position: bathroom.position,
-            details: bathroom.description ?? '',
-            numStalls: bathroom.num_stalls,
-            amenities: bathroom.amenities,
-            likes: bathroom.likes,
-          }),
+      const res = await fetch(
+          `http://localhost:3000/bathroom?minLng=${minLng}&minLat=${minLat}&maxLng=${maxLng}&maxLat=${maxLat}`,
       );
 
-      setPlaces(parsedBathroomData);
+      if (res.ok) {
+        const bathroomData = await res.json();
+
+        // ensure data is of correct type
+        const parsedBathroomData = (bathroomData as Place[])
+            .map((bathroom) => ({
+              id: bathroom.id,
+              name: bathroom.name,
+              position: bathroom.position,
+              description: bathroom.description,
+              numStalls: (bathroom as Place).numStalls,
+              amenities: (bathroom as Place).amenities,
+              gender: (bathroom as Place).gender,
+              cleanliness: (bathroom as Place).cleanliness,
+            }));
+
+        setPlaces(parsedBathroomData);
+      } else if (res.status === 404) {
+        setPlaces([]); // handle empty response
+      } else {
+        console.error('Error fetching bathrooms:', res.status);
+      }
     } catch (error) {
       console.error('Error fetching bathrooms:', error);
     }
   }, []);
 
-  // fetches pins. If user moves before, reset timer
+  // fetches pins after 250ms of idling. If user moves before, reset timer
   const clearIdleTimer = useCallback(() => {
     if (idleTimer.current) {
       window.clearTimeout(idleTimer.current);
@@ -365,12 +193,133 @@ function MapInner({apiKey}: { apiKey: string }) {
     clearIdleTimer();
   }, [clearIdleTimer]);
 
+  // for long polling to get real-time updates
+  useEffect(( ) => {
+    let cancelled = false;
+
+    /**
+     * Polls the new bathrooms if they are added
+     */
+    async function pollNewBathrooms() {
+      if (cancelled) return;
+
+      try {
+        const res = await fetch('http://localhost:3000/bathroom/updates');
+        if (!res.ok) {
+          console.error('Polling error:', res.status);
+        }
+
+        const newBathrooms: Place[] = await res.json();
+
+        if (newBathrooms.length > 0 && mapRef.current) {
+          const bounds = mapRef.current.getBounds();
+          if (bounds) {
+            // filter new bathrooms to only those within current map bounds
+            const visibleNewBathrooms = newBathrooms.filter((bathroom) => {
+              const pos = new google.maps.LatLng(
+                  bathroom.position.lat,
+                  bathroom.position.lng,
+              );
+              return bounds.contains(pos);
+            });
+            if (visibleNewBathrooms.length > 0) {
+              setPlaces((prevPlaces) => [
+                ...prevPlaces,
+                ...visibleNewBathrooms.filter((nb) =>
+                  !prevPlaces.some((p) => p.id === nb.id),
+                ),
+              ]);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Polling error:', err);
+        // wait before retrying
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      } finally {
+        if (!cancelled) pollNewBathrooms();
+      }
+    }
+    pollNewBathrooms();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filteredPlaces = useMemo(() => {
+    const genderKeys: Record<
+      GenderFilter,
+      keyof NonNullable<Place['gender']>
+    > = {
+      'Male': 'male',
+      'Female': 'female',
+      'Gender Neutral': 'gender_neutral',
+    };
+
+    const stallsMatch = (s?: number) => {
+      if (!selectedStalls.length) return true;
+      if (!s && s !== 0) return false;
+      const options = new Set(selectedStalls);
+      if (options.has('Private') && s === 1) return true;
+      if (options.has('2') && s === 2) return true;
+      if (options.has('3') && s === 3) return true;
+      if (options.has('4+') && s >= 4) return true;
+      return false;
+    };
+
+    const amenitiesMatch = (a?: Place['amenities']) => {
+      if (!selectedAmenities.length) return true;
+      if (!a) return false;
+      const need: Record<AmenityFilter, boolean> = {
+        'Soap': !!a.soap,
+        'Tissues': !!a.paper_towel,
+        'Menstrual Products': !!a.menstrual_products,
+        'Mirror': !!a.mirror,
+        'Toilet Paper': !!a.toilet_paper,
+        'Hand Dryer': !!a.hand_dryer,
+      };
+      return selectedAmenities.every((k) => need[k]);
+    };
+
+    const genderMatch = (g?: Place['gender']) => {
+      if (!selectedGenders.length) return true;
+      if (!g) return false;
+      return selectedGenders.some((opt) => !!g[genderKeys[opt]]);
+    };
+
+    const selectedNums = new Set(
+        selectedCleanliness.map((v) => parseInt(v, 10)),
+    );
+
+    const cleanlinessMatch = (c?: number) => {
+      if (!selectedCleanliness.length) return true;
+      const cNum = typeof c === 'number' ? c : parseInt(String(c ?? ''), 10);
+      if (Number.isNaN(cNum)) return false;
+      return selectedNums.has(cNum);
+    };
+
+    const matches = (p: Place) =>
+      genderMatch(p.gender) &&
+      stallsMatch(p.numStalls) &&
+      amenitiesMatch(p.amenities) &&
+      cleanlinessMatch(p.cleanliness);
+
+    return places.filter(matches);
+  }, [
+    places,
+    selectedGenders,
+    selectedStalls,
+    selectedAmenities,
+    selectedCleanliness,
+  ]);
+
   // map loading errors
   if (loadError) return <p>Failed to load Google Maps.</p>;
   if (!isLoaded) return <p>Loading map…</p>;
 
   return (
     <div className="map-align-center">
+      {isLoaded && <MapHeader map={mapRef.current} />}
       <GoogleMap
         onLoad={onMapLoad}
         onIdle={handleIdle}
@@ -381,79 +330,44 @@ function MapInner({apiKey}: { apiKey: string }) {
         zoom={14}
         onClick={handleMapClick}
         options={{
+          // prevents clicking on locations other than pins
           clickableIcons: false,
-          disableDoubleClickZoom: true,
+          disableDoubleClickZoom: true, // prevents accidental zoom
+          // locks map type to simple map
           mapTypeId: google.maps.MapTypeId.ROADMAP,
           disableDefaultUI: true,
         }}
       >
-        {places.map((p) => (
+        {filteredPlaces.map((p) => (
           <Marker
             key={p.id}
-            position={p.position}
-            title={p.name}
-            icon={pinIcon ?? undefined}
+            position={p.position} // position of pin
+            title={p.name} // shows location name when hovering pins
             onClick={() => setSelected(p)}
           />
         ))}
-        {addMode && draftPosition && (
-          <Marker
-            position={draftPosition}
-            icon={pinIcon ?? undefined}
-          />
-        )}
+
         {selected && (
           <InfoWindow
             position={selected.position}
+            // close info window by clicking x
             onCloseClick={() => setSelected(null)}
-            options={{
-              pixelOffset: new google.maps.Size(0, -10),
-              disableAutoPan: false,
-            }}
           >
-            <div
-              className="infowin"
-              style={{
-                backgroundColor: theme.palette.background.paper,
-                color: theme.palette.text.primary,
-              }}
-            >
-              <strong className="infowin-title">
-                {selected.name}
-              </strong>
-              {selected.details && (
-                <p className="infowin-text">
-                  {selected.details}
-                </p>
-              )}
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  marginTop: '6px',
-                }}
+            <div>
+              <strong>{selected.name}</strong>
+              {selected.description && <p>{selected.description}</p>}
+              {/* TODO: add genders, amenenities, and navigate button here */}
+              <Button // Get Directions button
+                variant="contained"
+                color="primary" // default blue unless we manually change it
+                size="small"
+                onClick={() => openWalkingDirections(
+                    selected.position.lat,
+                    selected.position.lng,
+                )}
               >
-                <Button
-                  data-testid="get-directions"
-                  variant="contained"
-                  size="small"
-                  onClick={() =>
-                    openWalkingDirections(
-                        selected.position.lat,
-                        selected.position.lng,
-                    )
-                  }
-                  sx={{
-                    'bgcolor': 'primary.main',
-                    'color': 'common.white',
-                    'fontWeight': 500,
-                    'borderRadius': '8px',
-                    '&:hover': {bgcolor: 'primary.dark'},
-                  }}
-                >
-                  Get Directions
-                </Button>
-              </div>
+                Get Directions
+              </Button>
             </div>
           </InfoWindow>
         )}
@@ -468,56 +382,6 @@ function MapInner({apiKey}: { apiKey: string }) {
         onStallsChange={setSelectedStalls}
         onAmenitiesChange={setSelectedAmenities}
         onCleanlinessChange={setSelectedCleanliness}
-      />
-
-      {!addMode && (
-        <AddBathroomButton onClick={handleAddButtonClick} />
-      )}
-
-      <AddBathroomPrompt
-        bannerOpen={bannerOpen}
-        onCancel={cancelAddFlow}
-        showPeekCard={addMode && !addOpen}
-        onPeekTouchStart={onPeekTouchStart}
-        onPeekTouchEnd={onPeekTouchEnd}
-        onPeekMouseDown={onPeekMouseDown}
-      />
-
-      <AddBathroom
-        open={addOpen}
-        onOpen={() => {
-          setBannerOpen(false);
-        }}
-        onClose={() => {
-          setAddOpen(false);
-          setBannerOpen(true);
-          setDraftPosition(null);
-        }}
-        onCancelFull={cancelAddFlow}
-        position={draftPosition}
-        name={formName}
-        details={formDetails}
-        onNameChange={setFormName}
-        onDetailsChange={setFormDetails}
-        resetToken={resetToken}
-        onSubmit={async (data) => {
-          setPlaces((prev) => [
-            ...prev,
-            {
-              id: String(Date.now()),
-              name: data.name,
-              position: data.position,
-              details: data.details,
-            },
-          ]);
-          setAddOpen(false);
-          setAddMode(false);
-          setBannerOpen(false);
-          setFormName('');
-          setFormDetails('');
-          setDraftPosition(null);
-          setResetToken((t) => t + 1);
-        }}
       />
     </div>
   );
