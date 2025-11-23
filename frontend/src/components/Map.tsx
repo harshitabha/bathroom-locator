@@ -13,13 +13,27 @@ import {
 import './Map.css';
 import {openWalkingDirections} from '../utils/navigation';
 import Button from '@mui/material/Button';
+import AddBathroomButton from './AddBathroomButton';
+import AddBathroomPeekCard from './AddBathroomPeekCard';
+import AddBathroomForm from './AddBathroomForm';
+import {usePinIcon} from '../utils/usePinIcon';
 import MapHeader from './MapHeader';
 
 type Place = {
-  id: number; // id
-  name: string; // name of location
-  position: google.maps.LatLngLiteral; // position on map
-  description?: string; // description if needed
+  id: string;
+  name: string;
+  position: google.maps.LatLngLiteral;
+  description?: string;
+  numStalls?: number;
+  amenities?: {
+    toilet_paper?: boolean;
+    soap?: boolean;
+    paper_towel?: boolean;
+    hand_dryer?: boolean;
+    menstrual_products?: boolean;
+    mirror?: boolean;
+  };
+  likes?: number;
 };
 
 const Map = () => {
@@ -39,6 +53,15 @@ function MapInner({apiKey}: { apiKey: string }) {
   const [places, setPlaces] = useState<Place[]>([]); // bathroom info
   // tracks which pin is selected (which info window to show)
   const [selected, setSelected] = useState<Place | null>(null);
+  // select where to add new pin
+  const [addMode, setAddMode] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [bannerOpen, setBannerOpen] = useState(false);
+  const [draftPosition, setDraftPosition] =
+    useState<google.maps.LatLngLiteral | null>(null);
+  const idleTimer = useRef<number | null>(null);
+  const [formName, setFormName] = useState('');
+  const [formDescription, setFormDescription] = useState('');
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -46,13 +69,12 @@ function MapInner({apiKey}: { apiKey: string }) {
     mapRef.current = map;
   };
 
-  //
-  const idleTimer = useRef<number | null>(null);
-
   // load map using api key
   const {isLoaded, loadError} = useLoadScript({
     googleMapsApiKey: apiKey,
   });
+
+  const pinIcon = usePinIcon(isLoaded);
 
   // default center coords when user doesn't provide location
   // (somewhere in santa cruz)
@@ -92,8 +114,43 @@ function MapInner({apiKey}: { apiKey: string }) {
   // center map on user if location is given, else default on santa cruz
   const center = userLocation ?? defaultCenter;
 
-  // close info window when clicking off
-  const handleMapClick = useCallback(() => setSelected(null), []);
+  const handleAddButtonClick = useCallback(() => {
+    setAddMode(true);
+    setBannerOpen(true);
+    setSelected(null);
+    setAddOpen(false);
+    setDraftPosition(null);
+  }, [setAddMode, setBannerOpen, setSelected, setAddOpen, setDraftPosition]);
+
+  // close info window when clicking off. in add mode, click drops draft pin
+  const handleMapClick = useCallback(
+      (e?: google.maps.MapMouseEvent) => {
+        setSelected(null);
+        if (addMode && e?.latLng) {
+          setDraftPosition({
+            lat: e.latLng.lat(),
+            lng: e.latLng.lng(),
+          });
+          setAddOpen(true);
+          setBannerOpen(false);
+        }
+      },
+      [addMode],
+  );
+
+  const cancelAddFlow = useCallback(() => {
+    setAddOpen(false);
+    setBannerOpen(false);
+    setAddMode(false);
+    setDraftPosition(null);
+    setFormName('');
+    setFormDescription('');
+  }, []);
+
+  const handleFormCloseToPrompt = useCallback(() => {
+    setAddOpen(false);
+    setBannerOpen(true);
+  }, []);
 
   // fetch bathroom pins within the current map view + some padding
   const fetchVisiblePins = useCallback(async () => {
@@ -127,7 +184,7 @@ function MapInner({apiKey}: { apiKey: string }) {
               id: bathroom.id,
               name: bathroom.name,
               position: bathroom.position,
-              details: bathroom.description,
+              description: bathroom.description,
             }));
 
         setPlaces(parsedBathroomData);
@@ -221,7 +278,13 @@ function MapInner({apiKey}: { apiKey: string }) {
 
   return (
     <div className="map-align-center">
-      {isLoaded && <MapHeader map={mapRef.current} />}
+      {isLoaded &&
+        <MapHeader
+          map={mapRef.current}
+          bannerOpen={bannerOpen}
+          onCancelBanner={cancelAddFlow}
+        />
+      }
       <GoogleMap
         onLoad={onMapLoad}
         onIdle={handleIdle}
@@ -232,10 +295,8 @@ function MapInner({apiKey}: { apiKey: string }) {
         zoom={14}
         onClick={handleMapClick}
         options={{
-          // prevents clicking on locations other than pins
           clickableIcons: false,
-          disableDoubleClickZoom: true, // prevents accidental zoom
-          // locks map type to simple map
+          disableDoubleClickZoom: true,
           mapTypeId: google.maps.MapTypeId.ROADMAP,
           disableDefaultUI: true,
         }}
@@ -245,9 +306,18 @@ function MapInner({apiKey}: { apiKey: string }) {
             key={p.id}
             position={p.position} // position of pin
             title={p.name} // shows location name when hovering pins
+            icon={pinIcon ?? undefined}
             onClick={() => setSelected(p)}
           />
         ))}
+
+        {/* draft marker */}
+        {addMode && draftPosition && (
+          <Marker
+            position={draftPosition}
+            icon={pinIcon ?? undefined}
+          />
+        )}
 
         {selected && (
           <InfoWindow
@@ -274,6 +344,35 @@ function MapInner({apiKey}: { apiKey: string }) {
           </InfoWindow>
         )}
       </GoogleMap>
+
+      {!addMode && (
+        <AddBathroomButton onClick={handleAddButtonClick} />
+      )}
+
+      <AddBathroomPeekCard
+        showPeekCard={addMode && !addOpen && draftPosition !== null}
+        onExpand={() => {
+          setAddOpen(true);
+          setBannerOpen(false);
+        }}
+      />
+
+      <AddBathroomForm
+        open={addOpen}
+        position={draftPosition}
+        name={formName}
+        description={formDescription}
+        onNameChange={setFormName}
+        onDescriptionChange={setFormDescription}
+        onOpen={() => {
+          setBannerOpen(false);
+        }}
+        onClose={handleFormCloseToPrompt}
+        onCreated={async () => {
+          await fetchVisiblePins();
+          cancelAddFlow();
+        }}
+      />
     </div>
   );
 }
