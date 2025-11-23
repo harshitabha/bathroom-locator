@@ -14,7 +14,6 @@ function AddBathroomButton(props: AddBathroomButtonProps) {
   const {onClick} = props;
   return (
     <Fab
-      color="primary"
       aria-label="Add a bathroom"
       onClick={onClick}
       sx={{

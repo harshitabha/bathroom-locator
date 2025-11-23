@@ -69,11 +69,12 @@ export default function AddBathroomPeekCard(props: AddBathroomPromptProps) {
         >
           <Paper
             elevation={3}
+            aria-label="Expand drawer by dragging"
             onTouchStart={onPeekTouchStart}
             onTouchEnd={onPeekTouchEnd}
             onMouseDown={onPeekMouseDown}
             sx={{
-              bgcolor: (theme) => theme.palette.background.default,
+              bgcolor: 'background.default',
               borderTopLeftRadius: 16,
               borderTopRightRadius: 16,
               px: 2,
@@ -99,7 +100,7 @@ export default function AddBathroomPeekCard(props: AddBathroomPromptProps) {
               fontWeight={600}
               sx={{
                 alignSelf: 'flex-start',
-                color: (theme) => theme.palette.text.primary,
+                color: 'text.primary',
               }}
             >
               New Bathroom

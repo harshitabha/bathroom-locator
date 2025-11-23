@@ -23,7 +23,7 @@ type Place = {
   id: string;
   name: string;
   position: google.maps.LatLngLiteral;
-  details?: string;
+  description?: string;
   numStalls?: number;
   amenities?: {
     toilet_paper?: boolean;
@@ -61,7 +61,7 @@ function MapInner({apiKey}: { apiKey: string }) {
     useState<google.maps.LatLngLiteral | null>(null);
   const idleTimer = useRef<number | null>(null);
   const [formName, setFormName] = useState('');
-  const [formDetails, setFormDetails] = useState('');
+  const [formDescription, setFormDescription] = useState('');
   const [mode, setMode] = useState<'add' | 'edit'>('add');
   // holds existing bathroom data
   const [editBathroom, setEditBathroom] = useState<Place | null>(null);
@@ -72,7 +72,7 @@ function MapInner({apiKey}: { apiKey: string }) {
   //   setEditBathroom(null);
   //   setDraftPosition(position);
   //   setFormName('');
-  //   setFormDetails('');
+  //   setFormDescription('');
   //   setAddOpen(true);
   //   setBannerOpen(false);
   // }, []);
@@ -82,11 +82,10 @@ function MapInner({apiKey}: { apiKey: string }) {
     setEditBathroom(bathroom);
     setDraftPosition(bathroom.position);
     setFormName(bathroom.name);
-    setFormDetails(bathroom.details || '');
+    setFormDescription(bathroom.description || '');
     setAddOpen(true);
     setBannerOpen(false);
   }, []);
-
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -146,7 +145,7 @@ function MapInner({apiKey}: { apiKey: string }) {
     setAddOpen(false);
     setDraftPosition(null);
     setFormName('');
-    setFormDetails('');
+    setFormDescription('');
     setMode('add');
     setEditBathroom(null);
   }, [
@@ -175,7 +174,7 @@ function MapInner({apiKey}: { apiKey: string }) {
     setPlacePinMode(false);
     setDraftPosition(null);
     setFormName('');
-    setFormDetails('');
+    setFormDescription('');
   }, []);
 
   const handleFormCloseToPrompt = useCallback(() => {
@@ -219,7 +218,7 @@ function MapInner({apiKey}: { apiKey: string }) {
               id: bathroom.id,
               name: bathroom.name,
               position: bathroom.position,
-              details: bathroom.details,
+              description: bathroom.description,
             }));
 
         setPlaces(parsedBathroomData);
@@ -362,7 +361,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           >
             <div>
               <strong>{selected.name}</strong>
-              {selected.details && <p>{selected.details}</p>}
+              {selected.description && <p>{selected.description}</p>}
               {/* TODO: add genders, amenenities, and navigate button here */}
               <Button // Get Directions button
                 variant="contained"
@@ -407,9 +406,9 @@ function MapInner({apiKey}: { apiKey: string }) {
         open={addOpen}
         position={draftPosition}
         name={formName}
-        details={formDetails}
+        description={formDescription}
         onNameChange={setFormName}
-        onDetailsChange={setFormDetails}
+        onDescriptionChange={setFormDescription}
         onOpen={() => {
           setBannerOpen(false);
         }}
@@ -422,7 +421,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           setBannerOpen(false);
           setDraftPosition(null);
           setFormName('');
-          setFormDetails('');
+          setFormDescription('');
         }}
         onUpdated={async () => {
           await fetchVisiblePins();
@@ -431,7 +430,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           setBannerOpen(false);
           setDraftPosition(null);
           setFormName('');
-          setFormDetails('');
+          setFormDescription('');
           setEditBathroom(null);
         }}
       />

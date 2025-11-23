@@ -1,73 +1,140 @@
-import {describe, it, afterEach, expect, vi} from 'vitest';
-import {render, screen, fireEvent, cleanup} from '@testing-library/react';
+import {describe, it, afterEach, expect, vi, beforeEach} from 'vitest';
+import {
+  render,
+  screen,
+  fireEvent,
+  cleanup,
+  waitFor,
+} from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
-import {AddBathroomForm} from '../components/AddBathroomForm';
+import AddBathroomPage from '../components/AddBathroomForm';
 
-describe('AddBathroomForm', () => {
-  afterEach(() => {
-    cleanup();
-    vi.resetAllMocks();
+const fetchMock = vi.fn();
+globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+const onClose = vi.fn();
+const onOpen = vi.fn();
+const onCreated = vi.fn();
+const onNameChange = vi.fn();
+const onDescriptionChange = vi.fn();
+
+const defaultProps = {
+  open: true,
+  onClose,
+  onOpen,
+  onCreated,
+  name: 'Valid Name',
+  description: 'Valid Description',
+  position: {lat: 36.123456, lng: -122.654321},
+  onNameChange,
+  onDescriptionChange,
+};
+
+beforeEach(() => {
+  vi.resetAllMocks();
+  fetchMock.mockReset();
+});
+
+afterEach(() => {
+  cleanup();
+  vi.resetAllMocks();
+});
+
+describe('AddBathroomPage', () => {
+  it('renders title when open', () => {
+    render(<AddBathroomPage {...defaultProps} />);
+
+    expect(screen.getByText('New Bathroom')).toBeInTheDocument();
   });
 
-  const defaultProps = {
-    name: '',
-    details: '',
-    position: {lat: 36.123456, lng: -122.654321},
-    onNameChange: vi.fn(),
-    onDetailsChange: vi.fn(),
-    onSubmit: vi.fn(),
-    onCancel: vi.fn(),
-    isMobile: true,
-  };
+  it('renders input fields when open', () => {
+    render(<AddBathroomPage {...defaultProps} />);
 
-  it('renders the form fields and actions', () => {
-    render(<AddBathroomForm {...defaultProps} />);
-
-    expect(screen.getByLabelText(/bathroom name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/bathroom description/i)).toBeInTheDocument();
-
-    expect(screen.getByRole('button', {name: 'Cancel'})).toBeInTheDocument();
-    expect(screen.getByRole('button', {name: 'Save'})).toBeInTheDocument();
+    expect(screen.getByText('Bathroom Name')).toBeInTheDocument();
+    expect(screen.getByText('Bathroom Description')).toBeInTheDocument();
   });
 
-  it('shows the location if provided', () => {
-    render(<AddBathroomForm {...defaultProps} />);
+  it('renders buttons when open', () => {
+    render(<AddBathroomPage {...defaultProps} />);
 
-    expect(screen.getByText(/location: 36\.123456/i)).toBeInTheDocument();
-    expect(screen.getByText(/-122\.654321/i)).toBeInTheDocument();
+    expect(screen.getByText('Cancel')).toBeInTheDocument();
+    expect(screen.getByText('Save')).toBeInTheDocument();
   });
 
-  it('does not show location if not provided', () => {
-    render(<AddBathroomForm {...defaultProps} position={null} />);
+  it('does not render content when closed', () => {
+    render(<AddBathroomPage {...defaultProps} open={false} />);
 
-    expect(screen.queryByText(/Location:/)).not.toBeInTheDocument();
+    expect(screen.queryByText('New Bathroom')).not.toBeInTheDocument();
   });
 
-  it('calls onSubmit when save button is clicked', () => {
-    const onSubmit = vi.fn();
+  it('renders the location if provided', () => {
+    render(<AddBathroomPage {...defaultProps} />);
 
+    expect(screen.getByText(
+        'Location: 36.123456, -122.654321',
+    )).toBeInTheDocument();
+  });
+
+  it('does not render location if not provided', () => {
+    render(<AddBathroomPage {...defaultProps} position={null} />);
+
+    expect(screen.queryByText('Location: ')).not.toBeInTheDocument();
+  });
+
+  it('does not submit when name is empty', () => {
     render(
-        <AddBathroomForm
+        <AddBathroomPage
           {...defaultProps}
-          name="Test Bathroom"
-          details="Some details"
-          onSubmit={onSubmit}
+          name=""
         />,
     );
 
-    const saveButton = screen.getByRole('button', {name: 'Save'});
-    fireEvent.click(saveButton);
-
-    expect(onSubmit).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByText('Save'));
+    expect(onCreated).not.toHaveBeenCalled();
   });
 
-  it('calls onCancel when cancel button is clicked', () => {
-    const onCancel = vi.fn();
+  it('does not submit when description is empty', () => {
+    render(<AddBathroomPage {...defaultProps} description="" />);
 
-    render(<AddBathroomForm {...defaultProps} onCancel={onCancel} />);
+    fireEvent.click(screen.getByText('Save'));
+    expect(onCreated).not.toHaveBeenCalled();
+  });
 
-    fireEvent.click(screen.getByRole('button', {name: 'Cancel'}));
+  it('does not submit when no location is provided', () => {
+    render(<AddBathroomPage {...defaultProps} position={null} />);
 
-    expect(onCancel).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByText('Save'));
+    expect(onCreated).not.toHaveBeenCalled();
+  });
+
+  it('submits correctly and calls onCreated', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    });
+
+    render(<AddBathroomPage {...defaultProps} />);
+
+    fireEvent.click(screen.getByText('Save'));
+    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
+  });
+
+  it('does not call onCreated when error', async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      json: async () => ({}),
+    });
+
+    render(<AddBathroomPage {...defaultProps} />);
+
+    fireEvent.click(screen.getByText('Save'));
+    await waitFor(() => expect(onCreated).not.toHaveBeenCalled());
+  });
+
+  it('closes when cancel button clicked', () => {
+    render(<AddBathroomPage {...defaultProps} />);
+
+    fireEvent.click(screen.getByText('Cancel'));
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });
