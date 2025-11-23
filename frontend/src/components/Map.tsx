@@ -18,6 +18,7 @@ import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
 import MapHeader from './MapHeader';
+import MoreMenu from './MoreMenu';
 
 type Place = {
   id: string;
@@ -361,6 +362,9 @@ function MapInner({apiKey}: { apiKey: string }) {
           >
             <div>
               <strong>{selected.name}</strong>
+              <MoreMenu
+                onEdit={() => handleStartEditBathroom(selected)}
+              />
               {selected.description && <p>{selected.description}</p>}
               {/* TODO: add genders, amenenities, and navigate button here */}
               <Button // Get Directions button
@@ -373,16 +377,6 @@ function MapInner({apiKey}: { apiKey: string }) {
                 )}
               >
                 Get Directions
-              </Button>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={() => {
-                  handleStartEditBathroom(selected);
-                  setSelected(null); // close info window
-                }}
-              >
-                Edit
               </Button>
             </div>
           </InfoWindow>
