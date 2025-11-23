@@ -72,82 +72,85 @@ const URL = 'http://localhost:3000/user/likes';
 
 const server = setupServer();
 
-beforeAll(() => server.listen());
-
-afterEach(async () => {
-  cleanup();
-  server.resetHandlers();
-});
-
-afterAll(() => server.close());
-
-it('renders bathroom as unliked when get request fails', () => {
+/**
+ * http response setup
+ * @param {Response} getResponse get response
+ * @param {Response} postResponse post response
+ * @param {Response} deleteResponse delete response
+ */
+function setupHttpRequests(
+    getResponse : Response,
+    postResponse : Response,
+    deleteResponse : Response,
+) {
   server.use(
       // get user's likes
       http.get(URL + '*', async () => {
-        return HttpResponse.json([], {status: 400});
+        return getResponse;
       }),
       // add user like
       http.post(URL, async () => {
-        return HttpResponse.json({status: 201});
+        return postResponse;
       }),
       // remove user like
       http.delete(URL, async () => {
-        return HttpResponse.json({status: 200});
+        return deleteResponse;
       }),
   );
+}
 
-  let likes : number = bathroomWith4Likes.likes;
+/**
+ * like component rendering
+ * @param {Bathroom} bathroom selected bathroom
+ */
+function renderLikeComponent(bathroom: Bathroom) {
+  let likes : number = bathroom.likes;
   const setLikesMock = vi.fn((newLikes) => {
     likes = newLikes;
   });
 
   render(
       <Like
-        bathroom={bathroomWith4Likes}
+        bathroom={bathroom}
         userId={userId}
         likes={likes}
         setLikes={setLikesMock}
       />,
   );
+}
+
+beforeAll(() => server.listen());
+
+afterEach(async () => {
+  cleanup();
+  server.resetHandlers();
+  vi.resetAllMocks();
+});
+
+afterAll(() => server.close());
+
+it('renders bathroom as unliked when get request fails', () => {
+  const getReponse = HttpResponse.json([], {status: 400});
+  const postResponse = HttpResponse.json({status: 201});
+  const deleteResponse = HttpResponse.json({status: 200});
+  setupHttpRequests(getReponse, postResponse, deleteResponse);
+
+  renderLikeComponent(bathroomWith4Likes);
 
   expect(screen.getByLabelText('unliked-bathroom'));
 });
 
 describe('Like component when post request fails', () => {
   beforeEach(() => {
-    server.use(
-        // get user's likes
-        http.get(URL + '*', async () => {
-          return HttpResponse.json([], {status: 200});
-        }),
-        // add user like
-        http.post(URL, async () => {
-          // throw new Error('Failed to like bathroom');
-          return HttpResponse.json(
-              {errorMessage: 'Failed to like bathroom'},
-              {status: 400},
-          );
-        }),
-        // remove user like
-        http.delete(URL, async () => {
-          return HttpResponse.json({status: 200});
-        }),
+    const getReponse = HttpResponse.json([], {status: 200});
+    const postResponse = HttpResponse.json(
+        {errorMessage: 'Failed to like bathroom'},
+        {status: 400},
     );
+    const deleteResponse = HttpResponse.json({status: 200});
+    setupHttpRequests(getReponse, postResponse, deleteResponse);
 
-    let likes : number = bathroomWith4Likes.likes;
-    const setLikesMock = vi.fn((newLikes) => {
-      likes = newLikes;
-    });
-
-    render(
-        <Like
-          bathroom={bathroomWith4Likes}
-          userId={userId}
-          likes={likes}
-          setLikes={setLikesMock}
-        />,
-    );
+    renderLikeComponent(bathroomWith4Likes);
   });
 
   it('keeps unliked state', async () => {
@@ -168,36 +171,19 @@ describe('Like component when post request fails', () => {
 
 describe('Like component when delete request fails', () => {
   beforeEach(() => {
-    server.use(
-        // get user's likes
-        http.get(URL + '*', async () => {
-          return HttpResponse.json([bathroomWith4Likes.id], {status: 200});
-        }),
-        // add user like
-        http.post(URL, async () => {
-          return HttpResponse.json({status: 201});
-        }),
-        // remove user like
-        http.delete(URL, async () => {
-          return HttpResponse.json(
-              {errorMessage: 'Failed to unlike bathroom'},
-              {status: 404});
-        }),
+    const getReponse = HttpResponse.json(
+        [bathroomWith4Likes.id],
+        {status: 200},
+    );
+    const postResponse = HttpResponse.json({status: 201});
+    const deleteResponse = HttpResponse.json(
+        {errorMessage: 'Failed to unlike bathroom'},
+        {status: 404},
     );
 
-    let likes : number = bathroomWith4Likes.likes;
-    const setLikesMock = vi.fn((newLikes) => {
-      likes = newLikes;
-    });
+    setupHttpRequests(getReponse, postResponse, deleteResponse);
 
-    render(
-        <Like
-          bathroom={bathroomWith4Likes}
-          userId={userId}
-          likes={likes}
-          setLikes={setLikesMock}
-        />,
-    );
+    renderLikeComponent(bathroomWith4Likes);
   });
 
   it('keeps liked state', async () => {
@@ -224,20 +210,10 @@ describe('Like component when delete request fails', () => {
 describe('Like component', async () => {
   let likes: number = bathroom.likes;
   beforeEach(() => {
-    server.use(
-        // get user's likes
-        http.get(URL + '*', async () => {
-          return HttpResponse.json([], {status: 200});
-        }),
-        // add user like
-        http.post(URL, async () => {
-          return HttpResponse.json({status: 201});
-        }),
-        // remove user like
-        http.delete(URL, async () => {
-          return HttpResponse.json({status: 200});
-        }),
-    );
+    const getResponse = HttpResponse.json([], {status: 200});
+    const postResponse = HttpResponse.json({status: 201});
+    const deleteResponse = HttpResponse.json({status: 200});
+    setupHttpRequests(getResponse, postResponse, deleteResponse);
 
     const setLikesMock = vi.fn((newLikes) => {
       likes = newLikes;
@@ -267,8 +243,8 @@ describe('Like component', async () => {
 
   it('renders number of likes when bathroom is liked', async () => {
     const likeButton = screen.getByLabelText('unliked-bathroom');
+    await userEvent.click(likeButton);
     await waitFor(() => {
-      userEvent.click(likeButton);
       expect(screen.getByText('1'));
     });
   });

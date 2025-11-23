@@ -16,6 +16,7 @@ import {supabase} from '../lib/supabaseClient';
 import {AuthError, type User, type UserResponse} from '@supabase/supabase-js';
 import AppContext from '../context/AppContext';
 import {getCurrentUserId} from '../App';
+import type {Bathroom} from '../types';
 
 const bathroom = {
   id: '5f1169fe-4db2-48a2-b059-f05cfe63588b',
@@ -100,12 +101,27 @@ function mockGetUserId(userId: string | null, error: string | null) {
   } as UserResponse);
 }
 
-describe('Bathroom Details visibility', () => {
-  afterEach(() => {
-    cleanup();
-    vi.resetAllMocks();
-  });
+/**
+ * renders bathroom details component with context
+ * @param {Bathroom} bathroom selected bathroom
+ */
+function verifyBathroomRender(bathroom: Bathroom) {
+  render(
+      <AppContext value={{getCurrentUserId}}>
+        <BathroomDetails
+          bathroom={bathroom}
+          setBathroom={() => {}}
+        />,
+      </AppContext>,
+  );
+}
 
+afterEach(() => {
+  cleanup();
+  vi.resetAllMocks();
+});
+
+describe('Bathroom Details visibility', () => {
   it('by default, doesn\'t render the Bathroom Details', () => {
     render(
         <InfoWindow bathroom={null} setBathroom={() => {}} />,
@@ -135,17 +151,8 @@ describe('Bathroom Details visibility', () => {
 
 describe('Bathroom Details component content', () => {
   beforeEach(() => {
-    render(
-        <BathroomDetails
-          bathroom={bathroom}
-          setBathroom={() => {}}
-        />,
-    );
-  });
-
-  afterEach(() => {
-    cleanup();
-    vi.resetAllMocks();
+    mockGetUserId(null, null);
+    verifyBathroomRender(bathroom);
   });
 
   it('renders the bathroom name and description', () => {
@@ -171,19 +178,7 @@ describe('Bathroom Details component content', () => {
 describe('Bathroom Details component when user is not logged in', () => {
   beforeEach(() => {
     mockGetUserId(null, null);
-    render(
-        <AppContext value={{getCurrentUserId}}>
-          <BathroomDetails
-            bathroom={bathroom}
-            setBathroom={() => {}}
-          />,
-        </AppContext>,
-    );
-  });
-
-  afterEach(() => {
-    cleanup();
-    vi.resetAllMocks();
+    verifyBathroomRender(bathroom);
   });
 
   it('doesn\'t render like component', async () => {
@@ -201,46 +196,15 @@ describe('Bathroom Details component when user is not logged in', () => {
 
 describe('Bathroom Details component when bathroom has >= 5 likes', () => {
   beforeEach(() => {
-    mockGetUserId(null, null);
-    render(
-        <AppContext value={{getCurrentUserId}}>
-          <BathroomDetails
-            bathroom={bathroomWith5Likes}
-            setBathroom={() => {}}
-          />,
-        </AppContext>,
-    );
-  });
-
-  afterEach(() => {
-    cleanup();
-    vi.resetAllMocks();
+    mockGetUserId('123', null);
+    verifyBathroomRender(bathroomWith5Likes);
   });
 
   it('renders verified bathroom', async () => {
     expect(screen.queryByLabelText('Verified Bathroom'));
   });
-});
 
-it('renders like component when user is logged in', () => {
-  beforeEach(() => {
-    mockGetUserId('123', null);
-    render(
-        <AppContext value={{getCurrentUserId}}>
-          <BathroomDetails
-            bathroom={bathroomWith5Likes}
-            setBathroom={() => {}}
-          />,
-        </AppContext>,
-    );
-  });
-
-  afterEach(() => {
-    cleanup();
-    vi.resetAllMocks();
-  });
-
-  it('renders like component', async () => {
+  it('renders like component when user is logged in', async () => {
     await waitFor(() => {
       expect(screen.getByLabelText('unliked-bathroom'));
     });
