@@ -350,7 +350,7 @@ function MapInner({apiKey}: { apiKey: string }) {
       )}
 
       <AddBathroomPeekCard
-        showPeekCard={addMode && !addOpen}
+        showPeekCard={addMode && !addOpen && draftPosition !== null}
         onExpand={() => {
           setAddOpen(true);
           setBannerOpen(false);
@@ -370,12 +370,7 @@ function MapInner({apiKey}: { apiKey: string }) {
         onClose={handleFormCloseToPrompt}
         onCreated={async () => {
           await fetchVisiblePins();
-          setAddOpen(false);
-          setAddMode(false);
-          setBannerOpen(false);
-          setDraftPosition(null);
-          setFormName('');
-          setFormDescription('');
+          cancelAddFlow();
         }}
       />
     </div>

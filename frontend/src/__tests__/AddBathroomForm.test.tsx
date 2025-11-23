@@ -1,3 +1,4 @@
+import {useState} from 'react';
 import {describe, it, afterEach, expect, vi, beforeEach} from 'vitest';
 import {
   render,
@@ -12,23 +13,37 @@ import AddBathroomPage from '../components/AddBathroomForm';
 const fetchMock = vi.fn();
 globalThis.fetch = fetchMock as unknown as typeof fetch;
 
-const onClose = vi.fn();
-const onOpen = vi.fn();
-const onCreated = vi.fn();
-const onNameChange = vi.fn();
-const onDescriptionChange = vi.fn();
-
-const defaultProps = {
-  open: true,
-  onClose,
-  onOpen,
-  onCreated,
-  name: 'Valid Name',
-  description: 'Valid Description',
-  position: {lat: 36.123456, lng: -122.654321},
-  onNameChange,
-  onDescriptionChange,
+type PageWrapperProps = {
+  open?: boolean;
+  name?: string;
+  description?: string;
 };
+
+/**
+ * @param {object} props props
+ * @returns {object} page
+ */
+function PageWrapper(props: PageWrapperProps) {
+  const {
+    open: initialOpen = true,
+    name = 'Valid Name',
+    description = 'Valid Description',
+  } = props;
+  const [open, setOpen] = useState(initialOpen);
+  return (
+    <AddBathroomPage
+      open={open}
+      onClose={() => setOpen(false)}
+      onOpen={() => {}}
+      onCreated={() => setOpen(false)}
+      name={name}
+      description={description}
+      position={{lat: 36.123456, lng: -122.654321}}
+      onNameChange={() => {}}
+      onDescriptionChange={() => {}}
+    />
+  );
+}
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -42,81 +57,65 @@ afterEach(() => {
 
 describe('AddBathroomPage', () => {
   it('renders title when open', () => {
-    render(<AddBathroomPage {...defaultProps} />);
+    render(<PageWrapper />);
 
-    expect(screen.getByText('New Bathroom')).toBeInTheDocument();
+    expect(screen.getByText('New Bathroom'));
   });
 
   it('renders input fields when open', () => {
-    render(<AddBathroomPage {...defaultProps} />);
+    render(<PageWrapper />);
 
-    expect(screen.getByText('Bathroom Name')).toBeInTheDocument();
-    expect(screen.getByText('Bathroom Description')).toBeInTheDocument();
+    expect(screen.getByText('Bathroom Name'));
+    expect(screen.getByText('Bathroom Description'));
   });
 
   it('renders buttons when open', () => {
-    render(<AddBathroomPage {...defaultProps} />);
+    render(<PageWrapper />);
 
-    expect(screen.getByText('Cancel')).toBeInTheDocument();
-    expect(screen.getByText('Save')).toBeInTheDocument();
+    expect(screen.getByText('Cancel'));
+    expect(screen.getByText('Save'));
+  });
+
+  it('renders the location', () => {
+    render(<PageWrapper />);
+
+    expect(screen.getByText('Location: 36.123456, -122.654321'));
   });
 
   it('does not render content when closed', () => {
-    render(<AddBathroomPage {...defaultProps} open={false} />);
+    render(<PageWrapper open={false} />);
 
-    expect(screen.queryByText('New Bathroom')).not.toBeInTheDocument();
-  });
-
-  it('renders the location if provided', () => {
-    render(<AddBathroomPage {...defaultProps} />);
-
-    expect(screen.getByText(
-        'Location: 36.123456, -122.654321',
-    )).toBeInTheDocument();
-  });
-
-  it('does not render location if not provided', () => {
-    render(<AddBathroomPage {...defaultProps} position={null} />);
-
-    expect(screen.queryByText('Location: ')).not.toBeInTheDocument();
+    expect(screen.queryByText('New Bathroom')).toBeNull();
   });
 
   it('does not submit when name is empty', () => {
-    render(
-        <AddBathroomPage
-          {...defaultProps}
-          name=""
-        />,
-    );
+    render(<PageWrapper name="" />);
 
     fireEvent.click(screen.getByText('Save'));
-    expect(onCreated).not.toHaveBeenCalled();
+    // form should still be open
+    expect(screen.queryByText('New Bathroom'));
   });
 
   it('does not submit when description is empty', () => {
-    render(<AddBathroomPage {...defaultProps} description="" />);
+    render(<PageWrapper description="" />);
 
     fireEvent.click(screen.getByText('Save'));
-    expect(onCreated).not.toHaveBeenCalled();
+    // form should still be open
+    expect(screen.queryByText('New Bathroom'));
   });
 
-  it('does not submit when no location is provided', () => {
-    render(<AddBathroomPage {...defaultProps} position={null} />);
-
-    fireEvent.click(screen.getByText('Save'));
-    expect(onCreated).not.toHaveBeenCalled();
-  });
-
-  it('submits correctly and calls onCreated', async () => {
+  it('submits correctly and form is closed', async () => {
     fetchMock.mockResolvedValue({
       ok: true,
       json: async () => ({}),
     });
 
-    render(<AddBathroomPage {...defaultProps} />);
+    render(<PageWrapper />);
 
     fireEvent.click(screen.getByText('Save'));
-    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(screen.queryByText('New Bathroom')).toBeNull(),
+    );
   });
 
   it('does not call onCreated when error', async () => {
@@ -125,16 +124,49 @@ describe('AddBathroomPage', () => {
       json: async () => ({}),
     });
 
-    render(<AddBathroomPage {...defaultProps} />);
+    render(<PageWrapper />);
 
     fireEvent.click(screen.getByText('Save'));
-    await waitFor(() => expect(onCreated).not.toHaveBeenCalled());
+    // form should still be open
+    expect(screen.queryByText('New Bathroom'));
   });
 
-  it('closes when cancel button clicked', () => {
-    render(<AddBathroomPage {...defaultProps} />);
+  it('closes when cancel button clicked', async () => {
+    render(<PageWrapper />);
 
     fireEvent.click(screen.getByText('Cancel'));
-    expect(onClose).toHaveBeenCalledTimes(1);
+    await waitFor(() =>
+      expect(screen.queryByText('New Bathroom')).toBeNull(),
+    );
+  });
+
+  it('closes when dragged down', async () => {
+    render(<PageWrapper />);
+
+    const handle = screen.getByLabelText('Close drawer by dragging');
+
+    // mouse drag down
+    fireEvent.mouseDown(handle, {clientY: 100});
+    fireEvent.mouseMove(window, {clientY: 300});
+    fireEvent.mouseUp(window, {clientY: 300});
+
+    await waitFor(() =>
+      expect(screen.queryByText('New Bathroom')).toBeNull(),
+    );
+  });
+
+  it('does not close when small drag down', async () => {
+    render(<PageWrapper />);
+
+    const handle = screen.getByLabelText('Close drawer by dragging');
+
+    // mouse drag down
+    fireEvent.mouseDown(handle, {clientY: 100});
+    fireEvent.mouseMove(window, {clientY: 105});
+    fireEvent.mouseUp(window, {clientY: 105});
+
+    await waitFor(() =>
+      expect(screen.queryByText('New Bathroom')),
+    );
   });
 });

@@ -257,6 +257,7 @@ export default function AddBathroomPage(props: Props) {
       }}
     >
       <Box
+        aria-label="Close drawer by dragging"
         className="addbathroom-drag-handle-container"
         onMouseDown={onHandleMouseDown}>
         <Box
