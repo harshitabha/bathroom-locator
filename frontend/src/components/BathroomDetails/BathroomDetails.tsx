@@ -1,6 +1,6 @@
 import {
   Box,
-  Button,
+  Chip,
   SwipeableDrawer,
   Typography,
   useTheme,
@@ -68,19 +68,20 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             display: 'flex',
           }}
         >
-          <Button
+          <Chip
+            label={
+              <Box sx={{display: 'flex', alignItems: 'center', gap: '3px'}}>
+                Navigate
+                <NearMeIcon fontSize='inherit' />
+              </Box>
+            }
             variant="outlined"
             color="secondary"
-            size="small"
-            className="details-button"
-            endIcon={<NearMeIcon />}
             onClick={() => openWalkingDirections(
                 bathroom.position.lat,
                 bathroom.position.lng,
             )}
-          >
-              Navigate
-          </Button>
+          />
         </Box>
 
         <Typography variant="h6" className="details-subheader">
