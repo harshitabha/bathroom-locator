@@ -19,23 +19,6 @@ import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
 
-type Place = {
-  id: string;
-  name: string;
-  position: google.maps.LatLngLiteral;
-  description?: string;
-  numStalls?: number;
-  amenities?: {
-    toilet_paper?: boolean;
-    soap?: boolean;
-    paper_towel?: boolean;
-    hand_dryer?: boolean;
-    menstrual_products?: boolean;
-    mirror?: boolean;
-  };
-  likes?: number;
-};
-
 const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
   if (!apiKey) return <p>Missing VITE_GOOGLE_MAPS_API_KEY</p>;
@@ -52,7 +35,7 @@ export default Map;
 function MapInner({apiKey}: { apiKey: string }) {
   const [bathrooms, setBathrooms] = useState<Bathroom[]>([]); // bathroom info
   // tracks which pin is selected (which info window to show)
-  const [selected, setSelected] = useState<Place | null>(null);
+  const [selected, setSelected] = useState<Bathroom | null>(null);
   // select where to add new pin
   const [addMode, setAddMode] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -314,13 +297,13 @@ function MapInner({apiKey}: { apiKey: string }) {
             onClick={() => setSelected(p)}
           />
         ))}
-        
-        {/*bathroom details */}
+
+        {/* bathroom details */}
         <InfoWindow
           bathroom={selected}
           setBathroom={setSelected}
         />
-        
+
         {/* draft marker */}
         {addMode && draftPosition && (
           <Marker
