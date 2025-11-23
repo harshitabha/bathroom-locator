@@ -1,0 +1,17 @@
+.flex {
+  display: flex;
+}
+
+.detail-container {
+  padding: 8px 0;
+}
+
+.chip-container {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+p.details-label {
+  font-weight: 500;
+  margin: 3px 15px 0 0;
+}

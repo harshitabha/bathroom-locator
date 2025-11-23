@@ -12,7 +12,7 @@ import {styled} from '@mui/material/styles';
 import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
 import type {AmenitieOptions, GenderOptions, Bathroom} from '../../types';
-import Detail from '../Detail';
+import Detail from './Detail';
 
 interface bathroomDetailsProps {
   bathroom: Bathroom,

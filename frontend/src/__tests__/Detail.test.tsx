@@ -1,7 +1,7 @@
 import {afterEach, beforeEach, it} from 'vitest';
 import {render, screen, cleanup} from '@testing-library/react';
 
-import Detail, {type Value} from '../components/Detail';
+import Detail, {type Value} from '../components/BathroomDetails/Detail';
 
 afterEach(() => cleanup());
 
