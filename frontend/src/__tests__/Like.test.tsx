@@ -339,36 +339,3 @@ describe('Already liked bathroom', async () => {
     });
   });
 });
-
-// it('renders as unliked on failed get request', async () => {
-//   server.use(
-//       // get user's likes
-//       http.get(URL + '*', async () => {
-//         return HttpResponse.json([], {status: 400});
-//       }),
-//       // add user like
-//       http.post(URL, async () => {
-//         return HttpResponse.json({status: 201});
-//       }),
-//       // remove user like
-//       http.delete(URL, async () => {
-//         return HttpResponse.json({status: 200});
-//       }),
-//   );
-
-//   let likes : number = bathroom.likes;
-//   const setLikesMock = vi.fn((newLikes) => {
-//     likes = newLikes;
-//   });
-
-//   render(
-//       <Like
-//         bathroom={bathroom}
-//         userId={userId}
-//         likes={likes}
-//         setLikes={setLikesMock}
-//       />,
-//   );
-
-//   expect(screen.getByLabelText('unliked-bathroom'));
-// });

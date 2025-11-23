@@ -89,7 +89,7 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             gap: '8px',
           }}
         >
-          {likes >= 1 ?
+          {likes >= 5 ?
             <Chip label="Verified Bathroom" variant="outlined"
               color="primary"/> :
             null}
