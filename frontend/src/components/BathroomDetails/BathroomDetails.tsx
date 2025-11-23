@@ -6,11 +6,14 @@ import {
   useTheme,
 } from '@mui/material';
 import NearMeIcon from '@mui/icons-material/NearMe';
-import type {Dispatch, SetStateAction} from 'react';
+import {useState, useContext, type Dispatch, type SetStateAction} from 'react';
 
 import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
 import type {Bathroom} from '../../types';
+import AppContext from '../../context/AppContext';
+import Like from './Like';
+import Chip from '@mui/material/Chip';
 
 interface bathroomDetailsProps {
   bathroom: Bathroom,
@@ -23,6 +26,11 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
     setBathroom,
   } = props;
   const theme = useTheme();
+
+  const [userId, setUserId] = useState<string | null>('');
+  const [likes, setLikes] = useState(bathroom.likes);
+  const appContext = useContext(AppContext);
+  appContext?.getCurrentUserId().then(setUserId);
 
   return (
     <SwipeableDrawer
@@ -58,16 +66,33 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
         <Typography
           variant="h5"
           fontWeight={600}
-          sx={{pb: '8px'}}
+          sx={{pb: '8px',
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
         >
           {bathroom.name}
+          {userId ?
+          <Like
+            bathroom={bathroom}
+            userId={userId}
+            likes={likes}
+            setLikes={setLikes}
+          /> :
+          null
+          }
         </Typography>
         <Box
           sx={{
             ml: '-2px',
             display: 'flex',
+            gap: '8px',
           }}
         >
+          {likes >= 1 ?
+            <Chip label="Verified Bathroom" variant="outlined"
+              color="primary"/> :
+            null}
           <Button
             variant="contained"
             color="secondary"
@@ -82,7 +107,6 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
               Navigate
           </Button>
         </Box>
-
         <Typography variant="h6" className="details-subheader">
             Description
         </Typography>
