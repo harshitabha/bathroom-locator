@@ -218,17 +218,18 @@ export default function AddBathroomPage(props: Props) {
     };
 
     try {
-      const url =
-      mode === 'add' ?
-        'http://localhost:3000/bathroom' :
-        `http://localhost:3000/bathroom/${bathroomId}`;
+      const url = 'http://localhost:3000/bathroom';
 
       const method = mode === 'add' ? 'POST' : 'PUT';
 
       const res = await fetch(url, {
         method: method,
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(payload),
+        body: JSON.stringify(
+          mode === 'edit' ?
+            {id: bathroomId, ...payload} :
+            payload,
+        ),
       });
 
       if (!res.ok) {

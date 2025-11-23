@@ -390,7 +390,7 @@ function MapInner({apiKey}: { apiKey: string }) {
         )}
       </GoogleMap>
 
-      {!placePinMode && (
+      {!placePinMode && !addOpen && (
         <AddBathroomButton onClick={handleAddButtonClick} />
       )}
 
