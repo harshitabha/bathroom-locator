@@ -63,7 +63,13 @@ const MapHeader = ({map, bannerOpen, onCancelBanner}: Props) => {
               onClose={handleClose}
               sx={{marginTop: 1}}
             >
-              <MenuItem onClick={signOut} sx={{paddingY: 0}}>
+              <MenuItem
+                onClick={async () => {
+                  await signOut();
+                  onCancelBanner();
+                }}
+                sx={{paddingY: 0}}
+              >
                 Logout
               </MenuItem>
             </Menu>
