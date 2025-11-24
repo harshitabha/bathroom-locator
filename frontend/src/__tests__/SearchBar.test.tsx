@@ -225,7 +225,7 @@ describe('SearchBar', () => {
     });
 
     await waitFor(() => {
-      expect(screen.queryByText('Bathroom One')).not.toBeInTheDocument();
+      expect(screen.queryByText('Bathroom One')).toBeNull();
     });
 
     expect(
@@ -262,7 +262,7 @@ describe('SearchBar', () => {
     fireEvent.change(input, {target: {value: ''}});
 
     await waitFor(() => {
-      expect(screen.queryByText('Bathroom One')).not.toBeInTheDocument();
+      expect(screen.queryByText('Bathroom One')).toBeNull();
     });
   });
 });
