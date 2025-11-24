@@ -7,6 +7,7 @@ import {
   Typography,
 } from '@mui/material';
 import './AddBathroomForm.css';
+import { API_BASE_URL } from '../utils/api';
 
 /**
  * Used to hide the add bathroom form by dragging down on desktop
@@ -107,7 +108,7 @@ export default function AddBathroomForm(props: Props) {
     };
 
     try {
-      const res = await fetch('http://localhost:3000/bathroom', {
+      const res = await fetch(`${API_BASE_URL}/bathroom`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(payload),

@@ -6,12 +6,14 @@ import cors from 'cors';
 
 import * as bathroom from './bathroom.js';
 
-const port = 3000;
+const PORT = process.env.PORT;
+const FRONTEND_URL = process.env.FRONTEND_URL;
+
 const app = express();
 
 // enable CORS for frontend origin
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: FRONTEND_URL,
 }));
 
 const swaggerDocument = YAML.load('./api/openapi.yaml');
@@ -39,9 +41,9 @@ app.get('/user/likes', bathroom.getUserLikes);
 app.post('/user/likes', bathroom.likeBathroom);
 app.delete('/user/likes', bathroom.unlikeBathroom);
 
-app.listen(port, () => {
-  console.log(`App running on port ${port}.`);
-  console.log('API Testing UI is at: http://localhost:3000/api/v0/docs/');
+app.listen(PORT, () => {
+  console.log(`App running on port ${PORT}.`);
+  console.log(`API Testing UI is at: http://localhost:${PORT}/api/v0/docs/`);
 });
 
 export default app;
