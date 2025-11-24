@@ -77,15 +77,12 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
           }}
         >
           {bathroom.name}
-          {userId ?
           <Like
             bathroom={bathroom}
             userId={userId}
             likes={likes}
             setLikes={setLikes}
-          /> :
-          null
-          }
+          />
         </Typography>
         <Box
           sx={{

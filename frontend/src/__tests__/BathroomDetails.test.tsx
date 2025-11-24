@@ -130,20 +130,11 @@ describe('Bathroom Details component content', () => {
   });
 });
 
-describe('Bathroom Details component when user is not logged in', () => {
-  beforeEach(() => {
-    mockGetUserId(null, null);
-    verifyBathroomRender(basicBathroom);
-  });
+it('doesn\'t render verified bathroom with <5 likes', async () => {
+  mockGetUserId(null, null);
+  verifyBathroomRender(basicBathroom);
 
-  it('doesn\'t render like component', async () => {
-    expect(screen.queryByLabelText(`Unlike ${basicBathroom.name}`)).toBeNull();
-    expect(screen.queryByLabelText(`Like ${basicBathroom.name}`)).toBeNull();
-  });
-
-  it('doesn\'t render verified bathroom with 0 likes', async () => {
-    expect(screen.queryByLabelText('Verified Bathroom')).toBeNull();
-  });
+  expect(screen.queryByLabelText('Verified Bathroom')).toBeNull();
 });
 
 
@@ -155,10 +146,6 @@ describe('Bathroom Details component when bathroom has >= 5 likes', () => {
 
   it('renders verified bathroom', async () => {
     expect(screen.queryByLabelText('Verified Bathroom'));
-  });
-
-  it('renders like component', async () => {
-    expect(screen.queryByLabelText(`Like ${basicBathroom.name}`));
   });
 });
 

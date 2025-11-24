@@ -207,7 +207,34 @@ describe('Like component when delete request fails', () => {
   });
 });
 
-describe('Like component', async () => {
+describe('Like component when user not logged in', async () => {
+  let likes: number = bathroom.likes;
+  beforeEach(() => {
+    const getResponse = HttpResponse.json([], {status: 200});
+    const postResponse = HttpResponse.json({status: 201});
+    const deleteResponse = HttpResponse.json({status: 200});
+    setupHttpRequests(getResponse, postResponse, deleteResponse);
+
+    const setLikesMock = vi.fn((newLikes) => {
+      likes = newLikes;
+    });
+
+    render(
+        <Like
+          bathroom={bathroom}
+          userId={null}
+          likes={likes}
+          setLikes={setLikesMock}
+        />,
+    );
+  });
+
+  it('doesn\'t render like button', async () => {
+    expect(screen.queryByLabelText(`Like ${bathroom.name}`)).toBeNull();
+  });
+});
+
+describe('Like component when user logged in', async () => {
   let likes: number = bathroom.likes;
   beforeEach(() => {
     const getResponse = HttpResponse.json([], {status: 200});

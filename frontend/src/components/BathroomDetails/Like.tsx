@@ -8,7 +8,7 @@ import React from 'react';
 
 interface LikeProps {
   bathroom: Bathroom;
-  userId: string;
+  userId: string | null;
   likes: number;
   setLikes: React.Dispatch<React.SetStateAction<number>>;
 }
@@ -124,6 +124,7 @@ const Like = ({bathroom, userId, likes, setLikes}: LikeProps) => {
   };
 
   return (
+    userId ?
     <div className='like-button'
       aria-label='like-button' onClick = {handleToggle}>
       {liked ?
@@ -132,7 +133,8 @@ const Like = ({bathroom, userId, likes, setLikes}: LikeProps) => {
       <Typography color="textSecondary">
         {likes > 0 && likes}
       </Typography>
-    </div>
+    </div> :
+    null
   );
 };
 
