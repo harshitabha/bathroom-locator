@@ -41,7 +41,11 @@ beforeEach(() => {
 
   render(
       <MemoryRouter>
-        <MapHeader map={null} />
+        <MapHeader
+          map={null}
+          bannerOpen={false}
+          onCancelBanner={() => {}}
+        />
       </MemoryRouter>,
   );
 });
@@ -59,7 +63,7 @@ describe('Map Header component', () => {
 
   it('hides the profile picture by default', async () => {
     const profilePicture = screen.queryByLabelText('profile-picture');
-    expect(profilePicture).not.toBeInTheDocument();
+    expect(profilePicture).toBeNull();
   });
 
   it('leads to login page when login button is clicked', async () => {

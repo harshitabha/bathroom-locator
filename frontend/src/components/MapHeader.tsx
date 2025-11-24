@@ -1,12 +1,15 @@
 import {Box, Button, Avatar} from '@mui/material';
 import {useNavigate} from 'react-router-dom';
 import SearchBar from './SearchBar';
+import AddBathroomBanner from './AddBathroomBanner';
 
 type Props = {
   map: google.maps.Map | null;
+  bannerOpen: boolean;
+  onCancelBanner: () => void;
 };
 
-const MapHeader = ({map}: Props) => {
+const MapHeader = ({map, bannerOpen, onCancelBanner}: Props) => {
   const loggedIn = false; // TODO: make this real (maybe pass it down from App)
   const navigate = useNavigate();
 
@@ -17,34 +20,48 @@ const MapHeader = ({map}: Props) => {
       zIndex: 100,
       width: '100%',
       display: 'flex',
-      justifyContent: 'right',
+      flexDirection: 'column',
+      alignItems: 'center',
       px: 1,
+      gap: 1,
     }}>
-      <Box sx={{flex: 1, mr: 1}}>
-        <SearchBar map={map} />
-      </Box>
-      {loggedIn ?
-      <Avatar
+      {/* row 1, search + login */}
+      <Box
         sx={{
-          bgcolor: 'primary.main',
-          color: 'background.default',
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'right',
+          alignItems: 'flex-start',
         }}
-        aria-label='Profile Picture'
-      /> :
-      <Button
-        variant="contained"
-        size="small"
-        color="secondary"
-        sx={{
-          height: 40,
-          padding: '7px',
-          borderRadius: '25px',
-        }}
-        onClick={() => navigate('/login')}
       >
-        Login
-      </Button>
-      }
+        <Box sx={{flex: 1, mr: 1}}>
+          <SearchBar map={map} />
+        </Box>
+        {loggedIn ?
+        <Avatar
+          sx={{
+            bgcolor: 'primary.main',
+            color: 'background.default',
+          }}
+          aria-label='Profile Picture'
+        /> :
+        <Button
+          variant="contained"
+          size="small"
+          color="secondary"
+          sx={{
+            height: 40,
+            padding: '7px',
+            borderRadius: '25px',
+          }}
+          onClick={() => navigate('/login')}
+        >
+          Login
+        </Button>
+        }
+      </Box>
+      {/* row 2, bathroom banner */}
+      <AddBathroomBanner bannerOpen={bannerOpen} onCancel={onCancelBanner} />
     </Box>
   );
 };

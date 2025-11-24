@@ -25,13 +25,7 @@
 
 h6.details-subheader {
   font-weight: 600;
-  margin-top: 16px;
-}
-
-.details-button {
-  border-radius: 30px !important;
-  padding: 10px 20px !important;
-  font-weight: 'normal' !important;
+  margin-top: 15px;
 }
 
 /* Margin for all text fields except the first */
