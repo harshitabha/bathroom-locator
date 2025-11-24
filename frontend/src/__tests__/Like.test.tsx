@@ -137,7 +137,7 @@ it('renders bathroom as unliked when get request fails', () => {
 
   renderLikeComponent(bathroomWith4Likes);
 
-  expect(screen.getByLabelText('unliked-bathroom'));
+  expect(screen.getByLabelText(`Like ${bathroom.name}`));
 });
 
 describe('Like component when post request fails', () => {
@@ -154,14 +154,14 @@ describe('Like component when post request fails', () => {
   });
 
   it('keeps unliked state', async () => {
-    await userEvent.click(screen.getByLabelText('unliked-bathroom'));
+    await userEvent.click(screen.getByLabelText(`Like ${bathroom.name}`));
 
-    const unlikedButton = await screen.getByLabelText('unliked-bathroom');
+    const unlikedButton = await screen.getByLabelText(`Like ${bathroom.name}`);
     expect(unlikedButton);
   });
 
   it('doesn\'t change # of likes', async () => {
-    await userEvent.click(screen.getByLabelText('unliked-bathroom'));
+    await userEvent.click(screen.getByLabelText(`Like ${bathroom.name}`));
 
     await waitFor(() => {
       expect(screen.getByText('4'));
@@ -188,17 +188,17 @@ describe('Like component when delete request fails', () => {
 
   it('keeps liked state', async () => {
     const likedButton = await waitFor(() => {
-      return screen.getByLabelText('liked-bathroom');
+      return screen.getByLabelText(`Unlike ${bathroom.name}`);
     });
     await userEvent.click(likedButton);
     expect(await waitFor(() => {
-      return screen.getByLabelText('liked-bathroom');
+      return screen.getByLabelText(`Unlike ${bathroom.name}`);
     }));
   });
 
   it('doesn\'t change # of likes', async () => {
     const likedButton = await waitFor(() => {
-      return screen.getByLabelText('liked-bathroom');
+      return screen.getByLabelText(`Unlike ${bathroom.name}`);
     });
     await userEvent.click(likedButton);
     await waitFor(() => {
@@ -230,19 +230,19 @@ describe('Like component', async () => {
   });
 
   it('renders like button', async () => {
-    expect(screen.getByLabelText('unliked-bathroom'));
+    expect(screen.getByLabelText(`Like ${bathroom.name}`));
   });
 
   it('toggles like on click', async () => {
-    const likeButton = screen.getByLabelText('unliked-bathroom');
+    const likeButton = screen.getByLabelText(`Like ${bathroom.name}`);
     await userEvent.click(likeButton);
     await waitFor(() => {
-      expect(screen.getByLabelText('liked-bathroom'));
+      expect(screen.getByLabelText(`Unlike ${bathroom.name}`));
     });
   });
 
   it('renders number of likes when bathroom is liked', async () => {
-    const likeButton = screen.getByLabelText('unliked-bathroom');
+    const likeButton = screen.getByLabelText(`Like ${bathroom.name}`);
     await userEvent.click(likeButton);
     await waitFor(() => {
       expect(screen.getByText('1'));
@@ -285,7 +285,7 @@ describe('Already liked bathroom', async () => {
 
   it('renders liked button', async () => {
     await waitFor(() => {
-      expect(screen.getByLabelText('liked-bathroom'));
+      expect(screen.getByLabelText(`Unlike ${bathroom.name}`));
     });
   });
 
@@ -297,17 +297,17 @@ describe('Already liked bathroom', async () => {
 
   it('toggles unlike on click', async () => {
     const likedButton = await waitFor(() => {
-      return screen.getByLabelText('liked-bathroom');
+      return screen.getByLabelText(`Unlike ${bathroom.name}`);
     });
     await userEvent.click(likedButton);
     await waitFor(() => {
-      expect(screen.getByLabelText('unliked-bathroom'));
+      expect(screen.getByLabelText(`Like ${bathroom.name}`));
     });
   });
 
   it('removes a like on click', async () => {
     const likedButton = await waitFor(() => {
-      return screen.getByLabelText('liked-bathroom');
+      return screen.getByLabelText(`Unlike ${bathroom.name}`);
     });
     await userEvent.click(likedButton);
     await waitFor(() => {

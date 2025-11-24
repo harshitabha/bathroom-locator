@@ -181,8 +181,8 @@ describe('Bathroom Details component when user is not logged in', () => {
   });
 
   it('doesn\'t render like component', async () => {
-    expect(screen.queryByLabelText('liked-bathroom')).toBeNull();
-    expect(screen.queryByLabelText('unliked-bathroom')).toBeNull();
+    expect(screen.queryByLabelText(`Unlike ${bathroom.name}`)).toBeNull();
+    expect(screen.queryByLabelText(`Like ${bathroom.name}`)).toBeNull();
   });
 
   it('doesn\'t render verified bathroom with 0 likes', async () => {

@@ -127,8 +127,8 @@ const Like = ({bathroom, userId, likes, setLikes}: LikeProps) => {
     <div className='like-button'
       aria-label='like-button' onClick = {handleToggle}>
       {liked ?
-        <FavoriteIcon color="error" aria-label='liked-bathroom'/> :
-        <FavoriteBorderIcon aria-label='unliked-bathroom'/>}
+        <FavoriteIcon color="error" aria-label={`Unlike ${bathroom.name}`}/> :
+        <FavoriteBorderIcon aria-label={`Like ${bathroom.name}`}/>}
       <Typography color="textSecondary">
         {likes > 0 && likes}
       </Typography>
