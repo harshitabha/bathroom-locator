@@ -7,41 +7,23 @@ import {
 import {
   GoogleMap,
   Marker,
-  InfoWindow,
   useLoadScript,
 } from '@react-google-maps/api';
+
 import './Map.css';
-import {openWalkingDirections} from '../utils/navigation';
-import Button from '@mui/material/Button';
 import MapHeader from './MapHeader';
+import InfoWindow from './InfoWindow';
+import type {Bathroom} from '../types';
+import AddBathroomButton from './AddBathroomButton';
+import AddBathroomPeekCard from './AddBathroomPeekCard';
+import AddBathroomForm from './AddBathroomForm';
+import {usePinIcon} from '../utils/usePinIcon';
 import MapFilters, {
   type GenderFilter,
   type StallsFilter,
   type AmenityFilter,
   type CleanlinessFilter,
 } from './MapFilters';
-
-type Place = {
-  id: number;
-  name: string;
-  position: google.maps.LatLngLiteral;
-  description?: string;
-  numStalls?: number;
-  amenities?: {
-    toilet_paper?: boolean;
-    soap?: boolean;
-    paper_towel?: boolean;
-    hand_dryer?: boolean;
-    menstrual_products?: boolean;
-    mirror?: boolean;
-  };
-  gender?: {
-    female?: boolean;
-    male?: boolean;
-    gender_neutral?: boolean;
-  };
-  cleanliness?: number;
-};
 
 const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -57,9 +39,18 @@ export default Map;
  * @returns {object} JSX compoent for the inner map content
  */
 function MapInner({apiKey}: { apiKey: string }) {
-  const [places, setPlaces] = useState<Place[]>([]); // bathroom info
+  const [bathrooms, setBathrooms] = useState<Bathroom[]>([]); // bathroom info
   // tracks which pin is selected (which info window to show)
-  const [selected, setSelected] = useState<Place | null>(null);
+  const [selected, setSelected] = useState<Bathroom | null>(null);
+  // select where to add new pin
+  const [addMode, setAddMode] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [bannerOpen, setBannerOpen] = useState(false);
+  const [draftPosition, setDraftPosition] =
+    useState<google.maps.LatLngLiteral | null>(null);
+  const idleTimer = useRef<number | null>(null);
+  const [formName, setFormName] = useState('');
+  const [formDescription, setFormDescription] = useState('');
   const [selectedGenders, setSelectedGenders] = useState<GenderFilter[]>([]);
   const [selectedStalls, setSelectedStalls] = useState<StallsFilter[]>([]);
   const [selectedAmenities, setSelectedAmenities] =
@@ -73,13 +64,12 @@ function MapInner({apiKey}: { apiKey: string }) {
     mapRef.current = map;
   };
 
-  //
-  const idleTimer = useRef<number | null>(null);
-
   // load map using api key
   const {isLoaded, loadError} = useLoadScript({
     googleMapsApiKey: apiKey,
   });
+
+  const pinIcon = usePinIcon(isLoaded);
 
   // default center coords when user doesn't provide location
   // (somewhere in santa cruz)
@@ -119,8 +109,43 @@ function MapInner({apiKey}: { apiKey: string }) {
   // center map on user if location is given, else default on santa cruz
   const center = userLocation ?? defaultCenter;
 
-  // close info window when clicking off
-  const handleMapClick = useCallback(() => setSelected(null), []);
+  const handleAddButtonClick = useCallback(() => {
+    setAddMode(true);
+    setBannerOpen(true);
+    setSelected(null);
+    setAddOpen(false);
+    setDraftPosition(null);
+  }, [setAddMode, setBannerOpen, setSelected, setAddOpen, setDraftPosition]);
+
+  // close info window when clicking off. in add mode, click drops draft pin
+  const handleMapClick = useCallback(
+      (e?: google.maps.MapMouseEvent) => {
+        setSelected(null);
+        if (addMode && e?.latLng) {
+          setDraftPosition({
+            lat: e.latLng.lat(),
+            lng: e.latLng.lng(),
+          });
+          setAddOpen(true);
+          setBannerOpen(false);
+        }
+      },
+      [addMode],
+  );
+
+  const cancelAddFlow = useCallback(() => {
+    setAddOpen(false);
+    setBannerOpen(false);
+    setAddMode(false);
+    setDraftPosition(null);
+    setFormName('');
+    setFormDescription('');
+  }, []);
+
+  const handleFormCloseToPrompt = useCallback(() => {
+    setAddOpen(false);
+    setBannerOpen(true);
+  }, []);
 
   // fetch bathroom pins within the current map view + some padding
   const fetchVisiblePins = useCallback(async () => {
@@ -150,21 +175,21 @@ function MapInner({apiKey}: { apiKey: string }) {
         const bathroomData = await res.json();
 
         // ensure data is of correct type
-        const parsedBathroomData = (bathroomData as Place[])
+        const parsedBathroomData = (bathroomData as Bathroom[])
             .map((bathroom) => ({
               id: bathroom.id,
               name: bathroom.name,
               position: bathroom.position,
               description: bathroom.description,
-              numStalls: (bathroom as Place).numStalls,
-              amenities: (bathroom as Place).amenities,
-              gender: (bathroom as Place).gender,
-              cleanliness: (bathroom as Place).cleanliness,
+              num_stalls: bathroom.num_stalls,
+              amenities: bathroom.amenities,
+              gender: bathroom.gender,
+              likes: bathroom.likes,
             }));
 
-        setPlaces(parsedBathroomData);
+        setBathrooms(parsedBathroomData);
       } else if (res.status === 404) {
-        setPlaces([]); // handle empty response
+        setBathrooms([]); // handle empty response
       } else {
         console.error('Error fetching bathrooms:', res.status);
       }
@@ -210,7 +235,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           console.error('Polling error:', res.status);
         }
 
-        const newBathrooms: Place[] = await res.json();
+        const newBathrooms: Bathroom[] = await res.json();
 
         if (newBathrooms.length > 0 && mapRef.current) {
           const bounds = mapRef.current.getBounds();
@@ -224,10 +249,10 @@ function MapInner({apiKey}: { apiKey: string }) {
               return bounds.contains(pos);
             });
             if (visibleNewBathrooms.length > 0) {
-              setPlaces((prevPlaces) => [
-                ...prevPlaces,
+              setBathrooms((prevBathrooms) => [
+                ...prevBathrooms,
                 ...visibleNewBathrooms.filter((nb) =>
-                  !prevPlaces.some((p) => p.id === nb.id),
+                  !prevBathrooms.some((p) => p.id === nb.id),
                 ),
               ]);
             }
@@ -247,10 +272,10 @@ function MapInner({apiKey}: { apiKey: string }) {
     };
   }, []);
 
-  const filteredPlaces = useMemo(() => {
+  const filteredBathrooms = useMemo(() => {
     const genderKeys: Record<
       GenderFilter,
-      keyof NonNullable<Place['gender']>
+      keyof NonNullable<Bathroom['gender']>
     > = {
       'Male': 'male',
       'Female': 'female',
@@ -268,7 +293,7 @@ function MapInner({apiKey}: { apiKey: string }) {
       return false;
     };
 
-    const amenitiesMatch = (a?: Place['amenities']) => {
+    const amenitiesMatch = (a?: Bathroom['amenities']) => {
       if (!selectedAmenities.length) return true;
       if (!a) return false;
       const need: Record<AmenityFilter, boolean> = {
@@ -282,7 +307,7 @@ function MapInner({apiKey}: { apiKey: string }) {
       return selectedAmenities.every((k) => need[k]);
     };
 
-    const genderMatch = (g?: Place['gender']) => {
+    const genderMatch = (g?: Bathroom['gender']) => {
       if (!selectedGenders.length) return true;
       if (!g) return false;
       return selectedGenders.some((opt) => !!g[genderKeys[opt]]);
@@ -292,22 +317,22 @@ function MapInner({apiKey}: { apiKey: string }) {
         selectedCleanliness.map((v) => parseInt(v, 10)),
     );
 
-    const cleanlinessMatch = (c?: number) => {
+    const cleanlinessMatch = (c?: number | string) => {
       if (!selectedCleanliness.length) return true;
       const cNum = typeof c === 'number' ? c : parseInt(String(c ?? ''), 10);
       if (Number.isNaN(cNum)) return false;
       return selectedNums.has(cNum);
     };
 
-    const matches = (p: Place) =>
-      genderMatch(p.gender) &&
-      stallsMatch(p.numStalls) &&
-      amenitiesMatch(p.amenities) &&
-      cleanlinessMatch(p.cleanliness);
+    const matches = (b: Bathroom) =>
+      genderMatch(b.gender) &&
+      stallsMatch(b.num_stalls) &&
+      amenitiesMatch(b.amenities) &&
+      cleanlinessMatch((b as unknown as {cleanliness?: number}).cleanliness);
 
-    return places.filter(matches);
+    return bathrooms.filter(matches);
   }, [
-    places,
+    bathrooms,
     selectedGenders,
     selectedStalls,
     selectedAmenities,
@@ -320,7 +345,13 @@ function MapInner({apiKey}: { apiKey: string }) {
 
   return (
     <div className="map-align-center">
-      {isLoaded && <MapHeader map={mapRef.current} />}
+      {isLoaded &&
+        <MapHeader
+          map={mapRef.current}
+          bannerOpen={bannerOpen}
+          onCancelBanner={cancelAddFlow}
+        />
+      }
       <GoogleMap
         onLoad={onMapLoad}
         onIdle={handleIdle}
@@ -331,48 +362,42 @@ function MapInner({apiKey}: { apiKey: string }) {
         zoom={14}
         onClick={handleMapClick}
         options={{
-          // prevents clicking on locations other than pins
           clickableIcons: false,
-          disableDoubleClickZoom: true, // prevents accidental zoom
-          // locks map type to simple map
+          disableDoubleClickZoom: true,
           mapTypeId: google.maps.MapTypeId.ROADMAP,
           disableDefaultUI: true,
         }}
       >
-        {filteredPlaces.map((p) => (
+        {filteredBathrooms.map((p) => (
           <Marker
             key={p.id}
             position={p.position} // position of pin
             title={p.name} // shows location name when hovering pins
+            icon={pinIcon ?? undefined}
+            aria-title={p.name}
             onClick={() => setSelected(p)}
           />
         ))}
 
-        {selected && (
-          <InfoWindow
-            position={selected.position}
-            // close info window by clicking x
-            onCloseClick={() => setSelected(null)}
-          >
-            <div>
-              <strong>{selected.name}</strong>
-              {selected.description && <p>{selected.description}</p>}
-              {/* TODO: add genders, amenenities, and navigate button here */}
-              <Button // Get Directions button
-                variant="contained"
-                color="primary" // default blue unless we manually change it
-                size="small"
-                onClick={() => openWalkingDirections(
-                    selected.position.lat,
-                    selected.position.lng,
-                )}
-              >
-                Get Directions
-              </Button>
-            </div>
-          </InfoWindow>
+        {/* draft marker */}
+        {addMode && draftPosition && (
+          <Marker
+            position={draftPosition}
+            icon={pinIcon ?? undefined}
+          />
         )}
+
+        <InfoWindow
+          bathroom={selected}
+          setBathroom={setSelected}
+        />
       </GoogleMap>
+
+      {/* bathroom details */}
+      <InfoWindow
+        bathroom={selected}
+        setBathroom={setSelected}
+      />
 
       <MapFilters
         selectedGenders={selectedGenders}
@@ -383,6 +408,34 @@ function MapInner({apiKey}: { apiKey: string }) {
         onStallsChange={setSelectedStalls}
         onAmenitiesChange={setSelectedAmenities}
         onCleanlinessChange={setSelectedCleanliness}
+      />
+      {!addMode && !selected && (
+        <AddBathroomButton onClick={handleAddButtonClick} />
+      )}
+
+      <AddBathroomPeekCard
+        showPeekCard={addMode && !addOpen && draftPosition !== null}
+        onExpand={() => {
+          setAddOpen(true);
+          setBannerOpen(false);
+        }}
+      />
+
+      <AddBathroomForm
+        open={addOpen}
+        position={draftPosition}
+        name={formName}
+        description={formDescription}
+        onNameChange={setFormName}
+        onDescriptionChange={setFormDescription}
+        onOpen={() => {
+          setBannerOpen(false);
+        }}
+        onClose={handleFormCloseToPrompt}
+        onCreated={async () => {
+          await fetchVisiblePins();
+          cancelAddFlow();
+        }}
       />
     </div>
   );

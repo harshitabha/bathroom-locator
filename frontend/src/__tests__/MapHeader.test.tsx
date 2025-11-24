@@ -1,9 +1,75 @@
 import MapHeader from '../components/MapHeader';
-
-import {describe, it, beforeEach, afterEach, expect, vi} from 'vitest';
-import {render, screen, cleanup, fireEvent} from '@testing-library/react';
+import {supabase} from '../lib/supabaseClient';
+import {
+  describe,
+  it,
+  beforeEach,
+  afterEach,
+  expect,
+  vi,
+  type MockedFunction,
+} from 'vitest';
+import {
+  render,
+  screen,
+  cleanup,
+  fireEvent,
+  waitFor,
+} from '@testing-library/react';
 import {MemoryRouter} from 'react-router-dom';
 import '@testing-library/jest-dom/vitest';
+import {AuthError, type User, type UserResponse} from '@supabase/supabase-js';
+import AppContext from '../context/AppContext';
+import {getCurrentUserId} from '../App';
+import userEvent from '@testing-library/user-event';
+
+// mock supabase
+vi.mock('../lib/supabaseClient', () => {
+  return {
+    supabase: {
+      auth: {
+        getUser: vi.fn(),
+        signOut: vi.fn(),
+      },
+    },
+  };
+});
+
+/**
+ * Mocks sign out
+ * @param {string | null} error error message
+ * @returns {MockedFunction} mocked sign out function
+ */
+function mockSignOut(error: string | null) :
+MockedFunction<() => Promise<{ error: AuthError | null }>> {
+  const mockLogout = vi.mocked(supabase.auth.signOut);
+  mockLogout.mockResolvedValueOnce(
+      {error: error ? new AuthError(error) : null},
+  );
+
+  return mockLogout;
+}
+
+/**
+ * Mocks supabase get user id
+ * @param {string | null} userId user id
+ * @param {string | null} error error message
+ */
+function mockGetUserId(userId: string | null, error: string | null) {
+  const user : User | null = userId ? {
+    id: userId,
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString()} :
+    null;
+
+  const mockGetUser = vi.mocked(supabase.auth.getUser);
+  mockGetUser.mockResolvedValueOnce({
+    data: {user: user},
+    error: error ? new AuthError(error) : null,
+  } as UserResponse);
+}
 
 // mock useNavigate
 const mockNavigate = vi.fn();
@@ -23,48 +89,252 @@ type GoogleWithMaps = {
 };
 const importLibraryMock = vi.fn<GoogleWithMaps['maps']['importLibrary']>();
 
-beforeEach(() => {
-  (globalThis as unknown as { google: GoogleWithMaps }).google = {
-    maps: {
-      importLibrary: importLibraryMock,
-    },
-  };
-
-  importLibraryMock.mockResolvedValue({
-    AutocompleteSessionToken: vi.fn(),
-    AutocompleteSuggestion: {
-      fetchAutocompleteSuggestions: vi
-          .fn()
-          .mockResolvedValue({suggestions: []}),
-    },
-  });
-
-  render(
-      <MemoryRouter>
-        <MapHeader map={null} />
-      </MemoryRouter>,
-  );
-});
-
 afterEach(() => {
   cleanup();
   vi.resetAllMocks();
 });
 
-describe('Map Header component', () => {
-  it('renders the login button by default', async () => {
-    const loginButton = screen.getByRole('button', {name: 'Login'});
+describe('Map Header component when not logged in', () => {
+  beforeEach(() => {
+    const userId = null;
+    const error = null;
+    (globalThis as unknown as { google: GoogleWithMaps }).google = {
+      maps: {
+        importLibrary: importLibraryMock,
+      },
+    };
+
+    importLibraryMock.mockResolvedValue({
+      AutocompleteSessionToken: vi.fn(),
+      AutocompleteSuggestion: {
+        fetchAutocompleteSuggestions: vi
+            .fn()
+            .mockResolvedValue({suggestions: []}),
+      },
+    });
+
+    mockGetUserId(userId, error);
+
+    render(
+        <MemoryRouter>
+          <AppContext value={{getCurrentUserId}}>
+            <MapHeader
+              map={null}
+              bannerOpen={false}
+              onCancelBanner={() => {}}
+            />
+          </AppContext>
+        </MemoryRouter>,
+    );
+  });
+
+  it('renders the login button', async () => {
+    const loginButton = screen.getByText('Login');
     expect(loginButton);
   });
 
-  it('hides the profile picture by default', async () => {
-    const profilePicture = screen.queryByLabelText('profile-picture');
-    expect(profilePicture).not.toBeInTheDocument();
+  it('hides the profile picture', async () => {
+    const profilePicture = screen.queryByLabelText('Profile Picture');
+    expect(profilePicture).toBeNull();
   });
 
   it('leads to login page when login button is clicked', async () => {
-    const loginButton = screen.getByRole('button', {name: 'Login'});
+    const loginButton = screen.getByText('Login');
     fireEvent.click(loginButton);
     expect(mockNavigate).toHaveBeenCalledWith('/login');
+  });
+});
+
+describe('Map Header component when logged in', () => {
+  beforeEach(() => {
+    const userId = '123';
+    const error = null;
+    (globalThis as unknown as { google: GoogleWithMaps }).google = {
+      maps: {
+        importLibrary: importLibraryMock,
+      },
+    };
+
+    importLibraryMock.mockResolvedValue({
+      AutocompleteSessionToken: vi.fn(),
+      AutocompleteSuggestion: {
+        fetchAutocompleteSuggestions: vi
+            .fn()
+            .mockResolvedValue({suggestions: []}),
+      },
+    });
+
+    mockGetUserId(userId, error);
+
+    render(
+        <MemoryRouter>
+          <AppContext value={{getCurrentUserId}}>
+            <MapHeader
+              map={null}
+              bannerOpen={false}
+              onCancelBanner={() => {}}
+            />
+          </AppContext>
+        </MemoryRouter>,
+    );
+  });
+
+  it('hides the login button', async () => {
+    await waitFor(() => {
+      expect(screen.queryByText('Login')).toBeNull();
+    });
+  });
+
+  it('renders the profile picture', async () => {
+    await waitFor(() => {
+      screen.getByLabelText('Profile Picture');
+    });
+  });
+
+  it('displays menu when profile picture is clicked', async () => {
+    const profilePicture = await waitFor(() => {
+      return screen.getByLabelText('Profile Picture');
+    });
+
+    fireEvent.click(profilePicture);
+
+    screen.getByText('Logout');
+  });
+
+  it('hides menu when clicking escape button', async () => {
+    const profilePicture = await waitFor(() => {
+      return screen.getByLabelText('Profile Picture');
+    });
+
+    await fireEvent.click(profilePicture);
+
+    // click escape button
+    await userEvent.keyboard('{Escape}');
+
+    await waitFor(() => {
+      expect(screen.queryByText('Logout')).toBeNull();
+    });
+  });
+
+  it('renders login button when logout is successful', async () => {
+    const profilePicture = await waitFor(() => {
+      return screen.getByLabelText('Profile Picture');
+    });
+
+    fireEvent.click(profilePicture);
+
+    const logoutButton = screen.getByText('Logout');
+    // mock succesful sign out
+    mockSignOut(null);
+    fireEvent.click(logoutButton);
+    await waitFor(() => {
+      screen.getByText('Login');
+    });
+  });
+});
+
+describe('Map Header component on sign out failure', async () => {
+  beforeEach(() => {
+    const userId = '123';
+    const error = null;
+    (globalThis as unknown as { google: GoogleWithMaps }).google = {
+      maps: {
+        importLibrary: importLibraryMock,
+      },
+    };
+
+    importLibraryMock.mockResolvedValue({
+      AutocompleteSessionToken: vi.fn(),
+      AutocompleteSuggestion: {
+        fetchAutocompleteSuggestions: vi
+            .fn()
+            .mockResolvedValue({suggestions: []}),
+      },
+    });
+
+    mockGetUserId(userId, error);
+
+    mockSignOut('Error signing user out');
+
+    render(
+        <MemoryRouter>
+          <AppContext value={{getCurrentUserId}}>
+            <MapHeader
+              map={null}
+              bannerOpen={false}
+              onCancelBanner={() => {}}
+            />
+          </AppContext>
+        </MemoryRouter>,
+    );
+  });
+
+  it('doesn\'t display login button', async () => {
+    const profilePicture = await waitFor(() => {
+      return screen.getByLabelText('Profile Picture');
+    });
+
+    fireEvent.click(profilePicture);
+
+    const logoutButton = screen.getByText('Logout');
+    fireEvent.click(logoutButton);
+
+    await waitFor(() => {
+      expect(screen.queryByText('Login')).toBeNull();
+    });
+  });
+
+  it('keeps profile pic display', async () => {
+    const profilePicture = await waitFor(() => {
+      return screen.getByLabelText('Profile Picture');
+    });
+
+    fireEvent.click(profilePicture);
+
+    const logoutButton = screen.getByText('Logout');
+    fireEvent.click(logoutButton);
+
+    await waitFor(() => {
+      screen.getByLabelText('Profile Picture');
+    });
+  });
+});
+
+describe('Map Header component when getting current user fails', () => {
+  beforeEach(() => {
+    const userId = null;
+    const error = null;
+    (globalThis as unknown as { google: GoogleWithMaps }).google = {
+      maps: {
+        importLibrary: importLibraryMock,
+      },
+    };
+
+    importLibraryMock.mockResolvedValue({
+      AutocompleteSessionToken: vi.fn(),
+      AutocompleteSuggestion: {
+        fetchAutocompleteSuggestions: vi
+            .fn()
+            .mockResolvedValue({suggestions: []}),
+      },
+    });
+
+    mockGetUserId(userId, error);
+
+    render(
+        <MemoryRouter>
+          <AppContext value={{getCurrentUserId}}>
+            <MapHeader
+              map={null}
+              bannerOpen={false}
+              onCancelBanner={() => {}}
+            />
+          </AppContext>
+        </MemoryRouter>,
+    );
+  });
+
+  it('defaults to login button', async () => {
+    screen.getByText('Login');
   });
 });
