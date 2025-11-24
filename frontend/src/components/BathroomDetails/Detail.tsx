@@ -3,7 +3,7 @@ import './Detail.css';
 
 const Detail = (props: DetailProps) => {
   return (
-    <Box className='flex'>
+    <Box className='flex detail-container'>
       <Typography variant='body1' className='details-label'>
         {props.name}:
       </Typography>
