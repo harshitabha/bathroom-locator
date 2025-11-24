@@ -11,7 +11,7 @@ import type {Dispatch, SetStateAction} from 'react';
 import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
 import type {GenderOptions, Bathroom} from '../../types';
-import Detail from '../Detail';
+import Detail from './Detail';
 
 interface bathroomDetailsProps {
   bathroom: Bathroom,
