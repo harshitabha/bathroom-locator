@@ -295,6 +295,7 @@ function MapInner({apiKey}: { apiKey: string }) {
             position={p.position} // position of pin
             title={p.name} // shows location name when hovering pins
             icon={pinIcon ?? undefined}
+            aria-title={p.name}
             onClick={() => setSelected(p)}
           />
         ))}
@@ -306,6 +307,11 @@ function MapInner({apiKey}: { apiKey: string }) {
             icon={pinIcon ?? undefined}
           />
         )}
+
+        <InfoWindow
+          bathroom={selected}
+          setBathroom={setSelected}
+        />
       </GoogleMap>
 
       {/* bathroom details */}

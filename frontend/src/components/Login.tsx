@@ -42,11 +42,12 @@ const Login = () => {
               Login
             </Typography>
             <div>
-              {errorMessage ? (
-                                <div>
-                                  <Alert severity="error">{errorMessage}</Alert>
-                                </div>
-                            ) : null }
+              {
+                errorMessage ?
+                <div>
+                  <Alert severity="error">{errorMessage}</Alert>
+                </div> : null
+              }
             </div>
             <Stack spacing={4}>
               <TextField
