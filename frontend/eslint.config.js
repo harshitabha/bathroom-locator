@@ -36,6 +36,7 @@ export default [
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      "quotes": ["error", "single"],
     },
     languageOptions: {
       ...react.configs.flat.recommended.languageOptions,

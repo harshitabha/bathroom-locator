@@ -20,7 +20,7 @@ INSERT INTO bathrooms (id, data) VALUES (
     "description": "more details",
     "num_stalls": 1,
     "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true},
-    "gender": {"female": false, "male": false, "gender_neutral": false}
+    "gender": {"female": true, "male": false, "gender_neutral": true}
   }'::jsonb
 );
 
