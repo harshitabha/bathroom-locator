@@ -7,35 +7,18 @@ import {
 import {
   GoogleMap,
   Marker,
-  InfoWindow,
   useLoadScript,
 } from '@react-google-maps/api';
+
 import './Map.css';
-import {openWalkingDirections} from '../utils/navigation';
-import Button from '@mui/material/Button';
+import MapHeader from './MapHeader';
+import InfoWindow from './InfoWindow';
+import type {Bathroom} from '../types';
 import AddBathroomButton from './AddBathroomButton';
 import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
-import MapHeader from './MapHeader';
 import {useAuth} from '../providers/AuthProvider';
-
-type Place = {
-  id: string;
-  name: string;
-  position: google.maps.LatLngLiteral;
-  description?: string;
-  numStalls?: number;
-  amenities?: {
-    toilet_paper?: boolean;
-    soap?: boolean;
-    paper_towel?: boolean;
-    hand_dryer?: boolean;
-    menstrual_products?: boolean;
-    mirror?: boolean;
-  };
-  likes?: number;
-};
 
 const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -51,9 +34,9 @@ export default Map;
  * @returns {object} JSX compoent for the inner map content
  */
 function MapInner({apiKey}: { apiKey: string }) {
-  const [places, setPlaces] = useState<Place[]>([]); // bathroom info
+  const [bathrooms, setBathrooms] = useState<Bathroom[]>([]); // bathroom info
   // tracks which pin is selected (which info window to show)
-  const [selected, setSelected] = useState<Place | null>(null);
+  const [selected, setSelected] = useState<Bathroom | null>(null);
   // select where to add new pin
   const [addMode, setAddMode] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -181,17 +164,21 @@ function MapInner({apiKey}: { apiKey: string }) {
         const bathroomData = await res.json();
 
         // ensure data is of correct type
-        const parsedBathroomData = (bathroomData as Place[])
+        const parsedBathroomData = (bathroomData as Bathroom[])
             .map((bathroom) => ({
               id: bathroom.id,
               name: bathroom.name,
               position: bathroom.position,
               description: bathroom.description,
+              num_stalls: bathroom.num_stalls,
+              amenities: bathroom.amenities,
+              gender: bathroom.gender,
+              likes: bathroom.likes,
             }));
 
-        setPlaces(parsedBathroomData);
+        setBathrooms(parsedBathroomData);
       } else if (res.status === 404) {
-        setPlaces([]); // handle empty response
+        setBathrooms([]); // handle empty response
       } else {
         console.error('Error fetching bathrooms:', res.status);
       }
@@ -237,7 +224,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           console.error('Polling error:', res.status);
         }
 
-        const newBathrooms: Place[] = await res.json();
+        const newBathrooms: Bathroom[] = await res.json();
 
         if (newBathrooms.length > 0 && mapRef.current) {
           const bounds = mapRef.current.getBounds();
@@ -251,10 +238,10 @@ function MapInner({apiKey}: { apiKey: string }) {
               return bounds.contains(pos);
             });
             if (visibleNewBathrooms.length > 0) {
-              setPlaces((prevPlaces) => [
-                ...prevPlaces,
+              setBathrooms((prevBathrooms) => [
+                ...prevBathrooms,
                 ...visibleNewBathrooms.filter((nb) =>
-                  !prevPlaces.some((p) => p.id === nb.id),
+                  !prevBathrooms.some((p) => p.id === nb.id),
                 ),
               ]);
             }
@@ -303,7 +290,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           disableDefaultUI: true,
         }}
       >
-        {places.map((p) => (
+        {bathrooms.map((p) => (
           <Marker
             key={p.id}
             position={p.position} // position of pin
@@ -320,34 +307,15 @@ function MapInner({apiKey}: { apiKey: string }) {
             icon={pinIcon ?? undefined}
           />
         )}
-
-        {selected && (
-          <InfoWindow
-            position={selected.position}
-            // close info window by clicking x
-            onCloseClick={() => setSelected(null)}
-          >
-            <div>
-              <strong>{selected.name}</strong>
-              {selected.description && <p>{selected.description}</p>}
-              {/* TODO: add genders, amenenities, and navigate button here */}
-              <Button // Get Directions button
-                variant="contained"
-                color="primary" // default blue unless we manually change it
-                size="small"
-                onClick={() => openWalkingDirections(
-                    selected.position.lat,
-                    selected.position.lng,
-                )}
-              >
-                Get Directions
-              </Button>
-            </div>
-          </InfoWindow>
-        )}
       </GoogleMap>
 
-      {!addMode && user && (
+      {/* bathroom details */}
+      <InfoWindow
+        bathroom={selected}
+        setBathroom={setSelected}
+      />
+
+      {!addMode && !selected && user && (
         <AddBathroomButton onClick={handleAddButtonClick} />
       )}
 

@@ -89,7 +89,7 @@ describe('Map Header component', () => {
   it('hides the profile picture by default', async () => {
     renderWithAuth(null);
     const profilePicture = screen.queryByLabelText('profile-picture');
-    expect(profilePicture).not.toBeInTheDocument();
+    expect(profilePicture).toBeNull();
   });
 
   it('renders profile picture when logged in', () => {

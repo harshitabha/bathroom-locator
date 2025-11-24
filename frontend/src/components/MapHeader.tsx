@@ -46,7 +46,7 @@ const MapHeader = ({map, bannerOpen, onCancelBanner}: Props) => {
             }}
             aria-label='profile-picture'
             onClick={() => {
-              signOut();
+              signOut(); // replace
             }}
           />
         ) : (
