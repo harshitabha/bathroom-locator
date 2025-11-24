@@ -100,7 +100,6 @@ async function likeBathroom(
 
 const Like = ({bathroom, userId, likes, setLikes}: LikeProps) => {
   const [liked, setLiked] = useState(false);
-
   useEffect(() => {
     /**
      * checks if user has liked the current bathroom
@@ -110,7 +109,9 @@ const Like = ({bathroom, userId, likes, setLikes}: LikeProps) => {
       setLiked(likedBathrooms.includes(bathroom.id));
     }
 
-    isLiked();
+    if (userId) {
+      isLiked();
+    };
   }, [userId, bathroom.id]);
 
   const handleToggle = async () => {
