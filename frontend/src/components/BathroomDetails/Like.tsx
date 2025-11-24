@@ -150,8 +150,8 @@ const Like = ({bathroom, userId, likes, setLikes}: LikeProps) => {
       {liked ?
         <FavoriteIcon color="error" aria-label={`Unlike ${bathroom.name}`}/> :
         <FavoriteBorderIcon aria-label={`Like ${bathroom.name}`}/>}
-      <Typography color="textSecondary">
-        {likes > 0 && likes}
+      <Typography color="textSecondary" className="like-number">
+        {likes > 0 ? likes : null}
       </Typography>
     </div> :
     null

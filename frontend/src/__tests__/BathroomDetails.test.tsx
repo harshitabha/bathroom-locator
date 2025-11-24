@@ -145,7 +145,7 @@ describe('Bathroom Details component when bathroom has >= 5 likes', () => {
   });
 
   it('renders verified bathroom', async () => {
-    expect(screen.queryByLabelText('Verified Bathroom'));
+    screen.findByLabelText('Verified Bathroom');
   });
 });
 
