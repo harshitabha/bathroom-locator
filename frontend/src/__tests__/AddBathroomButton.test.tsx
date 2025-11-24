@@ -20,6 +20,7 @@ function ButtonBannerWrapper({user}: {
     <AuthContext.Provider
       value={{
         user,
+        getCurrentUserId: vi.fn(),
         signOut: vi.fn(),
       }}
     >

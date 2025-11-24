@@ -1,5 +1,6 @@
-import {Box, Button, Avatar} from '@mui/material';
+import {Box, Button, Avatar, Menu, MenuItem} from '@mui/material';
 import {useNavigate} from 'react-router-dom';
+import {useState} from 'react';
 import SearchBar from './SearchBar';
 import AddBathroomBanner from './AddBathroomBanner';
 import {useAuth} from '../providers/AuthProvider';
@@ -11,8 +12,16 @@ type Props = {
 };
 
 const MapHeader = ({map, bannerOpen, onCancelBanner}: Props) => {
-  const {user, signOut} = useAuth();
   const navigate = useNavigate();
+  const {user, signOut} = useAuth();
+
+  // handling dropdown menu
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = anchorEl ? true : false;
+  const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => setAnchorEl(null);
 
   return (
     <Box sx={{
@@ -39,16 +48,26 @@ const MapHeader = ({map, bannerOpen, onCancelBanner}: Props) => {
           <SearchBar map={map} />
         </Box>
         {user ? (
-          <Avatar
-            sx={{
-              bgcolor: 'primary.main',
-              color: 'background.default',
-            }}
-            aria-label='profile-picture'
-            onClick={() => {
-              signOut(); // replace
-            }}
-          />
+          <>
+            <Avatar
+              sx={{
+                bgcolor: 'primary.main',
+                color: 'background.default',
+              }}
+              onClick={handleAvatarClick}
+              aria-label='Profile Picture'
+            />
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              sx={{marginTop: 1}}
+            >
+              <MenuItem onClick={signOut} sx={{paddingY: 0}}>
+                Logout
+              </MenuItem>
+            </Menu>
+          </>
         ) : (
           <Button
             variant="contained"

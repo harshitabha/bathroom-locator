@@ -315,7 +315,7 @@ function MapInner({apiKey}: { apiKey: string }) {
         setBathroom={setSelected}
       />
 
-      {!addMode && !selected && user && (
+      {!addMode && !selected && !!user && (
         <AddBathroomButton onClick={handleAddButtonClick} />
       )}
 

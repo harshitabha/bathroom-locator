@@ -31,9 +31,7 @@ describe('AuthProvider', () => {
 
     const {result} = renderHook(() => useAuth(), {wrapper});
 
-    await waitFor(() => {
-      expect(result.current.user?.id).toBe('123');
-    });
+    await waitFor(() => expect(result.current.user?.id).toBe('123'));
   });
 
   it('sets user to null when getUser returns null', async () => {
@@ -50,9 +48,7 @@ describe('AuthProvider', () => {
     );
 
     const {result} = renderHook(() => useAuth(), {wrapper});
-
     await waitFor(() => result.current.user === null);
-
     expect(result.current.user).toBe(null);
   });
 
@@ -64,11 +60,7 @@ describe('AuthProvider', () => {
     );
 
     const {result} = renderHook(() => useAuth(), {wrapper});
-
-    await act(async () => {
-      await result.current.signOut();
-    });
-
+    await act(async () => await result.current.signOut());
     expect(result.current.user).toBe(null);
   });
 
@@ -90,13 +82,8 @@ describe('AuthProvider', () => {
     );
 
     const {result} = renderHook(() => useAuth(), {wrapper});
-
     await waitFor(() => result.current.user?.id === '123');
-
-    await act(async () => {
-      await result.current.signOut();
-    });
-
+    await act(async () => await result.current.signOut());
     expect(result.current.user?.id).toBe('123');
   });
 });
