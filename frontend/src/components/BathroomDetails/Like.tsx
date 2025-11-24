@@ -33,20 +33,19 @@ async function getLikedBathrooms(userId: string | null) {
 /**
  * removes the user's like from the bathroom
  * @param {string} userId user id
- * @param {string} bathroomId bathroom id
- * @param {number} bathroomLikes saved bathroom likes
+ * @param {Bathroom} bathroom selected bathroom
  * @param {React.Dispatch<React.SetStateAction<boolean>>} setLiked liked setter
  * @param {React.Dispatch<React.SetStateAction<number>>} setLikes likes setter
  * @param {number} likes number of likes
  */
 async function unlikeBathroom(
     userId: string | null,
-    bathroomId: string,
-    bathroomLikes: number,
+    bathroom: Bathroom,
     setLiked: React.Dispatch<React.SetStateAction<boolean>>,
     setLikes: React.Dispatch<React.SetStateAction<number>>,
     likes: number,
 ) {
+  const bathroomId = bathroom.id;
   const res = await fetch('http://localhost:3000/user/likes', {
     method: 'delete',
     headers: {'Content-Type': 'application/json'},
@@ -59,7 +58,7 @@ async function unlikeBathroom(
   if (res.ok) {
     setLiked(false);
     setLikes(likes - 1);
-    bathroomLikes -= 1;
+    bathroom.likes -= 1;
   } else {
     console.error('Error deleting like: ', res.statusText);
   }
@@ -70,20 +69,19 @@ async function unlikeBathroom(
 /**
  * adds like to the bathroom
  * @param {string} userId user id
- * @param {string} bathroomId bathroom id
- * @param {number} bathroomLikes saved bathroom likes
+ * @param {Bathroom} bathroom selected bathroom
  * @param {React.Dispatch<React.SetStateAction<boolean>>} setLiked liked setter
  * @param {React.Dispatch<React.SetStateAction<number>>} setLikes likes setter
  * @param {number} likes number of likes
  */
 async function likeBathroom(
     userId: string | null,
-    bathroomId: string,
-    bathroomLikes: number,
+    bathroom: Bathroom,
     setLiked: React.Dispatch<React.SetStateAction<boolean>>,
     setLikes: React.Dispatch<React.SetStateAction<number>>,
     likes: number,
 ) {
+  const bathroomId = bathroom.id;
   const res = await fetch('http://localhost:3000/user/likes', {
     method: 'post',
     headers: {'Content-Type': 'application/json'},
@@ -96,7 +94,7 @@ async function likeBathroom(
   if (res.ok) {
     setLiked(true);
     setLikes(likes + 1);
-    bathroomLikes += 1;
+    bathroom.likes += 1;
   } else {
     console.error('Error adding like: ', res.statusText);
   }
@@ -125,8 +123,7 @@ const Like = ({bathroom, userId, likes, setLikes}: LikeProps) => {
     if (liked) {
       await unlikeBathroom(
           userId,
-          bathroom.id,
-          bathroom.likes,
+          bathroom,
           setLiked,
           setLikes,
           likes,
@@ -134,8 +131,7 @@ const Like = ({bathroom, userId, likes, setLikes}: LikeProps) => {
     } else {
       await likeBathroom(
           userId,
-          bathroom.id,
-          bathroom.likes,
+          bathroom,
           setLiked,
           setLikes,
           likes,
