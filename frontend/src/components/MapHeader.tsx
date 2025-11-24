@@ -1,7 +1,10 @@
-import {Box, Button, Avatar} from '@mui/material';
+import {Box, Button, Avatar, Menu, MenuItem} from '@mui/material';
 import {useNavigate} from 'react-router-dom';
+import {useState, useEffect, useContext} from 'react';
 import SearchBar from './SearchBar';
 import AddBathroomBanner from './AddBathroomBanner';
+import AppContext from '../context/AppContext';
+import {supabase} from '../lib/supabaseClient';
 
 type Props = {
   map: google.maps.Map | null;
@@ -10,8 +13,35 @@ type Props = {
 };
 
 const MapHeader = ({map, bannerOpen, onCancelBanner}: Props) => {
-  const loggedIn = false; // TODO: make this real (maybe pass it down from App)
   const navigate = useNavigate();
+  const [userId, setUserId] = useState<string | null>('');
+  const appContext = useContext(AppContext);
+
+  // handling dropdown menu
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = anchorEl ? true : false;
+  const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => setAnchorEl(null);
+
+  useEffect(() => {
+    appContext?.getCurrentUserId().then(setUserId);
+  }, []);
+
+  /**
+   * signs out current user
+   */
+  async function signOutUser() {
+    const {error} = await supabase.auth.signOut();
+
+    if (error) {
+      console.error('Error signing out:', error.message);
+    } else {
+      setUserId(null);
+    }
+  }
+
 
   return (
     <Box sx={{
@@ -37,14 +67,27 @@ const MapHeader = ({map, bannerOpen, onCancelBanner}: Props) => {
         <Box sx={{flex: 1, mr: 1}}>
           <SearchBar map={map} />
         </Box>
-        {loggedIn ?
-        <Avatar
-          sx={{
-            bgcolor: 'primary.main',
-            color: 'background.default',
-          }}
-          aria-label='profile-picture'
-        /> :
+        {userId ? (
+        <>
+          <Avatar
+            sx={{
+              bgcolor: 'primary.main',
+              color: 'background.default',
+            }}
+            onClick={handleAvatarClick}
+            aria-label='Profile Picture'
+          />
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            sx={{marginTop: 1}}
+          >
+            <MenuItem onClick={signOutUser} sx={{paddingY: 0}}>
+              Logout
+            </MenuItem>
+          </Menu>
+        </> ):
         <Button
           variant="contained"
           size="small"
