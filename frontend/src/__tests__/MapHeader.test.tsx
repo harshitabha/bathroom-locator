@@ -129,7 +129,7 @@ describe('Map Header component when not logged in', () => {
   });
 
   it('hides the profile picture', async () => {
-    const profilePicture = screen.queryByLabelText('profile-picture');
+    const profilePicture = screen.queryByLabelText('Profile Picture');
     expect(profilePicture).not.toBeInTheDocument();
   });
 
@@ -172,30 +172,30 @@ describe('Map Header component when logged in', () => {
 
   it('hides the login button', async () => {
     await waitFor(() => {
-      const loginButton = screen.queryByRole('button', {name: 'Login'});
-      expect(loginButton).not.toBeInTheDocument();
+      const loginButton = screen.queryByText('Login');
+      expect(loginButton).toBeNull();
     });
   });
 
   it('renders the profile picture', async () => {
     await waitFor(() => {
-      expect(screen.getByLabelText('profile-picture'));
+      screen.getByLabelText('Profile Picture');
     });
   });
 
   it('displays menu when profile picture is clicked', async () => {
     const profilePicture = await waitFor(() => {
-      return screen.getByLabelText('profile-picture');
+      return screen.getByLabelText('Profile Picture');
     });
 
     fireEvent.click(profilePicture);
 
-    expect(screen.getByRole('menuitem', {name: 'Logout'}));
+    screen.getByText('Logout');
   });
 
   it('hides menu when clicking escape button', async () => {
     const profilePicture = await waitFor(() => {
-      return screen.getByLabelText('profile-picture');
+      return screen.getByLabelText('Profile Picture');
     });
 
     await fireEvent.click(profilePicture);
@@ -205,24 +205,24 @@ describe('Map Header component when logged in', () => {
     await fireEvent.keyDown(menu, {key: 'Escape', code: 'Escape'});
 
     await waitFor(() => {
-      expect(
-          screen.queryByRole('menuitem', {name: 'Logout'}),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText('Logout')).toBeNull();
     });
   });
 
-  it('calls sign out when when logout is clicked', async () => {
+  it('renders login button when logout is successful', async () => {
     const profilePicture = await waitFor(() => {
-      return screen.getByLabelText('profile-picture');
+      return screen.getByLabelText('Profile Picture');
     });
 
     fireEvent.click(profilePicture);
 
     const logoutButton = screen.getByRole('menuitem', {name: 'Logout'});
     // mock succesful sign out
-    const mockLogout = mockSignOut(null);
+    mockSignOut(null);
     fireEvent.click(logoutButton);
-    expect(mockLogout).toHaveBeenCalled();
+    await waitFor(() => {
+      screen.getByText('Login');
+    });
   });
 });
 
@@ -260,7 +260,7 @@ describe('Map Header component on sign out failure', async () => {
 
   it('doesn\'t display login button', async () => {
     const profilePicture = await waitFor(() => {
-      return screen.getByLabelText('profile-picture');
+      return screen.getByLabelText('Profile Picture');
     });
 
     fireEvent.click(profilePicture);
@@ -269,13 +269,13 @@ describe('Map Header component on sign out failure', async () => {
     fireEvent.click(logoutButton);
 
     await waitFor(() => {
-      expect(screen.queryByText('Login')).not.toBeInTheDocument();
+      expect(screen.queryByText('Login')).toBeNull();
     });
   });
 
   it('keeps profile pic display', async () => {
     const profilePicture = await waitFor(() => {
-      return screen.getByLabelText('profile-picture');
+      return screen.getByLabelText('Profile Picture');
     });
 
     fireEvent.click(profilePicture);
@@ -284,7 +284,7 @@ describe('Map Header component on sign out failure', async () => {
     fireEvent.click(logoutButton);
 
     await waitFor(() => {
-      expect(screen.getByLabelText('profile-picture'));
+      screen.getByLabelText('Profile Picture');
     });
   });
 });
@@ -320,7 +320,6 @@ describe('Map Header component when getting current user fails', () => {
   });
 
   it('defaults to login button', async () => {
-    const loginButton = screen.getByRole('button', {name: 'Login'});
-    expect(loginButton);
+    screen.getByText('Login');
   });
 });

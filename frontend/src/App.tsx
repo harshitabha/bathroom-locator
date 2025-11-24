@@ -15,16 +15,12 @@ import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 export async function getCurrentUserId() : Promise<string | null> {
   const {data: {user}, error} = await supabase.auth.getUser();
 
-  if (error) {
-    console.error('Error getting current user: ', error.message);
+  if (!user || error) {
+    if (error) console.error('Error getting current user: ', error.message);
     return null;
   }
 
-  if (user) {
-    return user.id;
-  } else {
-    return null;
-  }
+  return user.id;
 }
 
 const App = () => {

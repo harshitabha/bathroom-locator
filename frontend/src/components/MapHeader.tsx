@@ -16,7 +16,7 @@ const MapHeader = ({map}: Props) => {
 
   // handling dropdown menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+  const open = anchorEl ? true : false;
   const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -61,14 +61,15 @@ const MapHeader = ({map}: Props) => {
               color: 'background.default',
             }}
             onClick={handleAvatarClick}
-            aria-label='profile-picture'
+            aria-label='Profile Picture'
           />
           <Menu
             anchorEl={anchorEl}
             open={open}
             onClose={handleClose}
+            sx={{marginTop: 1}}
           >
-            <MenuItem onClick={signOutUser}>
+            <MenuItem onClick={signOutUser} sx={{paddingY: 0}}>
               Logout
             </MenuItem>
           </Menu>
