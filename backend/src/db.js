@@ -69,7 +69,7 @@ export async function getBathroomsInBounds(
         (b.data->>'num_stalls')::int AS num_stalls,
         (b.data->'amenities') AS amenities,
         (b.data->'gender') AS gender,
-        (b.data->>'cleanliness')::int AS cleanliness,
+        COALESCE((b.data->>'cleanliness')::int, 0) AS cleanliness,
         COALESCE((b.data->>'likes')::int, 0) AS likes
       FROM bathrooms b
       WHERE

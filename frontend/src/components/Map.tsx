@@ -142,7 +142,9 @@ function MapInner({apiKey}: { apiKey: string }) {
 
     try {
       const res = await fetch(
-          `http://localhost:3000/bathroom?minLng=${minLng}&minLat=${minLat}&maxLng=${maxLng}&maxLat=${maxLat}`,
+          `http://localhost:3000/bathroom?minLng=${minLng}` +
+          `&minLat=${minLat}&maxLng=${maxLng}&maxLat=${maxLat}` +
+          `&limit=200`,
       );
 
       if (res.ok) {
