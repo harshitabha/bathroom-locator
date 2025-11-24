@@ -21,6 +21,7 @@ import '@testing-library/jest-dom/vitest';
 import {AuthError, type User, type UserResponse} from '@supabase/supabase-js';
 import AppContext from '../context/AppContext';
 import {getCurrentUserId} from '../App';
+import userEvent from '@testing-library/user-event';
 
 // mock supabase
 vi.mock('../lib/supabaseClient', () => {
@@ -208,8 +209,7 @@ describe('Map Header component when logged in', () => {
     await fireEvent.click(profilePicture);
 
     // click escape button
-    const menu = screen.getByRole('menu');
-    await fireEvent.keyDown(menu, {key: 'Escape', code: 'Escape'});
+    await userEvent.keyboard('{Escape}');
 
     await waitFor(() => {
       expect(screen.queryByText('Logout')).toBeNull();
