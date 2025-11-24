@@ -12,8 +12,8 @@ services:
     image: postgres
     restart: always
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${PGDATABASE}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
     volumes:
       - ./sql/create_database.sql:/docker-entrypoint-initdb.d/1.databases.sql
       - ./sql/create_schema.sql:/docker-entrypoint-initdb.d/2.create_schema.sql
