@@ -5,38 +5,15 @@ import '@testing-library/jest-dom/vitest';
 import * as navigation from '../utils/navigation';
 import BathroomDetails from '../components/BathroomDetails/BathroomDetails';
 import InfoWindow from '../components/InfoWindow';
+import {basicBathroom} from './constants';
+import type {Bathroom} from '../types';
 
-const bathroom = {
-  id: '5f1169fe-4db2-48a2-b059-f05cfe63588b',
-  name: 'Namaste Lounge Bathroom',
-  position: {
-    'lat': 37.00076576303953,
-    'lng': -122.05719563060227,
-  },
-  description: 'more details',
-  num_stalls: 1,
-  amenities: {
-    'soap': true,
-    'mirror': true,
-    'hand_dryer': false,
-    'paper_towel': true,
-    'toilet_paper': true,
-    'menstrual_products': true,
-  },
-  gender: {
-    'male': false,
-    'female': true,
-    'gender_neutral': false,
-  },
-  likes: 0,
-};
+afterEach(() => {
+  cleanup();
+  vi.resetAllMocks();
+});
 
 describe('Bathroom Details visibility', () => {
-  afterEach(() => {
-    cleanup();
-    vi.resetAllMocks();
-  });
-
   it('by default, doesn\'t render the Bathroom Details', () => {
     render(
         <InfoWindow bathroom={null} setBathroom={() => {}} />,
@@ -47,16 +24,15 @@ describe('Bathroom Details visibility', () => {
 
   it('renders the Bathroom Details when a bathroom is selected', async () => {
     render(
-        <InfoWindow bathroom={bathroom} setBathroom={() => {}} />,
+        <InfoWindow bathroom={basicBathroom} setBathroom={() => {}} />,
     );
-    const bathroomDetails = screen.queryByText('Namaste Lounge Bathroom');
-    expect(bathroomDetails).toBeInTheDocument();
+    screen.getByText('Namaste Lounge Bathroom');
   });
 
   it('closes when you click away', () => {
     const mockSetBathroom = vi.fn();
     render(
-        <InfoWindow bathroom={bathroom} setBathroom={mockSetBathroom} />,
+        <InfoWindow bathroom={basicBathroom} setBathroom={mockSetBathroom} />,
     );
     const backdrop = document.querySelector('.MuiBackdrop-root')!;
     fireEvent.click(backdrop);
@@ -68,7 +44,7 @@ describe('Bathroom Details component content', () => {
   beforeEach(() => {
     render(
         <BathroomDetails
-          bathroom={bathroom}
+          bathroom={basicBathroom}
           setBathroom={() => {}}
         />,
     );
@@ -88,13 +64,49 @@ describe('Bathroom Details component content', () => {
     expect(screen.getByText('Navigate'));
   });
 
+  it('Doesn\'t show additional details if there are' +
+    'no additional details', async () => {
+    const addtionalDetailsHeader = screen.queryByText('Additional Details');
+    expect(addtionalDetailsHeader).toBeNull();
+  });
+
   it('calls openWalkingDirections when you click on Navigate button', () => {
     const openWalkingDirectionsMock = vi.spyOn(
         navigation, 'openWalkingDirections').mockImplementation(() => {});
-    const button = screen.getByRole('button', {name: 'Navigate'});
+    const button = screen.getByText('Navigate');
     fireEvent.click(button);
 
     expect(openWalkingDirectionsMock)
         .toHaveBeenCalledWith(37.00076576303953, -122.05719563060227);
+  });
+});
+
+describe('Rendering Additional Details', async () => {
+  describe('Gender information', async () => {
+    beforeEach(() => {
+      const bathroomWithGender: Bathroom = {
+        ...basicBathroom,
+        gender: {
+          female: true,
+          male: false,
+          gender_neutral: true,
+        },
+      };
+      render(
+          <BathroomDetails
+            bathroom={bathroomWithGender}
+            setBathroom={() => {}}
+          />,
+      );
+    });
+
+    it('Renders gender label', async () => {
+      screen.getByText('Gender:');
+    });
+
+    it('Renders the true options in bathroom', async () => {
+      screen.getByText('Female');
+      screen.getByText('Gender Neutral');
+    });
   });
 });
