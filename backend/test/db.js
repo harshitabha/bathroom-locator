@@ -3,14 +3,14 @@ import pg from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
-process.env.POSTGRES_DB='test';
+process.env.PGDATABASE='test';
 
-const pool = new pg.Pool({
-  host: 'localhost',
-  port: 5432,
-  database: process.env.POSTGRES_DB,
-  user: 'postgres',
-  password: process.env.DB_PASSWORD,
+export const pool = new pg.Pool({
+  host: process.env.PGHOST,
+  port: process.env.PGPORT,
+  database: process.env.PGDATABASE,
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
 });
 
 const run = async (file) => {
