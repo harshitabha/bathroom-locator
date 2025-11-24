@@ -111,6 +111,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
         disableRipple
         disableElevation
         onClick={handleButtonClick}
+        aria-label={`${label} filter`}
         data-testid={dataTestId}
         endIcon={open ? (
           <ExpandLessIcon fontSize='small' />
@@ -119,9 +120,10 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
         )}
         sx={{
           'textTransform': 'none',
-          'borderRadius': 3,
-          'px': 1,
-          'py': 0.25,
+          'borderRadius': 2,
+          'px': 1.25,
+          'py': 0.75,
+          'minHeight': 32,
           'mr': 0.75,
           'bgcolor': 'background.paper',
           'color': 'text.primary',
@@ -136,8 +138,8 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
           sx={{
             color: 'inherit',
             fontWeight: 500,
-            fontSize: 12,
-            lineHeight: 1,
+            fontSize: 13,
+            lineHeight: 1.2,
             whiteSpace: 'nowrap',
           }}
         >
@@ -241,7 +243,7 @@ const MapFilters: React.FC<MapFiltersProps> = ({
         left: 8,
         right: 8,
         top: 55,
-        zIndex: 90,
+        zIndex: 40,
         display: 'flex',
         justifyContent: 'flex-start',
         pointerEvents: 'none',

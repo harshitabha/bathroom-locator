@@ -63,36 +63,30 @@ afterEach(() => {
 
 describe('MapFilters', () => {
   it('renders gender filter button', () => {
-    const genderBtn = screen.getByTestId('filter-gender');
-    expect(genderBtn).toBeInTheDocument();
+    screen.getByLabelText('Gender filter');
   });
 
   it('renders stalls filter button', () => {
-    const stallsBtn = screen.getByTestId('filter-stalls');
-    expect(stallsBtn).toBeInTheDocument();
+    screen.getByLabelText('Stalls filter');
   });
 
   it('renders amenities filter button', () => {
-    const amenitiesBtn = screen.getByTestId('filter-amenities');
-    expect(amenitiesBtn).toBeInTheDocument();
+    screen.getByLabelText('Amenities filter');
   });
 
   it('renders cleanliness filter button', () => {
-    const cleanlinessBtn = screen.getByTestId('filter-cleanliness');
-    expect(cleanlinessBtn).toBeInTheDocument();
+    screen.getByLabelText('Cleanliness filter');
   });
 
   it('opens gender dropdown on click', async () => {
-    const genderBtn = screen.getByTestId('filter-gender');
+    const genderBtn = screen.getByLabelText('Gender filter');
     fireEvent.click(genderBtn);
 
-    expect(
-        await screen.findByText(GENDER_FILTER_OPTIONS[0]),
-    ).toBeInTheDocument();
+    expect(screen.getByText(GENDER_FILTER_OPTIONS[0])).toBeInTheDocument();
   });
 
   it('closes gender dropdown on second click', async () => {
-    const genderBtn = screen.getByTestId('filter-gender');
+    const genderBtn = screen.getByLabelText('Gender filter');
     fireEvent.click(genderBtn);
     fireEvent.click(genderBtn);
 
@@ -104,16 +98,13 @@ describe('MapFilters', () => {
   });
 
   it('updates amenities to "2 Selected" after choosing 2 options', async () => {
-    const amenitiesBtn = screen.getByTestId('filter-amenities');
+    const amenitiesBtn = screen.getByLabelText('Amenities filter');
     fireEvent.click(amenitiesBtn);
 
-    await screen.findByText(AMENITIES_FILTER_OPTIONS[0]);
+    screen.getByText(AMENITIES_FILTER_OPTIONS[0]);
 
     fireEvent.click(screen.getByText(AMENITIES_FILTER_OPTIONS[0]));
     fireEvent.click(screen.getByText(AMENITIES_FILTER_OPTIONS[1]));
-
-    // close the dropdown so the label updates
-    fireEvent.click(amenitiesBtn);
 
     await waitFor(() => {
       expect(screen.getByText('2 Selected')).toBeInTheDocument();
@@ -121,10 +112,10 @@ describe('MapFilters', () => {
   });
 
   it('updates "gender" to "2 Selected" after choosing 2 options', async () => {
-    const genderBtn = screen.getByTestId('filter-gender');
+    const genderBtn = screen.getByLabelText('Gender filter');
     fireEvent.click(genderBtn);
 
-    await screen.findByText(GENDER_FILTER_OPTIONS[0]);
+    screen.getByText(GENDER_FILTER_OPTIONS[0]);
 
     fireEvent.click(screen.getByText(GENDER_FILTER_OPTIONS[0]));
     fireEvent.click(screen.getByText(GENDER_FILTER_OPTIONS[1]));
@@ -137,29 +128,25 @@ describe('MapFilters', () => {
   });
 
   it('opens stalls dropdown after gender dropdown is closed', async () => {
-    const genderBtn = screen.getByTestId('filter-gender');
-    const stallsBtn = screen.getByTestId('filter-stalls');
+    const genderBtn = screen.getByLabelText('Gender filter');
+    const stallsBtn = screen.getByLabelText('Stalls filter');
 
     fireEvent.click(genderBtn);
     fireEvent.click(genderBtn);
     fireEvent.click(stallsBtn);
 
-    expect(
-        await screen.findByText(STALLS_FILTER_OPTIONS[0]),
-    ).toBeInTheDocument();
+    expect(screen.getByText(STALLS_FILTER_OPTIONS[0])).toBeInTheDocument();
   });
 
   it('opens stalls dropdown on click', async () => {
-    const stallsBtn = screen.getByTestId('filter-stalls');
+    const stallsBtn = screen.getByLabelText('Stalls filter');
     fireEvent.click(stallsBtn);
 
-    expect(
-        await screen.findByText(STALLS_FILTER_OPTIONS[0]),
-    ).toBeInTheDocument();
+    expect(screen.getByText(STALLS_FILTER_OPTIONS[0])).toBeInTheDocument();
   });
 
   it('closes stalls dropdown on second click', async () => {
-    const stallsBtn = screen.getByTestId('filter-stalls');
+    const stallsBtn = screen.getByLabelText('Stalls filter');
     fireEvent.click(stallsBtn);
     fireEvent.click(stallsBtn);
 
@@ -171,7 +158,7 @@ describe('MapFilters', () => {
   });
 
   it('updates "stalls" to "2 Selected" after choosing 2 options', async () => {
-    const stallsBtn = screen.getByTestId('filter-stalls');
+    const stallsBtn = screen.getByLabelText('Stalls filter');
     fireEvent.click(stallsBtn);
 
     await screen.findByText(STALLS_FILTER_OPTIONS[0]);
@@ -187,16 +174,14 @@ describe('MapFilters', () => {
   });
 
   it('opens amenities dropdown on click', async () => {
-    const amenitiesBtn = screen.getByTestId('filter-amenities');
+    const amenitiesBtn = screen.getByLabelText('Amenities filter');
     fireEvent.click(amenitiesBtn);
 
-    expect(
-        await screen.findByText(AMENITIES_FILTER_OPTIONS[0]),
-    ).toBeInTheDocument();
+    expect(screen.getByText(AMENITIES_FILTER_OPTIONS[0])).toBeInTheDocument();
   });
 
   it('closes amenities dropdown on second click', async () => {
-    const amenitiesBtn = screen.getByTestId('filter-amenities');
+    const amenitiesBtn = screen.getByLabelText('Amenities filter');
     fireEvent.click(amenitiesBtn);
     fireEvent.click(amenitiesBtn);
 
@@ -208,14 +193,13 @@ describe('MapFilters', () => {
   });
 
   it('updates clean label to "1 Selected" when choosing 1 option', async () => {
-    const cleanBtn = screen.getByTestId('filter-cleanliness');
+    const cleanBtn = screen.getByLabelText('Cleanliness filter');
     fireEvent.click(cleanBtn);
 
     await screen.findByText(CLEANLINESS_FILTER_OPTIONS[2]);
 
     fireEvent.click(screen.getByText(CLEANLINESS_FILTER_OPTIONS[2]));
 
-    // close the dropdown so the label updates
     fireEvent.click(cleanBtn);
 
     await waitFor(() => {
@@ -224,16 +208,14 @@ describe('MapFilters', () => {
   });
 
   it('opens cleanliness dropdown on click', async () => {
-    const cleanBtn = screen.getByTestId('filter-cleanliness');
+    const cleanBtn = screen.getByLabelText('Cleanliness filter');
     fireEvent.click(cleanBtn);
 
-    expect(
-        await screen.findByText(CLEANLINESS_FILTER_OPTIONS[0]),
-    ).toBeInTheDocument();
+    expect(screen.getByText(CLEANLINESS_FILTER_OPTIONS[0])).toBeInTheDocument();
   });
 
   it('closes cleanliness dropdown on second click', async () => {
-    const cleanBtn = screen.getByTestId('filter-cleanliness');
+    const cleanBtn = screen.getByLabelText('Cleanliness filter');
     fireEvent.click(cleanBtn);
     fireEvent.click(cleanBtn);
 

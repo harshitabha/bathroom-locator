@@ -7,10 +7,9 @@ const theme = createTheme({
       light: '#DAEA98',
     },
     secondary: {main: '#845416'},
-    error: {main: '#F44336'},
-    background: {default: '#FBFAED', paper: '#FBFAED'},
-    text: {primary: '#000000'},
-    action: {disabled: 'rgba(0, 0, 0, 0.38)', hover: 'rgba(0, 0, 0, 0.04)'},
+    error: {main: '#904A43'},
+    background: {default: '#FBFAED'},
+    text: {primary: '#000000', secondary: '#76786B'},
   },
   components: {
     MuiButton: {

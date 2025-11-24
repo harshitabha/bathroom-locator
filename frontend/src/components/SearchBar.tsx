@@ -141,6 +141,9 @@ const SearchBar = ({map}: Props) => {
           maxWidth: '100%',
           padding: 0.5,
           borderRadius: 6,
+          bgcolor: 'common.white',
+          position: 'relative',
+          zIndex: 1000,
           boxSizing: 'border-box',
         }}
       >
@@ -189,6 +192,8 @@ const SearchBar = ({map}: Props) => {
               overflowY: 'auto',
               boxShadow: 'none',
               backgroundColor: 'transparent',
+              position: 'relative',
+              zIndex: 1300,
               p: 0,
             }}
           >

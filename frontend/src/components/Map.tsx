@@ -18,7 +18,7 @@ import AddBathroomButton from './AddBathroomButton';
 import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
-import MapFilters, {
+import {
   type GenderFilter,
   type StallsFilter,
   type AmenityFilter,
@@ -345,13 +345,21 @@ function MapInner({apiKey}: { apiKey: string }) {
 
   return (
     <div className="map-align-center">
-      {isLoaded &&
+      {isLoaded && (
         <MapHeader
           map={mapRef.current}
           bannerOpen={bannerOpen}
           onCancelBanner={cancelAddFlow}
+          selectedGenders={selectedGenders}
+          selectedStalls={selectedStalls}
+          selectedAmenities={selectedAmenities}
+          selectedCleanliness={selectedCleanliness}
+          onGendersChange={setSelectedGenders}
+          onStallsChange={setSelectedStalls}
+          onAmenitiesChange={setSelectedAmenities}
+          onCleanlinessChange={setSelectedCleanliness}
         />
-      }
+      )}
       <GoogleMap
         onLoad={onMapLoad}
         onIdle={handleIdle}
@@ -399,16 +407,6 @@ function MapInner({apiKey}: { apiKey: string }) {
         setBathroom={setSelected}
       />
 
-      <MapFilters
-        selectedGenders={selectedGenders}
-        selectedStalls={selectedStalls}
-        selectedAmenities={selectedAmenities}
-        selectedCleanliness={selectedCleanliness}
-        onGendersChange={setSelectedGenders}
-        onStallsChange={setSelectedStalls}
-        onAmenitiesChange={setSelectedAmenities}
-        onCleanlinessChange={setSelectedCleanliness}
-      />
       {!addMode && !selected && (
         <AddBathroomButton onClick={handleAddButtonClick} />
       )}

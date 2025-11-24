@@ -2,13 +2,3 @@
   width: 100vw;
   height: 100vh;
 }
-
-.infowin {
-  border-radius: 12px;
-  padding: 8px 12px 10px 12px;
-  min-width: 180px;
-  max-width: 230px;
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  line-height: 1.1;
-  box-shadow: none;
-}
