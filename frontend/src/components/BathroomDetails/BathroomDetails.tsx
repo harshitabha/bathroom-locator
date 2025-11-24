@@ -11,7 +11,7 @@ import {styled} from '@mui/material/styles';
 
 import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
-import type {AmenitieOptions, GenderOptions, Bathroom} from '../../types';
+import type {AmenityOptions, GenderOptions, Bathroom} from '../../types';
 import Detail from './Detail';
 
 interface bathroomDetailsProps {
@@ -30,7 +30,7 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
         return {name: key, selected: true};
       }) : [];
   const amenities = bathroom.amenities ? Object.keys(bathroom.amenities)
-      .filter((val) => bathroom.amenities![val as AmenitieOptions] == true)
+      .filter((val) => bathroom.amenities![val as AmenityOptions] == true)
       .map((key) => {
         return {name: key, selected: true};
       }) : [];

@@ -26,5 +26,5 @@ export interface Amenities {
   menstrual_products: boolean;
 }
 
-export type AmenitieOptions = 'soap' | 'mirror' | 'hand_dryer' |
+export type AmenityOptions = 'soap' | 'mirror' | 'hand_dryer' |
   'paper_towel' | 'toilet_paper' | 'menstrual_products';
