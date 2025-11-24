@@ -18,6 +18,7 @@ import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
 import MapHeader from './MapHeader';
+import {useAuth} from '../providers/AuthProvider';
 
 type Place = {
   id: string;
@@ -62,6 +63,7 @@ function MapInner({apiKey}: { apiKey: string }) {
   const idleTimer = useRef<number | null>(null);
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const {user} = useAuth();
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -345,7 +347,7 @@ function MapInner({apiKey}: { apiKey: string }) {
         )}
       </GoogleMap>
 
-      {!addMode && (
+      {!addMode && user && (
         <AddBathroomButton onClick={handleAddButtonClick} />
       )}
 

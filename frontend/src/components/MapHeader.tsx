@@ -2,6 +2,7 @@ import {Box, Button, Avatar} from '@mui/material';
 import {useNavigate} from 'react-router-dom';
 import SearchBar from './SearchBar';
 import AddBathroomBanner from './AddBathroomBanner';
+import {useAuth} from '../providers/AuthProvider';
 
 type Props = {
   map: google.maps.Map | null;
@@ -10,7 +11,7 @@ type Props = {
 };
 
 const MapHeader = ({map, bannerOpen, onCancelBanner}: Props) => {
-  const loggedIn = false; // TODO: make this real (maybe pass it down from App)
+  const {user, signOut} = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -37,28 +38,32 @@ const MapHeader = ({map, bannerOpen, onCancelBanner}: Props) => {
         <Box sx={{flex: 1, mr: 1}}>
           <SearchBar map={map} />
         </Box>
-        {loggedIn ?
-        <Avatar
-          sx={{
-            bgcolor: 'primary.main',
-            color: 'background.default',
-          }}
-          aria-label='profile-picture'
-        /> :
-        <Button
-          variant="contained"
-          size="small"
-          color="secondary"
-          sx={{
-            height: 40,
-            padding: '7px',
-            borderRadius: '25px',
-          }}
-          onClick={() => navigate('/login')}
-        >
-          Login
-        </Button>
-        }
+        {user ? (
+          <Avatar
+            sx={{
+              bgcolor: 'primary.main',
+              color: 'background.default',
+            }}
+            aria-label='profile-picture'
+            onClick={() => {
+              signOut();
+            }}
+          />
+        ) : (
+          <Button
+            variant="contained"
+            size="small"
+            color="secondary"
+            sx={{
+              height: 40,
+              padding: '7px',
+              borderRadius: '25px',
+            }}
+            onClick={() => navigate('/login')}
+          >
+            Login
+          </Button>
+        )}
       </Box>
       {/* row 2, bathroom banner */}
       <AddBathroomBanner bannerOpen={bannerOpen} onCancel={onCancelBanner} />
