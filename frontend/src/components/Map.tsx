@@ -297,7 +297,7 @@ function MapInner({apiKey}: { apiKey: string }) {
             onClick={() => setSelected(p)}
           />
         ))}
-        
+
         {/* draft marker */}
         {addMode && draftPosition && (
           <Marker
@@ -308,10 +308,10 @@ function MapInner({apiKey}: { apiKey: string }) {
       </GoogleMap>
 
       {/* bathroom details */}
-        <InfoWindow
-          bathroom={selected}
-          setBathroom={setSelected}
-        />
+      <InfoWindow
+        bathroom={selected}
+        setBathroom={setSelected}
+      />
 
       {!addMode && !selected && (
         <AddBathroomButton onClick={handleAddButtonClick} />
