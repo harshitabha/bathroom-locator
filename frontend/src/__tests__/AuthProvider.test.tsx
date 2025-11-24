@@ -4,16 +4,19 @@ import {renderHook, act, waitFor} from '@testing-library/react';
 import {AuthProvider, useAuth} from '../providers/AuthProvider';
 import {supabase} from '../lib/supabaseClient';
 
-vi.mock('../lib/supabaseClient', () => ({
-  supabase: {
-    auth: {
-      getUser: vi.fn() as unknown as Mock,
-      signOut: vi.fn() as unknown as Mock,
-      onAuthStateChange: vi.fn() as unknown as Mock,
-      signInWithPassword: vi.fn() as unknown as Mock,
+// mock supabase
+vi.mock('../lib/supabaseClient', () => {
+  return {
+    supabase: {
+      auth: {
+        getUser: vi.fn(),
+        signOut: vi.fn(),
+        onAuthStateChange: vi.fn(),
+        signInWithPassword: vi.fn(),
+      },
     },
-  },
-}));
+  };
+});
 
 describe('AuthProvider', () => {
   it('loads initial user', async () => {

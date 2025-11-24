@@ -29,6 +29,19 @@ function ButtonBannerWrapper({user}: {
   );
 }
 
+// mock supabase
+vi.mock('../lib/supabaseClient', () => {
+  return {
+    supabase: {
+      auth: {
+        getUser: vi.fn(),
+        signOut: vi.fn(),
+        onAuthStateChange: vi.fn(),
+      },
+    },
+  };
+});
+
 const fakeUser: User = {
   id: '123',
   app_metadata: {},
