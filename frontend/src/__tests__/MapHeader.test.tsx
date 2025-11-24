@@ -8,7 +8,6 @@ import {
   expect,
   vi,
   type Mock,
-  beforeAll,
 } from 'vitest';
 import {
   render,
@@ -78,7 +77,7 @@ type GoogleWithMaps = {
 };
 const importLibraryMock = vi.fn<GoogleWithMaps['maps']['importLibrary']>();
 
-beforeAll(() => {
+beforeEach(() => {
   (globalThis as unknown as { google: GoogleWithMaps }).google = {
     maps: {
       importLibrary: importLibraryMock,
