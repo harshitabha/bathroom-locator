@@ -156,9 +156,9 @@ function MapInner({apiKey}: { apiKey: string }) {
 
     try {
       const res = await fetch(
-          `${API_BASE_URL}/bathroom
-          ?minLng=${minLng}&minLat=${minLat}
-          &maxLng=${maxLng}&maxLat=${maxLat}`,
+          `${API_BASE_URL}/bathroom` +
+          `?minLng=${minLng}&minLat=${minLat}` +
+          `&maxLng=${maxLng}&maxLat=${maxLat}`,
       );
 
       if (res.ok) {
