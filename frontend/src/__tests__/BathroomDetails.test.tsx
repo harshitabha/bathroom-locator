@@ -127,7 +127,7 @@ describe('Bathroom Details visibility', () => {
         <InfoWindow bathroom={null} setBathroom={() => {}} />,
     );
     const bathroomDetails = screen.queryByText('Namaste Lounge Bathroom');
-    expect(bathroomDetails).not.toBeInTheDocument();
+    expect(bathroomDetails).toBeNull();
   });
 
   it('renders the Bathroom Details when a bathroom is selected', async () => {

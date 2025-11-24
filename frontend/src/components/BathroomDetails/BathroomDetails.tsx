@@ -1,6 +1,6 @@
 import {
   Box,
-  Button,
+  Chip,
   SwipeableDrawer,
   Typography,
   useTheme,
@@ -13,7 +13,6 @@ import {openWalkingDirections} from '../../utils/navigation';
 import type {Bathroom} from '../../types';
 import AppContext from '../../context/AppContext';
 import Like from './Like';
-import Chip from '@mui/material/Chip';
 
 interface bathroomDetailsProps {
   bathroom: Bathroom,
@@ -93,19 +92,20 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             <Chip label="Verified Bathroom" variant="outlined"
               color="primary"/> :
             null}
-          <Button
-            variant="contained"
+          <Chip
+            label={
+              <Box sx={{display: 'flex', alignItems: 'center', gap: '3px'}}>
+                Navigate
+                <NearMeIcon fontSize='inherit' />
+              </Box>
+            }
+            variant="outlined"
             color="secondary"
-            size="small"
-            className="details-button"
-            endIcon={<NearMeIcon />}
             onClick={() => openWalkingDirections(
                 bathroom.position.lat,
                 bathroom.position.lng,
             )}
-          >
-              Navigate
-          </Button>
+          />
         </Box>
         <Typography variant="h6" className="details-subheader">
             Description
