@@ -7,7 +7,7 @@ import {
   Typography,
 } from '@mui/material';
 import './AddBathroomForm.css';
-import { API_BASE_URL } from '../utils/api';
+import {API_BASE_URL} from '../utils/api';
 
 /**
  * Used to hide the add bathroom form by dragging down on desktop

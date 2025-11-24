@@ -18,7 +18,7 @@ import AddBathroomButton from './AddBathroomButton';
 import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
-import { API_BASE_URL } from '../utils/api';
+import {API_BASE_URL} from '../utils/api';
 
 const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -156,7 +156,9 @@ function MapInner({apiKey}: { apiKey: string }) {
 
     try {
       const res = await fetch(
-          `${API_BASE_URL}/bathroom?minLng=${minLng}&minLat=${minLat}&maxLng=${maxLng}&maxLat=${maxLat}`,
+          `${API_BASE_URL}/bathroom
+          ?minLng=${minLng}&minLat=${minLat}
+          &maxLng=${maxLng}&maxLat=${maxLat}`,
       );
 
       if (res.ok) {
