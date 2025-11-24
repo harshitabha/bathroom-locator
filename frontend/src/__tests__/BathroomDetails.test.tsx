@@ -10,63 +10,13 @@ import '@testing-library/jest-dom/vitest';
 import * as navigation from '../utils/navigation';
 import BathroomDetails from '../components/BathroomDetails/BathroomDetails';
 import InfoWindow from '../components/InfoWindow';
-import {basicBathroom} from './constants';
+import {basicBathroom, bathroomWith5Likes} from './constants';
 import type {Bathroom} from '../types';
 
 import {supabase} from '../lib/supabaseClient';
 import {AuthError, type User, type UserResponse} from '@supabase/supabase-js';
 import AppContext from '../context/AppContext';
 import {getCurrentUserId} from '../App';
-
-const bathroom = {
-  id: '5f1169fe-4db2-48a2-b059-f05cfe63588b',
-  name: 'Namaste Lounge Bathroom',
-  position: {
-    'lat': 37.00076576303953,
-    'lng': -122.05719563060227,
-  },
-  description: 'more details',
-  num_stalls: 1,
-  amenities: {
-    'soap': true,
-    'mirror': true,
-    'hand_dryer': false,
-    'paper_towel': true,
-    'toilet_paper': true,
-    'menstrual_products': true,
-  },
-  gender: {
-    'male': false,
-    'female': true,
-    'gender_neutral': false,
-  },
-  likes: 0,
-};
-
-const bathroomWith5Likes = {
-  id: '5f1169fe-4db2-48a2-b059-f05cfe63588b',
-  name: 'Namaste Lounge Bathroom',
-  position: {
-    'lat': 37.00076576303953,
-    'lng': -122.05719563060227,
-  },
-  description: 'more details',
-  num_stalls: 1,
-  amenities: {
-    'soap': true,
-    'mirror': true,
-    'hand_dryer': false,
-    'paper_towel': true,
-    'toilet_paper': true,
-    'menstrual_products': true,
-  },
-  gender: {
-    'male': false,
-    'female': true,
-    'gender_neutral': false,
-  },
-  likes: 5,
-};
 
 // mock supabase
 vi.mock('../lib/supabaseClient', () => {
@@ -183,12 +133,12 @@ describe('Bathroom Details component content', () => {
 describe('Bathroom Details component when user is not logged in', () => {
   beforeEach(() => {
     mockGetUserId(null, null);
-    verifyBathroomRender(bathroom);
+    verifyBathroomRender(basicBathroom);
   });
 
   it('doesn\'t render like component', async () => {
-    expect(screen.queryByLabelText(`Unlike ${bathroom.name}`)).toBeNull();
-    expect(screen.queryByLabelText(`Like ${bathroom.name}`)).toBeNull();
+    expect(screen.queryByLabelText(`Unlike ${basicBathroom.name}`)).toBeNull();
+    expect(screen.queryByLabelText(`Like ${basicBathroom.name}`)).toBeNull();
   });
 
   it('doesn\'t render verified bathroom with 0 likes', async () => {
@@ -205,6 +155,10 @@ describe('Bathroom Details component when bathroom has >= 5 likes', () => {
 
   it('renders verified bathroom', async () => {
     expect(screen.queryByLabelText('Verified Bathroom'));
+  });
+
+  it('renders like component', async () => {
+    expect(screen.queryByLabelText(`Like ${basicBathroom.name}`));
   });
 });
 
