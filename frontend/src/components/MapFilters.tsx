@@ -197,7 +197,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
                   <ListItemText
                     primary={option}
                     slotProps={{
-                      primary: {sx: {fontWeight: 500}},
+                      primary: {sx: {fontWeight: 450}},
                     }}
                   />
                 </MenuItem>
