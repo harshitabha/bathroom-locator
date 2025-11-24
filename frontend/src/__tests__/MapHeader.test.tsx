@@ -128,7 +128,7 @@ describe('Map Header component when not logged in', () => {
   });
 
   it('renders the login button', async () => {
-    const loginButton = screen.getByRole('button', {name: 'Login'});
+    const loginButton = screen.getByText('Login');
     expect(loginButton);
   });
 
@@ -138,7 +138,7 @@ describe('Map Header component when not logged in', () => {
   });
 
   it('leads to login page when login button is clicked', async () => {
-    const loginButton = screen.getByRole('button', {name: 'Login'});
+    const loginButton = screen.getByText('Login');
     fireEvent.click(loginButton);
     expect(mockNavigate).toHaveBeenCalledWith('/login');
   });
@@ -223,7 +223,7 @@ describe('Map Header component when logged in', () => {
 
     fireEvent.click(profilePicture);
 
-    const logoutButton = screen.getByRole('menuitem', {name: 'Logout'});
+    const logoutButton = screen.getByText('Logout');
     // mock succesful sign out
     mockSignOut(null);
     fireEvent.click(logoutButton);
@@ -276,7 +276,7 @@ describe('Map Header component on sign out failure', async () => {
 
     fireEvent.click(profilePicture);
 
-    const logoutButton = screen.getByRole('menuitem', {name: 'Logout'});
+    const logoutButton = screen.getByText('Logout');
     fireEvent.click(logoutButton);
 
     await waitFor(() => {
@@ -291,7 +291,7 @@ describe('Map Header component on sign out failure', async () => {
 
     fireEvent.click(profilePicture);
 
-    const logoutButton = screen.getByRole('menuitem', {name: 'Logout'});
+    const logoutButton = screen.getByText('Logout');
     fireEvent.click(logoutButton);
 
     await waitFor(() => {
