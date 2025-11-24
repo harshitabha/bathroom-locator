@@ -117,7 +117,11 @@ describe('Map Header component when not logged in', () => {
     render(
         <MemoryRouter>
           <AppContext value={{getCurrentUserId}}>
-            <MapHeader map={null} />
+            <MapHeader
+              map={null}
+              bannerOpen={false}
+              onCancelBanner={() => {}}
+            />
           </AppContext>
         </MemoryRouter>,
     );
@@ -130,7 +134,7 @@ describe('Map Header component when not logged in', () => {
 
   it('hides the profile picture', async () => {
     const profilePicture = screen.queryByLabelText('Profile Picture');
-    expect(profilePicture).not.toBeInTheDocument();
+    expect(profilePicture).toBeNull();
   });
 
   it('leads to login page when login button is clicked', async () => {
@@ -164,7 +168,11 @@ describe('Map Header component when logged in', () => {
     render(
         <MemoryRouter>
           <AppContext value={{getCurrentUserId}}>
-            <MapHeader map={null} />
+            <MapHeader
+              map={null}
+              bannerOpen={false}
+              onCancelBanner={() => {}}
+            />
           </AppContext>
         </MemoryRouter>,
     );
@@ -172,8 +180,7 @@ describe('Map Header component when logged in', () => {
 
   it('hides the login button', async () => {
     await waitFor(() => {
-      const loginButton = screen.queryByText('Login');
-      expect(loginButton).toBeNull();
+      expect(screen.queryByText('Login')).toBeNull();
     });
   });
 
@@ -252,7 +259,11 @@ describe('Map Header component on sign out failure', async () => {
     render(
         <MemoryRouter>
           <AppContext value={{getCurrentUserId}}>
-            <MapHeader map={null} />
+            <MapHeader
+              map={null}
+              bannerOpen={false}
+              onCancelBanner={() => {}}
+            />
           </AppContext>
         </MemoryRouter>,
     );
@@ -313,7 +324,11 @@ describe('Map Header component when getting current user fails', () => {
     render(
         <MemoryRouter>
           <AppContext value={{getCurrentUserId}}>
-            <MapHeader map={null} />
+            <MapHeader
+              map={null}
+              bannerOpen={false}
+              onCancelBanner={() => {}}
+            />
           </AppContext>
         </MemoryRouter>,
     );

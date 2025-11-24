@@ -2,14 +2,17 @@ import {Box, Button, Avatar, Menu, MenuItem} from '@mui/material';
 import {useNavigate} from 'react-router-dom';
 import {useState, useEffect, useContext} from 'react';
 import SearchBar from './SearchBar';
+import AddBathroomBanner from './AddBathroomBanner';
 import AppContext from '../context/AppContext';
 import {supabase} from '../lib/supabaseClient';
 
 type Props = {
   map: google.maps.Map | null;
+  bannerOpen: boolean;
+  onCancelBanner: () => void;
 };
 
-const MapHeader = ({map}: Props) => {
+const MapHeader = ({map, bannerOpen, onCancelBanner}: Props) => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>('');
   const appContext = useContext(AppContext);
@@ -47,13 +50,24 @@ const MapHeader = ({map}: Props) => {
       zIndex: 100,
       width: '100%',
       display: 'flex',
-      justifyContent: 'right',
+      flexDirection: 'column',
+      alignItems: 'center',
       px: 1,
+      gap: 1,
     }}>
-      <Box sx={{flex: 1, mr: 1}}>
-        <SearchBar map={map} />
-      </Box>
-      {userId ? (
+      {/* row 1, search + login */}
+      <Box
+        sx={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'right',
+          alignItems: 'flex-start',
+        }}
+      >
+        <Box sx={{flex: 1, mr: 1}}>
+          <SearchBar map={map} />
+        </Box>
+        {userId ? (
         <>
           <Avatar
             sx={{
@@ -74,20 +88,23 @@ const MapHeader = ({map}: Props) => {
             </MenuItem>
           </Menu>
         </> ):
-      <Button
-        variant="contained"
-        size="small"
-        color="secondary"
-        sx={{
-          height: 40,
-          padding: '7px',
-          borderRadius: '25px',
-        }}
-        onClick={() => navigate('/login')}
-      >
-        Login
-      </Button>
-      }
+        <Button
+          variant="contained"
+          size="small"
+          color="secondary"
+          sx={{
+            height: 40,
+            padding: '7px',
+            borderRadius: '25px',
+          }}
+          onClick={() => navigate('/login')}
+        >
+          Login
+        </Button>
+        }
+      </Box>
+      {/* row 2, bathroom banner */}
+      <AddBathroomBanner bannerOpen={bannerOpen} onCancel={onCancelBanner} />
     </Box>
   );
 };
