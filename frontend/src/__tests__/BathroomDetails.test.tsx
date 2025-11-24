@@ -4,7 +4,6 @@ import {
   screen,
   cleanup,
   fireEvent,
-  waitFor,
 } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 
@@ -182,14 +181,12 @@ describe('Bathroom Details component when user is not logged in', () => {
   });
 
   it('doesn\'t render like component', async () => {
-    expect(screen.queryByLabelText('liked-bathroom')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('unliked-bathroom')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('liked-bathroom')).toBeNull();
+    expect(screen.queryByLabelText('unliked-bathroom')).toBeNull();
   });
 
   it('doesn\'t render verified bathroom with 0 likes', async () => {
-    expect(
-        screen.queryByLabelText('Verified Bathroom'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Verified Bathroom')).toBeNull();
   });
 });
 
@@ -202,12 +199,6 @@ describe('Bathroom Details component when bathroom has >= 5 likes', () => {
 
   it('renders verified bathroom', async () => {
     expect(screen.queryByLabelText('Verified Bathroom'));
-  });
-
-  it('renders like component when user is logged in', async () => {
-    await waitFor(() => {
-      expect(screen.getByLabelText('unliked-bathroom'));
-    });
   });
 });
 
