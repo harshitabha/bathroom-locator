@@ -34,6 +34,7 @@ async function getLikedBathrooms(userId: string | null) {
  * removes the user's like from the bathroom
  * @param {string} userId user id
  * @param {string} bathroomId bathroom id
+ * @param {number} bathroomLikes saved bathroom likes
  * @param {React.Dispatch<React.SetStateAction<boolean>>} setLiked liked setter
  * @param {React.Dispatch<React.SetStateAction<number>>} setLikes likes setter
  * @param {number} likes number of likes
@@ -41,6 +42,7 @@ async function getLikedBathrooms(userId: string | null) {
 async function unlikeBathroom(
     userId: string | null,
     bathroomId: string,
+    bathroomLikes: number,
     setLiked: React.Dispatch<React.SetStateAction<boolean>>,
     setLikes: React.Dispatch<React.SetStateAction<number>>,
     likes: number,
@@ -57,6 +59,7 @@ async function unlikeBathroom(
   if (res.ok) {
     setLiked(false);
     setLikes(likes - 1);
+    bathroomLikes -= 1;
   } else {
     console.error('Error deleting like: ', res.statusText);
   }
@@ -68,6 +71,7 @@ async function unlikeBathroom(
  * adds like to the bathroom
  * @param {string} userId user id
  * @param {string} bathroomId bathroom id
+ * @param {number} bathroomLikes saved bathroom likes
  * @param {React.Dispatch<React.SetStateAction<boolean>>} setLiked liked setter
  * @param {React.Dispatch<React.SetStateAction<number>>} setLikes likes setter
  * @param {number} likes number of likes
@@ -75,6 +79,7 @@ async function unlikeBathroom(
 async function likeBathroom(
     userId: string | null,
     bathroomId: string,
+    bathroomLikes: number,
     setLiked: React.Dispatch<React.SetStateAction<boolean>>,
     setLikes: React.Dispatch<React.SetStateAction<number>>,
     likes: number,
@@ -91,6 +96,7 @@ async function likeBathroom(
   if (res.ok) {
     setLiked(true);
     setLikes(likes + 1);
+    bathroomLikes += 1;
   } else {
     console.error('Error adding like: ', res.statusText);
   }
@@ -117,11 +123,24 @@ const Like = ({bathroom, userId, likes, setLikes}: LikeProps) => {
   const handleToggle = async () => {
     // update likes table
     if (liked) {
-      await unlikeBathroom(userId, bathroom.id, setLiked, setLikes, likes);
+      await unlikeBathroom(
+          userId,
+          bathroom.id,
+          bathroom.likes,
+          setLiked,
+          setLikes,
+          likes,
+      );
     } else {
-      await likeBathroom(userId, bathroom.id, setLiked, setLikes, likes);
+      await likeBathroom(
+          userId,
+          bathroom.id,
+          bathroom.likes,
+          setLiked,
+          setLikes,
+          likes,
+      );
     }
-    bathroom.likes = likes;
   };
 
   return (

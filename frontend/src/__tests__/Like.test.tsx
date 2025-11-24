@@ -188,21 +188,21 @@ describe('Like component when delete request fails', () => {
 
   it('keeps liked state', async () => {
     const likedButton = await waitFor(() => {
-      return screen.getByLabelText(`Unlike ${bathroom.name}`);
+      return screen.getByLabelText(`Unlike ${bathroomWith4Likes.name}`);
     });
     await userEvent.click(likedButton);
     expect(await waitFor(() => {
-      return screen.getByLabelText(`Unlike ${bathroom.name}`);
+      return screen.getByLabelText(`Unlike ${bathroomWith4Likes.name}`);
     }));
   });
 
   it('doesn\'t change # of likes', async () => {
     const likedButton = await waitFor(() => {
-      return screen.getByLabelText(`Unlike ${bathroom.name}`);
+      return screen.getByLabelText(`Unlike ${bathroomWith4Likes.name}`);
     });
     await userEvent.click(likedButton);
     await waitFor(() => {
-      expect(screen.getByText('4'));
+      screen.getByText('4');
     });
   });
 });
