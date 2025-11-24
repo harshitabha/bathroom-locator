@@ -176,5 +176,47 @@ describe('Rendering Additional Details', async () => {
       screen.getByText('Female');
       screen.getByText('Gender Neutral');
     });
+
+    it('It doesn\'t display amenities if not set', async () => {
+      const amenitiesLabel = screen.queryByText('Amenities:');
+      expect(amenitiesLabel).toBeNull();
+    });
+  });
+
+  describe('Amenities information', async () => {
+    beforeEach(() => {
+      const bathroomWithAmenities: Bathroom = {
+        ...basicBathroom,
+        amenities: {
+          soap: true,
+          mirror: false,
+          hand_dryer: true,
+          paper_towel: false,
+          toilet_paper: true,
+          menstrual_products: false,
+        },
+      };
+      render(
+          <BathroomDetails
+            bathroom={bathroomWithAmenities}
+            setBathroom={() => {}}
+          />,
+      );
+    });
+
+    it('Renders gender label', async () => {
+      screen.getByText('Amenities:');
+    });
+
+    it('Renders the true options in bathroom', async () => {
+      screen.getByText('Soap');
+      screen.getByText('Hand Dryer');
+      screen.getByText('Toilet Paper');
+    });
+
+    it('It doesn\'t display gender if not set', async () => {
+      const genderLabel = screen.queryByText('Gender:');
+      expect(genderLabel).toBeNull();
+    });
   });
 });

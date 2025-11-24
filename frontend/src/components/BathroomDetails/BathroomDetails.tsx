@@ -12,7 +12,7 @@ import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
 import AppContext from '../../context/AppContext';
 import Like from './Like';
-import type {GenderOptions, Bathroom} from '../../types';
+import type {AmenityOptions, GenderOptions, Bathroom} from '../../types';
 import Detail from './Detail';
 
 interface bathroomDetailsProps {
@@ -30,6 +30,12 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
       .map((key) => {
         return {name: key, selected: true};
       }) : [];
+  const amenities = bathroom.amenities ? Object.keys(bathroom.amenities)
+      .filter((val) => bathroom.amenities![val as AmenityOptions] == true)
+      .map((key) => {
+        return {name: key, selected: true};
+      }) : [];
+
   const theme = useTheme();
 
   const [userId, setUserId] = useState<string | null>('');
@@ -118,12 +124,19 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
         </Typography>
 
         {
-          gender.length > 0 ?
+          gender.length > 0 || amenities.length > 0 ?
           <Box>
             <Typography variant="h6" className="details-subheader">
               Additional Details
             </Typography>
-            <Detail name='Gender' values={gender}/>
+            {
+              gender.length > 0 ?
+              <Detail name='Gender' values={gender}/> : null
+            }
+            {
+              amenities.length > 0 ?
+              <Detail name='Amenities' values={amenities}/> : null
+            }
           </Box> : null
         }
 
