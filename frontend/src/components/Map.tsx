@@ -3,7 +3,8 @@ import {
   useMemo,
   useState,
   useCallback,
-  useRef} from 'react';
+  useRef,
+  useContext} from 'react';
 import {
   GoogleMap,
   Marker,
@@ -18,7 +19,7 @@ import AddBathroomButton from './AddBathroomButton';
 import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
-import {useAuth} from '../providers/AuthProvider';
+import AppContext from '../context/AppContext';
 
 const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -46,7 +47,7 @@ function MapInner({apiKey}: { apiKey: string }) {
   const idleTimer = useRef<number | null>(null);
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
-  const {user} = useAuth();
+  const appContext = useContext(AppContext);
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -321,7 +322,7 @@ function MapInner({apiKey}: { apiKey: string }) {
         setBathroom={setSelected}
       />
 
-      {!addMode && !selected && !!user && (
+      {!addMode && !selected && appContext?.userId &&(
         <AddBathroomButton onClick={handleAddButtonClick} />
       )}
 

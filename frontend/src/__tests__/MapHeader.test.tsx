@@ -7,7 +7,7 @@ import {
   afterEach,
   expect,
   vi,
-  type Mock,
+  type MockedFunction,
 } from 'vitest';
 import {
   render,
@@ -18,8 +18,10 @@ import {
 } from '@testing-library/react';
 import {MemoryRouter} from 'react-router-dom';
 import '@testing-library/jest-dom/vitest';
-import {AuthProvider} from '../providers/AuthProvider';
+import {AuthError, type User, type UserResponse} from '@supabase/supabase-js';
+import AppContext from '../context/AppContext';
 import userEvent from '@testing-library/user-event';
+import {useState} from 'react';
 
 // mock supabase
 vi.mock('../lib/supabaseClient', () => {
@@ -28,35 +30,45 @@ vi.mock('../lib/supabaseClient', () => {
       auth: {
         getUser: vi.fn(),
         signOut: vi.fn(),
-        onAuthStateChange: vi.fn(),
       },
     },
   };
 });
 
 /**
- * mocks supabase get user
- * @param {string | null} id id
+ * Mocks sign out
+ * @param {string | null} error error message
+ * @returns {MockedFunction} mocked sign out function
  */
-function mockUser(id: string | null) {
-  (supabase.auth.getUser as Mock).mockResolvedValue({
-    data: {user: id ? {id} : null},
-    error: null,
-  });
+function mockSignOut(error: string | null) :
+MockedFunction<() => Promise<{ error: AuthError | null }>> {
+  const mockLogout = vi.mocked(supabase.auth.signOut);
+  mockLogout.mockResolvedValueOnce(
+      {error: error ? new AuthError(error) : null},
+  );
 
-  (supabase.auth.onAuthStateChange as Mock).mockReturnValue({
-    data: {subscription: {unsubscribe: vi.fn()}},
-  });
+  return mockLogout;
 }
 
 /**
- * mocks supabase signout
+ * Mocks supabase get user id
+ * @param {string | null} userId user id
  * @param {string | null} error error message
  */
-function mockSignOut(error: string | null) {
-  (supabase.auth.signOut as Mock).mockResolvedValue({
-    error: error ? {message: error} : null,
-  });
+function mockGetUserId(userId: string | null, error: string | null) {
+  const user : User | null = userId ? {
+    id: userId,
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString()} :
+    null;
+
+  const mockGetUser = vi.mocked(supabase.auth.getUser);
+  mockGetUser.mockResolvedValueOnce({
+    data: {user: user},
+    error: error ? new AuthError(error) : null,
+  } as UserResponse);
 }
 
 // mock useNavigate
@@ -76,6 +88,30 @@ type GoogleWithMaps = {
   };
 };
 const importLibraryMock = vi.fn<GoogleWithMaps['maps']['importLibrary']>();
+
+/**
+ *
+ * @param {object} root0 props
+ * @param {string | null} root0.initUserId userid
+ * @returns {object} Mapheader + AppContext
+ */
+function ContextWrapper({initUserId}: {
+  initUserId: string | null;
+}) {
+  const [userId, setUserId] = useState<string | null>(initUserId);
+  const getCurrentUserId = vi.fn().mockResolvedValue(userId);
+  return (
+    <MemoryRouter>
+      <AppContext value={{userId, setUserId, getCurrentUserId}}>
+        <MapHeader
+          map={null}
+          bannerOpen={false}
+          onCancelBanner={() => {}}
+        />
+      </AppContext>
+    </MemoryRouter>
+  );
+}
 
 beforeEach(() => {
   (globalThis as unknown as { google: GoogleWithMaps }).google = {
@@ -101,14 +137,12 @@ afterEach(() => {
 
 describe('Map Header component when not logged in', () => {
   beforeEach(() => {
+    const userId = null;
+    const error = null;
+
+    mockGetUserId(userId, error);
     render(
-        <MemoryRouter>
-          <MapHeader
-            map={null}
-            bannerOpen={false}
-            onCancelBanner={() => {}}
-          />
-        </MemoryRouter>,
+        <ContextWrapper initUserId={userId}/>,
     );
   });
 
@@ -131,18 +165,12 @@ describe('Map Header component when not logged in', () => {
 
 describe('Map Header component when logged in', () => {
   beforeEach(() => {
-    mockUser('123');
+    const userId = '123';
+    const error = null;
 
+    mockGetUserId(userId, error);
     render(
-        <MemoryRouter>
-          <AuthProvider>
-            <MapHeader
-              map={null}
-              bannerOpen={false}
-              onCancelBanner={() => {}}
-            />
-          </AuthProvider>
-        </MemoryRouter>,
+        <ContextWrapper initUserId={userId}/>,
     );
   });
 
@@ -202,35 +230,13 @@ describe('Map Header component when logged in', () => {
 
 describe('Map Header component on sign out failure', async () => {
   beforeEach(() => {
-    (globalThis as unknown as { google: GoogleWithMaps }).google = {
-      maps: {
-        importLibrary: importLibraryMock,
-      },
-    };
+    const userId = '123';
+    const error = null;
 
-    importLibraryMock.mockResolvedValue({
-      AutocompleteSessionToken: vi.fn(),
-      AutocompleteSuggestion: {
-        fetchAutocompleteSuggestions: vi
-            .fn()
-            .mockResolvedValue({suggestions: []}),
-      },
-    });
-
-    mockUser('123');
-
+    mockGetUserId(userId, error);
     mockSignOut('Error signing user out');
-
     render(
-        <MemoryRouter>
-          <AuthProvider>
-            <MapHeader
-              map={null}
-              bannerOpen={false}
-              onCancelBanner={() => {}}
-            />
-          </AuthProvider>
-        </MemoryRouter>,
+        <ContextWrapper initUserId={userId}/>,
     );
   });
 
@@ -267,33 +273,12 @@ describe('Map Header component on sign out failure', async () => {
 
 describe('Map Header component when getting current user fails', () => {
   beforeEach(() => {
-    (globalThis as unknown as { google: GoogleWithMaps }).google = {
-      maps: {
-        importLibrary: importLibraryMock,
-      },
-    };
+    const userId = null;
+    const error = null;
 
-    importLibraryMock.mockResolvedValue({
-      AutocompleteSessionToken: vi.fn(),
-      AutocompleteSuggestion: {
-        fetchAutocompleteSuggestions: vi
-            .fn()
-            .mockResolvedValue({suggestions: []}),
-      },
-    });
-
-    mockUser(null);
-
+    mockGetUserId(userId, error);
     render(
-        <MemoryRouter>
-          <AuthProvider>
-            <MapHeader
-              map={null}
-              bannerOpen={false}
-              onCancelBanner={() => {}}
-            />
-          </AuthProvider>
-        </MemoryRouter>,
+        <ContextWrapper initUserId={userId}/>,
     );
   });
 
