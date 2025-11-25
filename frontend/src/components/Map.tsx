@@ -349,12 +349,8 @@ function MapInner({apiKey}: { apiKey: string }) {
           <Marker
             position={userLocation}
             icon={{
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 8,
-              fillColor: '#4285F4', // match google Maps blue
-              fillOpacity: 1,
-              strokeColor: '#ffffff',
-              strokeWeight: 2,
+              url: "/userLocation.png",
+              scaledSize: new window.google.maps.Size(40, 40),
             }}
             title="You are here"
           />
@@ -372,11 +368,12 @@ function MapInner({apiKey}: { apiKey: string }) {
         setBathroom={setSelected}
       />
 
+      {!addMode && !selected && userLocation && (
+        <RecenterButton onClick={handleRecenter} />
+      )}
+
       {!addMode && !selected && (
-        <>
-          <RecenterButton onClick={handleRecenter} />
-          <AddBathroomButton onClick={handleAddButtonClick} />
-        </>
+        <AddBathroomButton onClick={handleAddButtonClick} />
       )}
 
       <AddBathroomPeekCard
