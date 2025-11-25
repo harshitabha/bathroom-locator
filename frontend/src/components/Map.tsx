@@ -349,7 +349,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           <Marker
             position={userLocation}
             icon={{
-              url: "/userLocation.png",
+              url: '/userLocation.png',
               scaledSize: new window.google.maps.Size(40, 40),
             }}
             title="You are here"
