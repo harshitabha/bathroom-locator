@@ -10,7 +10,7 @@ import type {Dispatch, SetStateAction} from 'react';
 
 import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
-import type {AmenityOptions, GenderOptions, Bathroom} from '../../types';
+import type {Bathroom, Gender, Amenities, OptionalObj} from '../../types';
 import Detail from './Detail';
 
 interface bathroomDetailsProps {
@@ -23,16 +23,10 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
     bathroom,
     setBathroom,
   } = props;
-  const gender = bathroom.gender ? Object.keys(bathroom.gender)
-      .filter((val) => bathroom.gender![val as GenderOptions] == true)
-      .map((key) => {
-        return {name: key, selected: true};
-      }) : [];
-  const amenities = bathroom.amenities ? Object.keys(bathroom.amenities)
-      .filter((val) => bathroom.amenities![val as AmenityOptions] == true)
-      .map((key) => {
-        return {name: key, selected: true};
-      }) : [];
+  const gender = getTrueKeys(bathroom.gender);
+  const amenities = getTrueKeys(bathroom.amenities);
+  const additionalDetailsExist = getNumKeysInObj(bathroom.gender) > 0 ||
+    getNumKeysInObj(bathroom.amenities) > 0;
 
   const theme = useTheme();
 
@@ -104,17 +98,17 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
         </Typography>
 
         {
-          gender.length > 0 || amenities.length > 0 ?
+          additionalDetailsExist ?
           <Box>
             <Typography variant="h6" className="details-subheader">
               Additional Details
             </Typography>
             {
-              gender.length > 0 ?
+              getNumKeysInObj(bathroom.gender) > 0 ?
               <Detail name='Gender' values={gender}/> : null
             }
             {
-              amenities.length > 0 ?
+              getNumKeysInObj(bathroom.amenities) > 0 ?
               <Detail name='Amenities' values={amenities}/> : null
             }
           </Box> : null
@@ -125,5 +119,38 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
     </SwipeableDrawer>
   );
 };
+
+/**
+ * Get the object with only it's true keys
+ * @param {object | undefined} obj object to process
+ * @returns {object} object with only true keys
+ */
+function getTrueKeys(obj: Gender | Amenities | undefined) {
+  if (!obj) {
+    return {};
+  }
+
+  const filtered: {[key: string]: boolean} = Object.keys(obj)
+      .reduce((newObj, key) => {
+        const typedKey = key as keyof (Gender | Amenities);
+        if (obj[typedKey]) {
+          newObj[typedKey] = obj[typedKey];
+        }
+        return newObj;
+      }, {} as OptionalObj<Gender | Amenities>);
+  return filtered;
+}
+
+/**
+ * Gets the number of keys in an object
+ * @param {object | undefined} obj the object to check the number of keys of
+ * @returns {number} the number of keys in the object
+ */
+function getNumKeysInObj(obj: object | undefined) {
+  if (!obj) {
+    return 0;
+  }
+  return Object.keys(obj).length;
+}
 
 export default BathroomDetails;

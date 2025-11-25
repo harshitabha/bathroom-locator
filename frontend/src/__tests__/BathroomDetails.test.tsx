@@ -136,7 +136,7 @@ describe('Rendering Additional Details', async () => {
       );
     });
 
-    it('Renders gender label', async () => {
+    it('Renders amenities label', async () => {
       screen.getByText('Amenities:');
     });
 

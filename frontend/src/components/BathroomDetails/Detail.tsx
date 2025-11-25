@@ -9,14 +9,17 @@ const Detail = (props: DetailProps) => {
       </Typography>
       <Box className='flex chip-container'>
         {
-          props.values.map((value, key) =>
-            <Chip
-              key={`${props.name}-${key}`}
-              component={Paper}
-              elevation={1}
-              label={formatString(value.name)}
-              sx={value.selected ? {bgcolor: 'primary.light'}: null}/>,
-          )
+          Object.keys(props.values).map((key) => {
+            console.log(key, props.values[key]);
+            return (
+              <Chip
+                key={`${props.name}-${key}`}
+                component={Paper}
+                elevation={1}
+                label={formatString(key)}
+                sx={props.values[key] ? {bgcolor: 'primary.light'}: null}/>
+            );
+          })
         }
       </Box>
     </Box>
@@ -36,12 +39,12 @@ function formatString(str: string): string {
 
 interface DetailProps {
   name: string,
-  values: Array<Value>,
+  values: {[key: string]: boolean},
 }
 
-export interface Value {
-  name: string,
-  selected: boolean,
-}
+// export interface Value {
+//   name: string,
+//   selected: boolean,
+// }
 
 export default Detail;

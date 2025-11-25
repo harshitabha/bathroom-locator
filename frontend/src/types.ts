@@ -10,12 +10,10 @@ export interface Bathroom {
 };
 
 export interface Gender {
-  male: boolean,
-  female: boolean,
-  gender_neutral: boolean
+  'male': boolean,
+  'female': boolean,
+  'gender_neutral': boolean
 };
-
-export type GenderOptions = 'female' | 'male' | 'gender_neutral';
 
 export interface Amenities {
   soap: boolean;
@@ -26,5 +24,8 @@ export interface Amenities {
   menstrual_products: boolean;
 }
 
-export type AmenityOptions = 'soap' | 'mirror' | 'hand_dryer' |
-  'paper_towel' | 'toilet_paper' | 'menstrual_products';
+export type OptionalObj<T> = {
+  [K in keyof T]?: T[K]
+};
+
+export type AmenityOptions = keyof Amenities;
