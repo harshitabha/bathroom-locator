@@ -90,6 +90,26 @@ type GoogleWithMaps = {
 const importLibraryMock = vi.fn<GoogleWithMaps['maps']['importLibrary']>();
 
 /**
+ * Sets up google.maps mock
+ */
+function setupGoogleMapsMock() {
+  (globalThis as unknown as { google: GoogleWithMaps }).google = {
+    maps: {
+      importLibrary: importLibraryMock,
+    },
+  };
+
+  importLibraryMock.mockResolvedValue({
+    AutocompleteSessionToken: vi.fn(),
+    AutocompleteSuggestion: {
+      fetchAutocompleteSuggestions: vi
+          .fn()
+          .mockResolvedValue({suggestions: []}),
+    },
+  });
+}
+
+/**
  *
  * @param {object} root0 props
  * @param {string | null} root0.initUserId userid
@@ -113,23 +133,6 @@ function ContextWrapper({initUserId}: {
   );
 }
 
-beforeEach(() => {
-  (globalThis as unknown as { google: GoogleWithMaps }).google = {
-    maps: {
-      importLibrary: importLibraryMock,
-    },
-  };
-
-  importLibraryMock.mockResolvedValue({
-    AutocompleteSessionToken: vi.fn(),
-    AutocompleteSuggestion: {
-      fetchAutocompleteSuggestions: vi
-          .fn()
-          .mockResolvedValue({suggestions: []}),
-    },
-  });
-});
-
 afterEach(() => {
   cleanup();
   vi.resetAllMocks();
@@ -140,6 +143,7 @@ describe('Map Header component when not logged in', () => {
     const userId = null;
     const error = null;
 
+    setupGoogleMapsMock();
     mockGetUserId(userId, error);
     render(
         <ContextWrapper initUserId={userId}/>,
@@ -168,6 +172,7 @@ describe('Map Header component when logged in', () => {
     const userId = '123';
     const error = null;
 
+    setupGoogleMapsMock();
     mockGetUserId(userId, error);
     render(
         <ContextWrapper initUserId={userId}/>,
@@ -233,6 +238,7 @@ describe('Map Header component on sign out failure', async () => {
     const userId = '123';
     const error = null;
 
+    setupGoogleMapsMock();
     mockGetUserId(userId, error);
     mockSignOut('Error signing user out');
     render(
@@ -276,6 +282,7 @@ describe('Map Header component when getting current user fails', () => {
     const userId = null;
     const error = null;
 
+    setupGoogleMapsMock();
     mockGetUserId(userId, error);
     render(
         <ContextWrapper initUserId={userId}/>,

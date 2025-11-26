@@ -49,6 +49,10 @@ function MapInner({apiKey}: { apiKey: string }) {
   const [formDescription, setFormDescription] = useState('');
   const appContext = useContext(AppContext);
 
+  useEffect(() => {
+    appContext?.getCurrentUserId();
+  }, []);
+
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
   const onMapLoad = (map: google.maps.Map) => {
