@@ -18,7 +18,7 @@ import {
 } from '@testing-library/react';
 import {MemoryRouter} from 'react-router-dom';
 import '@testing-library/jest-dom/vitest';
-import {AuthError, type User, type UserResponse} from '@supabase/supabase-js';
+import {AuthError} from '@supabase/supabase-js';
 import AppContext from '../context/AppContext';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
@@ -28,7 +28,6 @@ vi.mock('../lib/supabaseClient', () => {
   return {
     supabase: {
       auth: {
-        getUser: vi.fn(),
         signOut: vi.fn(),
       },
     },
@@ -48,27 +47,6 @@ MockedFunction<() => Promise<{ error: AuthError | null }>> {
   );
 
   return mockLogout;
-}
-
-/**
- * Mocks supabase get user id
- * @param {string | null} userId user id
- * @param {string | null} error error message
- */
-function mockGetUserId(userId: string | null, error: string | null) {
-  const user : User | null = userId ? {
-    id: userId,
-    app_metadata: {},
-    user_metadata: {},
-    aud: 'authenticated',
-    created_at: new Date().toISOString()} :
-    null;
-
-  const mockGetUser = vi.mocked(supabase.auth.getUser);
-  mockGetUser.mockResolvedValueOnce({
-    data: {user: user},
-    error: error ? new AuthError(error) : null,
-  } as UserResponse);
 }
 
 // mock useNavigate
@@ -119,7 +97,8 @@ function ContextWrapper({initUserId}: {
   initUserId: string | null;
 }) {
   const [userId, setUserId] = useState<string | null>(initUserId);
-  const getCurrentUserId = vi.fn().mockResolvedValue(userId);
+  const getCurrentUserId = async () => {};
+
   return (
     <MemoryRouter>
       <AppContext value={{userId, setUserId, getCurrentUserId}}>
@@ -140,13 +119,9 @@ afterEach(() => {
 
 describe('Map Header component when not logged in', () => {
   beforeEach(() => {
-    const userId = null;
-    const error = null;
-
     setupGoogleMapsMock();
-    mockGetUserId(userId, error);
     render(
-        <ContextWrapper initUserId={userId}/>,
+        <ContextWrapper initUserId={null}/>,
     );
   });
 
@@ -169,13 +144,9 @@ describe('Map Header component when not logged in', () => {
 
 describe('Map Header component when logged in', () => {
   beforeEach(() => {
-    const userId = '123';
-    const error = null;
-
     setupGoogleMapsMock();
-    mockGetUserId(userId, error);
     render(
-        <ContextWrapper initUserId={userId}/>,
+        <ContextWrapper initUserId={'123'}/>,
     );
   });
 
@@ -235,14 +206,10 @@ describe('Map Header component when logged in', () => {
 
 describe('Map Header component on sign out failure', async () => {
   beforeEach(() => {
-    const userId = '123';
-    const error = null;
-
     setupGoogleMapsMock();
-    mockGetUserId(userId, error);
     mockSignOut('Error signing user out');
     render(
-        <ContextWrapper initUserId={userId}/>,
+        <ContextWrapper initUserId={'123'}/>,
     );
   });
 
@@ -279,13 +246,9 @@ describe('Map Header component on sign out failure', async () => {
 
 describe('Map Header component when getting current user fails', () => {
   beforeEach(() => {
-    const userId = null;
-    const error = null;
-
     setupGoogleMapsMock();
-    mockGetUserId(userId, error);
     render(
-        <ContextWrapper initUserId={userId}/>,
+        <ContextWrapper initUserId={null}/>,
     );
   });
 
