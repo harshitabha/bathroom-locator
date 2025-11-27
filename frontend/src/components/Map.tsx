@@ -18,11 +18,8 @@ import AddBathroomButton from './AddBathroomButton';
 import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
-import MapFilters, {
-  type GenderFilter,
-  type StallsFilter,
+import {
   type AmenityFilter,
-  type CleanlinessFilter,
 } from './MapFilters';
 
 const Map = () => {
@@ -51,12 +48,8 @@ function MapInner({apiKey}: { apiKey: string }) {
   const idleTimer = useRef<number | null>(null);
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
-  const [selectedGenders, setSelectedGenders] = useState<GenderFilter[]>([]);
-  const [selectedStalls, setSelectedStalls] = useState<StallsFilter[]>([]);
   const [selectedAmenities, setSelectedAmenities] =
     useState<AmenityFilter[]>([]);
-  const [selectedCleanliness, setSelectedCleanliness] =
-    useState<CleanlinessFilter[]>([]);
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -273,26 +266,6 @@ function MapInner({apiKey}: { apiKey: string }) {
   }, []);
 
   const filteredBathrooms = useMemo(() => {
-    const genderKeys: Record<
-      GenderFilter,
-      keyof NonNullable<Bathroom['gender']>
-    > = {
-      'Male': 'male',
-      'Female': 'female',
-      'Gender Neutral': 'gender_neutral',
-    };
-
-    const stallsMatch = (s?: number) => {
-      if (!selectedStalls.length) return true;
-      if (!s && s !== 0) return false;
-      const options = new Set(selectedStalls);
-      if (options.has('Private') && s === 1) return true;
-      if (options.has('2') && s === 2) return true;
-      if (options.has('3') && s === 3) return true;
-      if (options.has('4+') && s >= 4) return true;
-      return false;
-    };
-
     const amenitiesMatch = (a?: Bathroom['amenities']) => {
       if (!selectedAmenities.length) return true;
       if (!a) return false;
@@ -307,36 +280,10 @@ function MapInner({apiKey}: { apiKey: string }) {
       return selectedAmenities.every((k) => need[k]);
     };
 
-    const genderMatch = (g?: Bathroom['gender']) => {
-      if (!selectedGenders.length) return true;
-      if (!g) return false;
-      return selectedGenders.some((opt) => !!g[genderKeys[opt]]);
-    };
-
-    const selectedNums = new Set(
-        selectedCleanliness.map((v) => parseInt(v, 10)),
-    );
-
-    const cleanlinessMatch = (c?: number | string) => {
-      if (!selectedCleanliness.length) return true;
-      const cNum = typeof c === 'number' ? c : parseInt(String(c ?? ''), 10);
-      if (Number.isNaN(cNum)) return false;
-      return selectedNums.has(cNum);
-    };
-
-    const matches = (b: Bathroom) =>
-      genderMatch(b.gender) &&
-      stallsMatch(b.num_stalls) &&
-      amenitiesMatch(b.amenities) &&
-      cleanlinessMatch((b as unknown as {cleanliness?: number}).cleanliness);
-
-    return bathrooms.filter(matches);
+    return bathrooms.filter((b) => amenitiesMatch(b.amenities));
   }, [
     bathrooms,
-    selectedGenders,
-    selectedStalls,
     selectedAmenities,
-    selectedCleanliness,
   ]);
 
   // map loading errors
@@ -350,6 +297,8 @@ function MapInner({apiKey}: { apiKey: string }) {
           map={mapRef.current}
           bannerOpen={bannerOpen}
           onCancelBanner={cancelAddFlow}
+          selectedAmenities={selectedAmenities}
+          onAmenitiesChange={setSelectedAmenities}
         />
       }
       <GoogleMap
@@ -397,17 +346,6 @@ function MapInner({apiKey}: { apiKey: string }) {
       <InfoWindow
         bathroom={selected}
         setBathroom={setSelected}
-      />
-
-      <MapFilters
-        selectedGenders={selectedGenders}
-        selectedStalls={selectedStalls}
-        selectedAmenities={selectedAmenities}
-        selectedCleanliness={selectedCleanliness}
-        onGendersChange={setSelectedGenders}
-        onStallsChange={setSelectedStalls}
-        onAmenitiesChange={setSelectedAmenities}
-        onCleanlinessChange={setSelectedCleanliness}
       />
       {!addMode && !selected && (
         <AddBathroomButton onClick={handleAddButtonClick} />

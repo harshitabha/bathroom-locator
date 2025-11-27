@@ -1,4 +1,7 @@
 import MapHeader from '../components/MapHeader';
+import {
+  type AmenityFilter,
+} from '../components/MapFilters';
 import {supabase} from '../lib/supabaseClient';
 import {
   describe,
@@ -122,6 +125,7 @@ describe('Map Header component when not logged in', () => {
               map={null}
               bannerOpen={false}
               onCancelBanner={() => {}}
+              {...baseFilterProps}
             />
           </AppContext>
         </MemoryRouter>,
@@ -173,6 +177,7 @@ describe('Map Header component when logged in', () => {
               map={null}
               bannerOpen={false}
               onCancelBanner={() => {}}
+              {...baseFilterProps}
             />
           </AppContext>
         </MemoryRouter>,
@@ -263,6 +268,7 @@ describe('Map Header component on sign out failure', async () => {
               map={null}
               bannerOpen={false}
               onCancelBanner={() => {}}
+              {...baseFilterProps}
             />
           </AppContext>
         </MemoryRouter>,
@@ -328,6 +334,7 @@ describe('Map Header component when getting current user fails', () => {
               map={null}
               bannerOpen={false}
               onCancelBanner={() => {}}
+              {...baseFilterProps}
             />
           </AppContext>
         </MemoryRouter>,
@@ -338,3 +345,10 @@ describe('Map Header component when getting current user fails', () => {
     screen.getByText('Login');
   });
 });
+const baseFilterProps: {
+  selectedAmenities: AmenityFilter[];
+  onAmenitiesChange: (next: AmenityFilter[]) => void;
+} = {
+  selectedAmenities: [],
+  onAmenitiesChange: () => {},
+};
