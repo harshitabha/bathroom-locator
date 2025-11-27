@@ -11,7 +11,7 @@ import type {Dispatch, SetStateAction} from 'react';
 import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
 import type {Bathroom, Gender, Amenities, OptionalObj} from '../../types';
-import Detail from './Detail';
+import Detail from '../Detail';
 
 interface bathroomDetailsProps {
   bathroom: Bathroom,
@@ -104,12 +104,18 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
               Additional Details
             </Typography>
             {
-              getNumKeysInObj(bathroom.gender) > 0 ?
-              <Detail name='Gender' values={gender}/> : null
+              getNumKeysInObj(gender) > 0 ?
+              <Detail
+                name='Gender'
+                values={gender}
+                handleClick={() => {}}/> : null
             }
             {
-              getNumKeysInObj(bathroom.amenities) > 0 ?
-              <Detail name='Amenities' values={amenities}/> : null
+              getNumKeysInObj(amenities) > 0 ?
+              <Detail
+                name='Amenities'
+                values={amenities}
+                handleClick={() => {}}/> : null
             }
           </Box> : null
         }

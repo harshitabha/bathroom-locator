@@ -2,8 +2,8 @@ import {useState} from 'react';
 import {describe, it, afterEach, expect} from 'vitest';
 import {render, screen, cleanup, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
-import AddBathroomButton from '../components/AddBathroomButton';
-import AddBathroomBanner from '../components/AddBathroomBanner';
+import AddBathroomButton from '../../components/AddBathroom/AddBathroomButton';
+import AddBathroomBanner from '../../components/AddBathroom/AddBathroomBanner';
 
 /**
  * @returns {object} button + banner

@@ -14,9 +14,9 @@ import './Map.css';
 import MapHeader from './MapHeader';
 import InfoWindow from './InfoWindow';
 import type {Bathroom} from '../types';
-import AddBathroomButton from './AddBathroomButton';
-import AddBathroomPeekCard from './AddBathroomPeekCard';
-import AddBathroomForm from './AddBathroomForm';
+import AddBathroomButton from './AddBathroom/AddBathroomButton';
+import AddBathroomPeekCard from './AddBathroom/AddBathroomPeekCard';
+import AddBathroomForm from './AddBathroom/AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
 
 const Map = () => {

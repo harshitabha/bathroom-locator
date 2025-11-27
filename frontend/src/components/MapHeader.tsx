@@ -2,7 +2,7 @@ import {Box, Button, Avatar, Menu, MenuItem} from '@mui/material';
 import {useNavigate} from 'react-router-dom';
 import {useState, useEffect, useContext} from 'react';
 import SearchBar from './SearchBar';
-import AddBathroomBanner from './AddBathroomBanner';
+import AddBathroomBanner from './AddBathroom/AddBathroomBanner';
 import AppContext from '../context/AppContext';
 import {supabase} from '../lib/supabaseClient';
 

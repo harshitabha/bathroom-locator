@@ -15,3 +15,7 @@ p.details-label {
   font-weight: 500;
   margin: 3px 8px 0 0;
 }
+
+.detail-container.column > .chip-container {
+  margin-top: 8px;
+}

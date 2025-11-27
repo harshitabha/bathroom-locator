@@ -28,4 +28,6 @@ export type OptionalObj<T> = {
   [K in keyof T]?: T[K]
 };
 
+export type IndexObject<T> = {[key: string]: T}
+
 export type AmenityOptions = keyof Amenities;

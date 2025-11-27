@@ -1,4 +1,4 @@
-import {useRef, useCallback} from 'react';
+import {useRef, useCallback, useState} from 'react';
 import {
   Box,
   Button,
@@ -7,6 +7,8 @@ import {
   Typography,
 } from '@mui/material';
 import './AddBathroomForm.css';
+import Detail from '../Detail';
+import type {IndexObject} from '../../types';
 
 /**
  * Used to hide the add bathroom form by dragging down on desktop
@@ -63,8 +65,8 @@ type Props = {
   onClose: () => void;
   onOpen?: () => void;
   position: { lat: number; lng: number } | null;
-  name: string;
-  description: string;
+  name?: string;
+  description?: string;
   onNameChange: (newName: string) => void;
   onDescriptionChange: (newDescription: string) => void;
   onCreated: () => Promise<void> | void;
@@ -89,28 +91,20 @@ export default function AddBathroomForm(props: Props) {
   } = props;
 
   const handleSubmit = async () => {
-    if (!position || !name.trim() || !description.trim()) return;
+    if (!position || !name?.trim() || !description?.trim()) return;
 
-    const payload = {
-      name: name.trim(),
-      description: description.trim(),
+    const newBathroom = {
+      name: name?.trim() || '',
+      description: description?.trim() || '',
       position,
-      num_stalls: 1,
-      amenities: {
-        toilet_paper: false,
-        soap: false,
-        paper_towel: false,
-        hand_dryer: false,
-        menstrual_products: false,
-        mirror: false,
-      },
+      gender: additionalDetails.gender,
     };
 
     try {
       const res = await fetch('http://localhost:3000/bathroom', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(payload),
+        body: JSON.stringify(newBathroom),
       });
 
       if (!res.ok) {
@@ -128,6 +122,38 @@ export default function AddBathroomForm(props: Props) {
   };
 
   const {onMouseDown: onHandleMouseDown} = useDragToCloseDrawer(onClose);
+  const [additionalDetails, setAdditionalDetails] = useState({
+    gender: {
+      female: false,
+      male: false,
+      gender_neutral: false,
+    },
+  } as IndexObject<IndexObject<boolean>>);
+
+  const handleDetailsChange = (
+      event: React.MouseEvent<HTMLDivElement, MouseEvent>,
+      name: string,
+  ) => {
+    const attributeToSet = stringToKey((event.target as HTMLElement).innerText);
+    setAdditionalDetails({
+      ...additionalDetails,
+      [name]: {
+        ...(additionalDetails[name] as object),
+        [attributeToSet]: !additionalDetails[name][attributeToSet],
+      },
+    });
+  };
+
+  /**
+   * properly formats the input value property names
+   * @param {string} str string to format
+   * @returns {string} formated string
+   */
+  const stringToKey = (str: string): string => {
+    let words = str.split(' ');
+    words = words.map((word) => word[0].toLowerCase() + word.substring(1));
+    return words.join('_');
+  };
 
   return (
     <SwipeableDrawer
@@ -169,8 +195,7 @@ export default function AddBathroomForm(props: Props) {
           sx={{bgcolor: 'background.default'}}
         >
           <Typography
-            variant="h5"
-            fontWeight={600}
+            variant="h1"
             className="addbathroom-title"
           >
             New Bathroom
@@ -198,6 +223,18 @@ export default function AddBathroomForm(props: Props) {
             }
             className="addbathroom-description"
           />
+
+          <Box>
+            <Typography variant='h2' className='addbathroom-subtitle'>
+              Additional Details (Optional)
+            </Typography>
+            <Detail
+              name='Gender'
+              values={additionalDetails.gender}
+              handleClick={(event) => handleDetailsChange(event, 'gender')}
+              styles='column'
+            />
+          </Box>
 
           {position && (
             <Typography

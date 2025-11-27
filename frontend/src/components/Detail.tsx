@@ -3,21 +3,29 @@ import './Detail.css';
 
 const Detail = (props: DetailProps) => {
   return (
-    <Box className='flex detail-container'>
+    <Box
+      className={`flex detail-container ${props.styles ? props.styles : ''}`}>
       <Typography variant='body1' className='details-label'>
         {props.name}:
       </Typography>
       <Box className='flex chip-container'>
         {
           Object.keys(props.values).map((key) => {
-            console.log(key, props.values[key]);
             return (
               <Chip
                 key={`${props.name}-${key}`}
                 component={Paper}
                 elevation={1}
+                onClick={(event) => props.handleClick(event)}
                 label={formatString(key)}
-                sx={props.values[key] ? {bgcolor: 'primary.light'}: null}/>
+                sx={props.values[key] ?
+                  {bgcolor: 'primary.light'} :
+                  {bgcolor: 'white'}}
+                aria-label={
+                  props.chipEditable ?
+                  getChipAriaLable(formatString(key), props.values[key]) :
+                  ''
+                }/>
             );
           })
         }
@@ -25,6 +33,19 @@ const Detail = (props: DetailProps) => {
     </Box>
   );
 };
+
+/**
+ * Get the aria label for the chip with the given value
+ * @param {string} val value for the chip
+ * @param {boolean} selected is the chip selected
+ * @returns {string} aria lable for the chip
+ */
+function getChipAriaLable(val: string, selected: boolean): string {
+  if (selected) {
+    return `Unselect ${val}`;
+  }
+  return `Select ${val}`;
+}
 
 /**
  * properly formats the input value property names
@@ -40,11 +61,9 @@ function formatString(str: string): string {
 interface DetailProps {
   name: string,
   values: {[key: string]: boolean},
+  styles?: string, // any additional classes to add for styling
+  chipEditable?: boolean,
+  handleClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
-
-// export interface Value {
-//   name: string,
-//   selected: boolean,
-// }
 
 export default Detail;
