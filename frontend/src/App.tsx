@@ -4,27 +4,31 @@ import Map from './components/Map';
 import Login from './components/Login';
 import SignUp from './components/SignUp';
 import {supabase} from './lib/supabaseClient';
+import {useState} from 'react';
 import AppContext from './context/AppContext';
 
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 
-/**
- * gets id of user currently logged in
- * @returns {string | null} user id of logged in user
- */
-export async function getCurrentUserId() : Promise<string | null> {
-  const {data: {user}, error} = await supabase.auth.getUser();
+const App = () => {
+  const [userId, setUserId] = useState<string | null>(null);
 
-  if (!user || error) {
-    return null;
+  /**
+   * gets id of user currently logged in
+   * @returns {string | null} user id of logged in user
+   */
+  async function getCurrentUserId() : Promise<void> {
+    const {data: {user}, error} = await supabase.auth.getUser();
+
+    if (!user || error) {
+      setUserId(null);
+      return;
+    }
+
+    setUserId(user.id);
   }
 
-  return user.id;
-}
-
-const App = () => {
   return (
-    <AppContext value={{getCurrentUserId}}>
+    <AppContext value={{userId, setUserId, getCurrentUserId}}>
       <Router>
         <Routes>
           <Route path="/" element={<Map />}/>
