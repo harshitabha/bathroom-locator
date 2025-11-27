@@ -19,3 +19,17 @@ p.details-label {
 .detail-container.column > .chip-container {
   margin-top: 8px;
 }
+
+.chip-container > .detailChip {
+  background-color: white;
+  &:focus {
+    background-color: white;
+  }
+}
+
+.detailChip.selected {
+  background-color: var(--mui-palette-primary-light);
+  &:focus {
+    background-color: var(--mui-palette-primary-light);
+  }
+}

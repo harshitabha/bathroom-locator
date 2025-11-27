@@ -29,7 +29,7 @@
 }
 
 .addbathroom-card .addbathroom-title {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 600;
   margin-bottom: 28px;
 }
@@ -37,6 +37,7 @@
 .addbathroom-card .addbathroom-subtitle {
   font-size: 22px;
   font-weight: 600;
+  margin-top: 24px;
 }
 
 .column {

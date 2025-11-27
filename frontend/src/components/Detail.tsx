@@ -18,9 +18,7 @@ const Detail = (props: DetailProps) => {
                 elevation={1}
                 onClick={() => props.handleClick(props.name, key)}
                 label={formatString(key)}
-                sx={props.values[key] ?
-                  {bgcolor: 'primary.light'} :
-                  {bgcolor: 'white'}}
+                className={`detailChip ${props.values[key] ? 'selected' : ''}`}
                 aria-label={
                   props.chipEditable ?
                   getChipAriaLable(formatString(key), props.values[key]) :
