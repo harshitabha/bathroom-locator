@@ -6,11 +6,13 @@ import {
   useTheme,
 } from '@mui/material';
 import NearMeIcon from '@mui/icons-material/NearMe';
-import type {Dispatch, SetStateAction} from 'react';
+import {useState, useContext, type Dispatch, type SetStateAction} from 'react';
 
 import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
-import type {GenderOptions, Bathroom} from '../../types';
+import AppContext from '../../context/AppContext';
+import Like from './Like';
+import type {AmenityOptions, GenderOptions, Bathroom} from '../../types';
 import Detail from './Detail';
 
 interface bathroomDetailsProps {
@@ -28,7 +30,16 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
       .map((key) => {
         return {name: key, selected: true};
       }) : [];
+  const amenities = bathroom.amenities ? Object.keys(bathroom.amenities)
+      .filter((val) => bathroom.amenities![val as AmenityOptions] == true)
+      .map((key) => {
+        return {name: key, selected: true};
+      }) : [];
+
   const theme = useTheme();
+
+  const [likes, setLikes] = useState(bathroom.likes);
+  const appContext = useContext(AppContext);
 
   return (
     <SwipeableDrawer
@@ -64,16 +75,30 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
         <Typography
           variant="h5"
           fontWeight={600}
-          sx={{pb: '8px'}}
+          sx={{pb: '8px',
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
         >
           {bathroom.name}
+          <Like
+            bathroom={bathroom}
+            userId={appContext?.userId ?? null}
+            likes={likes}
+            setLikes={setLikes}
+          />
         </Typography>
         <Box
           sx={{
             ml: '-2px',
             display: 'flex',
+            gap: '8px',
           }}
         >
+          {likes >= 5 ?
+            <Chip label="Verified Bathroom" variant="outlined"
+              color="primary"/> :
+            null}
           <Chip
             label={
               <Box sx={{display: 'flex', alignItems: 'center', gap: '3px'}}>
@@ -89,7 +114,6 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             )}
           />
         </Box>
-
         <Typography variant="h6" className="details-subheader">
             Description
         </Typography>
@@ -98,12 +122,19 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
         </Typography>
 
         {
-          gender.length > 0 ?
+          gender.length > 0 || amenities.length > 0 ?
           <Box>
             <Typography variant="h6" className="details-subheader">
               Additional Details
             </Typography>
-            <Detail name='Gender' values={gender}/>
+            {
+              gender.length > 0 ?
+              <Detail name='Gender' values={gender}/> : null
+            }
+            {
+              amenities.length > 0 ?
+              <Detail name='Amenities' values={amenities}/> : null
+            }
           </Box> : null
         }
 

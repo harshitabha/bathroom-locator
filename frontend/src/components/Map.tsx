@@ -4,7 +4,8 @@ import {
   useState,
   useCallback,
   useRef,
-  useContext} from 'react';
+  useContext,
+} from 'react';
 import {
   GoogleMap,
   Marker,
