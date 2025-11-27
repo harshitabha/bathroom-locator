@@ -1,9 +1,5 @@
 import MapHeader from '../components/MapHeader';
-import {
-  type GenderFilter,
-  type StallsFilter,
-  type AmenityFilter,
-} from '../components/MapFilters';
+import {type StallsFilter} from '../components/MapFilters';
 import {supabase} from '../lib/supabaseClient';
 import {
   describe,
@@ -348,17 +344,9 @@ describe('Map Header component when getting current user fails', () => {
   });
 });
 const baseFilterProps: {
-  selectedGenders: GenderFilter[];
   selectedStalls: StallsFilter[];
-  selectedAmenities: AmenityFilter[];
-  onGendersChange: (next: GenderFilter[]) => void;
   onStallsChange: (next: StallsFilter[]) => void;
-  onAmenitiesChange: (next: AmenityFilter[]) => void;
 } = {
-  selectedGenders: [],
   selectedStalls: [],
-  selectedAmenities: [],
-  onGendersChange: () => {},
   onStallsChange: () => {},
-  onAmenitiesChange: () => {},
 };

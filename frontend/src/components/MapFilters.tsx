@@ -16,26 +16,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import CheckIcon from '@mui/icons-material/Check';
 
-export const GENDER_FILTER_OPTIONS = [
-  'Male',
-  'Female',
-  'Gender Neutral',
-] as const;
-
 export const STALLS_FILTER_OPTIONS = ['Private', '2', '3', '4+'] as const;
 
-export const AMENITIES_FILTER_OPTIONS = [
-  'Soap',
-  'Tissues',
-  'Menstrual Products',
-  'Mirror',
-  'Toilet Paper',
-  'Hand Dryer',
-] as const;
-
-export type GenderFilter = (typeof GENDER_FILTER_OPTIONS)[number];
 export type StallsFilter = (typeof STALLS_FILTER_OPTIONS)[number];
-export type AmenityFilter = (typeof AMENITIES_FILTER_OPTIONS)[number];
 
 type FilterDropdownProps = {
   label: string;
@@ -209,24 +192,16 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
 };
 
 type MapFiltersProps = {
-  selectedGenders: GenderFilter[];
   selectedStalls: StallsFilter[];
-  selectedAmenities: AmenityFilter[];
-  onGendersChange: (next: GenderFilter[]) => void;
   onStallsChange: (next: StallsFilter[]) => void;
-  onAmenitiesChange: (next: AmenityFilter[]) => void;
 };
 
 const MapFilters: React.FC<MapFiltersProps> = ({
-  selectedGenders,
   selectedStalls,
-  selectedAmenities,
-  onGendersChange,
   onStallsChange,
-  onAmenitiesChange,
 }: MapFiltersProps) => {
   const [activeFilter, setActiveFilter] = useState<
-    'gender' | 'stalls' | 'amenities' | null
+    'stalls' | null
   >(null);
   return (
     <Box
@@ -255,16 +230,6 @@ const MapFilters: React.FC<MapFiltersProps> = ({
         }}
       >
         <FilterDropdown
-          label='Gender'
-          options={GENDER_FILTER_OPTIONS}
-          selected={selectedGenders}
-          onChange={(next) => onGendersChange(next as GenderFilter[])}
-          isActive={activeFilter === 'gender'}
-          onActivated={() => setActiveFilter('gender')}
-          onRequestClose={() => setActiveFilter(null)}
-          ariaLabel='Gender filter'
-        />
-        <FilterDropdown
           label='Stalls'
           options={STALLS_FILTER_OPTIONS}
           selected={selectedStalls}
@@ -273,16 +238,6 @@ const MapFilters: React.FC<MapFiltersProps> = ({
           onActivated={() => setActiveFilter('stalls')}
           onRequestClose={() => setActiveFilter(null)}
           ariaLabel='Stalls filter'
-        />
-        <FilterDropdown
-          label='Amenities'
-          options={AMENITIES_FILTER_OPTIONS}
-          selected={selectedAmenities}
-          onChange={(next) => onAmenitiesChange(next as AmenityFilter[])}
-          isActive={activeFilter === 'amenities'}
-          onActivated={() => setActiveFilter('amenities')}
-          onRequestClose={() => setActiveFilter(null)}
-          ariaLabel='Amenities filter'
         />
       </Box>
     </Box>

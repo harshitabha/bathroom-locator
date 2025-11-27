@@ -18,11 +18,7 @@ import AddBathroomButton from './AddBathroomButton';
 import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
-import {
-  type GenderFilter,
-  type StallsFilter,
-  type AmenityFilter,
-} from './MapFilters';
+import {type StallsFilter} from './MapFilters';
 
 const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -50,10 +46,7 @@ function MapInner({apiKey}: { apiKey: string }) {
   const idleTimer = useRef<number | null>(null);
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
-  const [selectedGenders, setSelectedGenders] = useState<GenderFilter[]>([]);
   const [selectedStalls, setSelectedStalls] = useState<StallsFilter[]>([]);
-  const [selectedAmenities, setSelectedAmenities] =
-    useState<AmenityFilter[]>([]);
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -270,15 +263,6 @@ function MapInner({apiKey}: { apiKey: string }) {
   }, []);
 
   const filteredBathrooms = useMemo(() => {
-    const genderKeys: Record<
-      GenderFilter,
-      keyof NonNullable<Bathroom['gender']>
-    > = {
-      'Male': 'male',
-      'Female': 'female',
-      'Gender Neutral': 'gender_neutral',
-    };
-
     const stallsMatch = (s?: number) => {
       if (!selectedStalls.length) return true;
       if (!s && s !== 0) return false;
@@ -290,37 +274,12 @@ function MapInner({apiKey}: { apiKey: string }) {
       return false;
     };
 
-    const amenitiesMatch = (a?: Bathroom['amenities']) => {
-      if (!selectedAmenities.length) return true;
-      if (!a) return false;
-      const need: Record<AmenityFilter, boolean> = {
-        'Soap': !!a.soap,
-        'Tissues': !!a.paper_towel,
-        'Menstrual Products': !!a.menstrual_products,
-        'Mirror': !!a.mirror,
-        'Toilet Paper': !!a.toilet_paper,
-        'Hand Dryer': !!a.hand_dryer,
-      };
-      return selectedAmenities.every((k) => need[k]);
-    };
-
-    const genderMatch = (g?: Bathroom['gender']) => {
-      if (!selectedGenders.length) return true;
-      if (!g) return false;
-      return selectedGenders.some((opt) => !!g[genderKeys[opt]]);
-    };
-
-    const matches = (b: Bathroom) =>
-      genderMatch(b.gender) &&
-      stallsMatch(b.num_stalls) &&
-      amenitiesMatch(b.amenities);
+    const matches = (b: Bathroom) => stallsMatch(b.num_stalls);
 
     return bathrooms.filter(matches);
   }, [
     bathrooms,
-    selectedGenders,
     selectedStalls,
-    selectedAmenities,
   ]);
 
   // map loading errors
@@ -330,17 +289,13 @@ function MapInner({apiKey}: { apiKey: string }) {
   return (
     <div className="map-align-center">
       {isLoaded &&
-        <MapHeader
-          map={mapRef.current}
-          bannerOpen={bannerOpen}
-          onCancelBanner={cancelAddFlow}
-          selectedGenders={selectedGenders}
-          selectedStalls={selectedStalls}
-          selectedAmenities={selectedAmenities}
-          onGendersChange={setSelectedGenders}
-          onStallsChange={setSelectedStalls}
-          onAmenitiesChange={setSelectedAmenities}
-        />
+          <MapHeader
+            map={mapRef.current}
+            bannerOpen={bannerOpen}
+            onCancelBanner={cancelAddFlow}
+            selectedStalls={selectedStalls}
+            onStallsChange={setSelectedStalls}
+          />
       }
       <GoogleMap
         onLoad={onMapLoad}

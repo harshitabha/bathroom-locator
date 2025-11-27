@@ -3,11 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import {useState, useEffect, useContext} from 'react';
 import SearchBar from './SearchBar';
 import AddBathroomBanner from './AddBathroomBanner';
-import MapFilters, {
-  type GenderFilter,
-  type StallsFilter,
-  type AmenityFilter,
-} from './MapFilters';
+import MapFilters, {type StallsFilter} from './MapFilters';
 import AppContext from '../context/AppContext';
 import {supabase} from '../lib/supabaseClient';
 
@@ -15,24 +11,16 @@ type Props = {
   map: google.maps.Map | null;
   bannerOpen: boolean;
   onCancelBanner: () => void;
-  selectedGenders: GenderFilter[];
   selectedStalls: StallsFilter[];
-  selectedAmenities: AmenityFilter[];
-  onGendersChange: (next: GenderFilter[]) => void;
   onStallsChange: (next: StallsFilter[]) => void;
-  onAmenitiesChange: (next: AmenityFilter[]) => void;
 };
 
 const MapHeader = ({
   map,
   bannerOpen,
   onCancelBanner,
-  selectedGenders,
   selectedStalls,
-  selectedAmenities,
-  onGendersChange,
   onStallsChange,
-  onAmenitiesChange,
 }: Props) => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>('');
@@ -128,12 +116,8 @@ const MapHeader = ({
       <AddBathroomBanner bannerOpen={bannerOpen} onCancel={onCancelBanner} />
       {/* row 3, filters */}
       <MapFilters
-        selectedGenders={selectedGenders}
         selectedStalls={selectedStalls}
-        selectedAmenities={selectedAmenities}
-        onGendersChange={onGendersChange}
         onStallsChange={onStallsChange}
-        onAmenitiesChange={onAmenitiesChange}
       />
     </Box>
   );
