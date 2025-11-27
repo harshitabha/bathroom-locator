@@ -5,6 +5,7 @@ export interface Bathroom {
   description: string;
   likes: number;
   amenities?: Amenities,
+  amenities?: Amenities,
   num_stalls?: number,
   gender?: Gender,
 };
@@ -29,5 +30,3 @@ export type OptionalObj<T> = {
 };
 
 export type IndexObject<T> = {[key: string]: T}
-
-export type AmenityOptions = keyof Amenities;

@@ -101,9 +101,15 @@ describe('Renders', async () => {
   it('Additional details', async () => {
     render(<AddBathroomWrapper />);
     screen.getByText('Additional Details (Optional)');
-    screen.getByText('Gender'); // label is only present if options are
-    // verify aria labels for chips exist
+    screen.getByText('Gender:'); // label is only present if options are
+    // // verify aria labels for chips exist
+  });
+
+  it('Options have the select label by default', async () => {
+    render(<AddBathroomWrapper />);
     screen.getByLabelText('Select Female');
+    screen.getByLabelText('Select Male');
+    screen.getByLabelText('Select Gender Neutral');
   });
 });
 
@@ -137,7 +143,7 @@ function mockServer(status: number) {
   );
 }
 
-it('Basic Bathroom created successfully', async () => {
+it.only('Basic Bathroom created successfully', async () => {
   mockServer(204);
   render(<AddBathroomWrapper />);
 
@@ -158,11 +164,30 @@ it('does not call onCreated when error', async () => {
 
 describe('Selecting gender details', async () => {
   beforeEach(() => {
-    mockServer(204);
     render(<AddBathroomWrapper />);
   });
-  it('Options have the select label by default', async () => {
+
+  it('Changes label to unselect when chip is selected', async () => {
+    const chip = screen.getByLabelText('Select Female');
+    fireEvent.click(chip);
+    screen.getByLabelText('Unselect Female');
+  });
+
+  it('Changes label back if chip is clicked again', async () => {
+    const chip = screen.getByLabelText('Select Female');
+    fireEvent.click(chip);
+    fireEvent.click(chip);
     screen.getByLabelText('Select Female');
+  });
+
+  it('Can create a bathroom with gender info selected', async () => {
+    mockServer(204);
+    const chip = screen.getByLabelText('Select Female');
+    fireEvent.click(chip);
+    fireEvent.click(screen.getByText('Save'));
+    await waitFor(() =>
+      expect(screen.queryByText('New Bathroom')).toBeNull(),
+    );
   });
 });
 

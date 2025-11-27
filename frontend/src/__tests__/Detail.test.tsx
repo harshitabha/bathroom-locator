@@ -55,6 +55,6 @@ describe('Clickable chip', async () => {
   it('Select aria label exists unselected chip', async () => {
     screen.getByLabelText('Unselect Prop 1');
   });
-  // Note: To avoid recreating the handleClick method the click
+  // Note: To avoid recreating the handleClick method & state the click
   // implementation will be tested in bathroom details
 });

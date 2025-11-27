@@ -3,7 +3,8 @@ import {
   useMemo,
   useState,
   useCallback,
-  useRef} from 'react';
+  useRef,
+} from 'react';
 import {
   GoogleMap,
   Marker,

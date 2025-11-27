@@ -99,6 +99,7 @@ export default function AddBathroomForm(props: Props) {
       position,
       gender: additionalDetails.gender,
     };
+    console.log('trying to submit');
 
     try {
       const res = await fetch('http://localhost:3000/bathroom', {
@@ -233,6 +234,7 @@ export default function AddBathroomForm(props: Props) {
               values={additionalDetails.gender}
               handleClick={(event) => handleDetailsChange(event, 'gender')}
               styles='column'
+              chipEditable={true}
             />
           </Box>
 
