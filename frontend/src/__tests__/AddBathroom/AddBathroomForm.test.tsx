@@ -101,15 +101,16 @@ describe('Renders', async () => {
   it('Additional details', async () => {
     render(<AddBathroomWrapper />);
     screen.getByText('Additional Details (Optional)');
-    screen.getByText('Gender:'); // label is only present if options are
-    // // verify aria labels for chips exist
+    // label is only present if options are
+    screen.getByText('Gender:');
+    screen.getByText('Amenities:');
   });
 
   it('Options have the select label by default', async () => {
     render(<AddBathroomWrapper />);
+    // check one from each group
     screen.getByLabelText('Select Female');
-    screen.getByLabelText('Select Male');
-    screen.getByLabelText('Select Gender Neutral');
+    screen.getByLabelText('Select Toilet Paper');
   });
 });
 
@@ -162,21 +163,27 @@ it('does not call onCreated when error', async () => {
   screen.queryByText('New Bathroom');
 });
 
-describe('Selecting gender details', async () => {
+/**
+ * Click on the element with the given label
+ * @param {string} label element label
+ */
+async function clickOn(label: string) {
+  const elem = await screen.findByLabelText(label);
+  fireEvent.click(elem);
+}
+describe('Selecting additional details', async () => {
   beforeEach(() => {
     render(<AddBathroomWrapper />);
   });
 
   it('Changes label to unselect when chip is selected', async () => {
-    const chip = screen.getByLabelText('Select Female');
-    fireEvent.click(chip);
+    await clickOn('Select Female');
     screen.getByLabelText('Unselect Female');
   });
 
   it('Changes label back if chip is clicked again', async () => {
-    const chip = screen.getByLabelText('Select Female');
-    fireEvent.click(chip);
-    fireEvent.click(chip);
+    await clickOn('Select Female');
+    await clickOn('Unselect Female');
     screen.getByLabelText('Select Female');
   });
 
@@ -188,6 +195,34 @@ describe('Selecting gender details', async () => {
     await waitFor(() =>
       expect(screen.queryByText('New Bathroom')).toBeNull(),
     );
+  });
+
+  it('Can select multiple gender options', async () => {
+    await clickOn('Select Female');
+    await clickOn('Select Gender Neutral');
+    const femaleChip = screen.queryByLabelText('Unselect Female');
+    const genderNeutralChip = screen
+        .queryByLabelText('Unselect Gender Neutral');
+    expect(femaleChip && genderNeutralChip).toBeTruthy();
+  });
+
+  it('Can create a bathroom with amenity info selected', async () => {
+    mockServer(204);
+    const chip = screen.getByLabelText('Select Toliet Paper');
+    fireEvent.click(chip);
+    fireEvent.click(screen.getByText('Save'));
+    await waitFor(() =>
+      expect(screen.queryByText('New Bathroom')).toBeNull(),
+    );
+  });
+
+  it('Can select multiple amenity options', async () => {
+    await clickOn('Select Mirror');
+    await clickOn('Select Toliet Paper');
+    const mirrorChip = screen.queryByLabelText('Unselect Mirror');
+    const tolietPaperChip = screen
+        .queryByLabelText('Unselect Toliet Paper');
+    expect(mirrorChip && tolietPaperChip).toBeTruthy();
   });
 });
 

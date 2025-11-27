@@ -128,18 +128,25 @@ export default function AddBathroomForm(props: Props) {
       male: false,
       gender_neutral: false,
     },
+    amenities: {
+      toilet_paper: false,
+      soap: false,
+      paper_towel: false,
+      hand_dryer: false,
+      menstrual_products: false,
+      mirror: false,
+    },
   } as IndexObject<IndexObject<boolean>>);
 
   const handleDetailsChange = (
       detailName: string,
       attrName: string,
   ) => {
-    const fDetailName = detailName.toLowerCase();
     setAdditionalDetails({
       ...additionalDetails,
-      [fDetailName]: {
-        ...(additionalDetails[fDetailName] as object),
-        [attrName]: !additionalDetails[fDetailName][attrName],
+      [detailName]: {
+        ...(additionalDetails[detailName] as object),
+        [attrName]: !additionalDetails[detailName][attrName],
       },
     });
   };
@@ -220,6 +227,13 @@ export default function AddBathroomForm(props: Props) {
             <Detail
               name='Gender'
               values={additionalDetails.gender}
+              handleClick={handleDetailsChange}
+              styles='column'
+              chipEditable={true}
+            />
+            <Detail
+              name='Amenities'
+              values={additionalDetails.amenities}
               handleClick={handleDetailsChange}
               styles='column'
               chipEditable={true}

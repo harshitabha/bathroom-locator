@@ -16,7 +16,7 @@ const Detail = (props: DetailProps) => {
                 key={`${props.name}-${key}`}
                 component={Paper}
                 elevation={1}
-                onClick={() => props.handleClick(props.name, key)}
+                onClick={() => props.handleClick(props.name.toLowerCase(), key)}
                 label={formatString(key)}
                 className={`detailChip ${props.values[key] ? 'selected' : ''}`}
                 aria-label={
