@@ -16,7 +16,7 @@ const Detail = (props: DetailProps) => {
                 key={`${props.name}-${key}`}
                 component={Paper}
                 elevation={1}
-                onClick={(event) => props.handleClick(event)}
+                onClick={() => props.handleClick(props.name, key)}
                 label={formatString(key)}
                 sx={props.values[key] ?
                   {bgcolor: 'primary.light'} :
@@ -63,7 +63,7 @@ interface DetailProps {
   values: {[key: string]: boolean},
   styles?: string, // any additional classes to add for styling
   chipEditable?: boolean,
-  handleClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  handleClick: (propName: string, attrName: string) => void;
 }
 
 export default Detail;

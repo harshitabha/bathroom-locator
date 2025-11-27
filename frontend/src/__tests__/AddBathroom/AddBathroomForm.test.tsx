@@ -137,13 +137,13 @@ describe('Does not submit with missing property', async () => {
  */
 function mockServer(status: number) {
   server.use(
-      http.put(URL, async () => {
+      http.post(URL, async () => {
         return HttpResponse.json({status});
       }),
   );
 }
 
-it.only('Basic Bathroom created successfully', async () => {
+it('Basic Bathroom created successfully', async () => {
   mockServer(204);
   render(<AddBathroomWrapper />);
 

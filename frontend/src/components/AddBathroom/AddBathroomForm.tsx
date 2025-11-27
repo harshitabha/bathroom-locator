@@ -99,7 +99,6 @@ export default function AddBathroomForm(props: Props) {
       position,
       gender: additionalDetails.gender,
     };
-    console.log('trying to submit');
 
     try {
       const res = await fetch('http://localhost:3000/bathroom', {
@@ -132,28 +131,17 @@ export default function AddBathroomForm(props: Props) {
   } as IndexObject<IndexObject<boolean>>);
 
   const handleDetailsChange = (
-      event: React.MouseEvent<HTMLDivElement, MouseEvent>,
-      name: string,
+      detailName: string,
+      attrName: string,
   ) => {
-    const attributeToSet = stringToKey((event.target as HTMLElement).innerText);
+    const fDetailName = detailName.toLowerCase();
     setAdditionalDetails({
       ...additionalDetails,
-      [name]: {
-        ...(additionalDetails[name] as object),
-        [attributeToSet]: !additionalDetails[name][attributeToSet],
+      [fDetailName]: {
+        ...(additionalDetails[fDetailName] as object),
+        [attrName]: !additionalDetails[fDetailName][attrName],
       },
     });
-  };
-
-  /**
-   * properly formats the input value property names
-   * @param {string} str string to format
-   * @returns {string} formated string
-   */
-  const stringToKey = (str: string): string => {
-    let words = str.split(' ');
-    words = words.map((word) => word[0].toLowerCase() + word.substring(1));
-    return words.join('_');
   };
 
   return (
@@ -232,7 +220,7 @@ export default function AddBathroomForm(props: Props) {
             <Detail
               name='Gender'
               values={additionalDetails.gender}
-              handleClick={(event) => handleDetailsChange(event, 'gender')}
+              handleClick={handleDetailsChange}
               styles='column'
               chipEditable={true}
             />
