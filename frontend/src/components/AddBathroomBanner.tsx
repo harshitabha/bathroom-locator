@@ -30,6 +30,8 @@ export default function AddBathroomBanner(props: AddBathroomBannerProps) {
         px: 1.5,
         py: 1,
         justifyContent: 'space-between',
+        position: 'relative',
+        zIndex: 110,
       }}
     >
       <Typography variant="subtitle1" fontWeight={500}>

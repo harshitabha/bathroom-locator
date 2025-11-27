@@ -1,4 +1,9 @@
 import MapHeader from '../components/MapHeader';
+import {
+  type GenderFilter,
+  type StallsFilter,
+  type AmenityFilter,
+} from '../components/MapFilters';
 import {supabase} from '../lib/supabaseClient';
 import {
   describe,
@@ -122,6 +127,7 @@ describe('Map Header component when not logged in', () => {
               map={null}
               bannerOpen={false}
               onCancelBanner={() => {}}
+              {...baseFilterProps}
             />
           </AppContext>
         </MemoryRouter>,
@@ -173,6 +179,7 @@ describe('Map Header component when logged in', () => {
               map={null}
               bannerOpen={false}
               onCancelBanner={() => {}}
+              {...baseFilterProps}
             />
           </AppContext>
         </MemoryRouter>,
@@ -263,6 +270,7 @@ describe('Map Header component on sign out failure', async () => {
               map={null}
               bannerOpen={false}
               onCancelBanner={() => {}}
+              {...baseFilterProps}
             />
           </AppContext>
         </MemoryRouter>,
@@ -328,6 +336,7 @@ describe('Map Header component when getting current user fails', () => {
               map={null}
               bannerOpen={false}
               onCancelBanner={() => {}}
+              {...baseFilterProps}
             />
           </AppContext>
         </MemoryRouter>,
@@ -338,3 +347,18 @@ describe('Map Header component when getting current user fails', () => {
     screen.getByText('Login');
   });
 });
+const baseFilterProps: {
+  selectedGenders: GenderFilter[];
+  selectedStalls: StallsFilter[];
+  selectedAmenities: AmenityFilter[];
+  onGendersChange: (next: GenderFilter[]) => void;
+  onStallsChange: (next: StallsFilter[]) => void;
+  onAmenitiesChange: (next: AmenityFilter[]) => void;
+} = {
+  selectedGenders: [],
+  selectedStalls: [],
+  selectedAmenities: [],
+  onGendersChange: () => {},
+  onStallsChange: () => {},
+  onAmenitiesChange: () => {},
+};

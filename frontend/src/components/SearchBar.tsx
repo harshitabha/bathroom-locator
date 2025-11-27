@@ -3,6 +3,7 @@ import {ClickAwayListener, Divider, Box, Paper, TextField, List,
   ListItemButton, ListItemText, InputAdornment, IconButton,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import {useTheme} from '@mui/material/styles';
 
 // helper types
 type PlacePrediction = google.maps.places.PlacePrediction;
@@ -20,6 +21,7 @@ type SugWithPred = Suggestion & { placePrediction: PlacePrediction };
 type Props = { map: google.maps.Map | null };
 
 const SearchBar = ({map}: Props) => {
+  const theme = useTheme();
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [openList, setOpenList] = useState(false);
@@ -141,7 +143,11 @@ const SearchBar = ({map}: Props) => {
           maxWidth: '100%',
           padding: 0.5,
           borderRadius: 6,
+          backgroundColor:
+            theme.palette.custom?.searchPaper ?? theme.palette.background.paper,
           boxSizing: 'border-box',
+          position: 'relative',
+          zIndex: 120,
         }}
       >
         <TextField

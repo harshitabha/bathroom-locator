@@ -1,5 +1,18 @@
 import {createTheme} from '@mui/material/styles';
 
+declare module '@mui/material/styles' {
+  interface Palette {
+    custom?: {
+      searchPaper: string;
+    };
+  }
+  interface PaletteOptions {
+    custom?: {
+      searchPaper?: string;
+    };
+  }
+}
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -9,6 +22,7 @@ const theme = createTheme({
     secondary: {main: '#845416'},
     error: {main: '#F44336'},
     background: {default: '#FBFAED', paper: '#FBFAED'},
+    custom: {searchPaper: '#FFFFFF'},
     text: {primary: '#000000'},
     action: {disabled: 'rgba(0, 0, 0, 0.38)', hover: 'rgba(0, 0, 0, 0.04)'},
   },

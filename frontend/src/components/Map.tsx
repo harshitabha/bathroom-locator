@@ -18,11 +18,10 @@ import AddBathroomButton from './AddBathroomButton';
 import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
-import MapFilters, {
+import {
   type GenderFilter,
   type StallsFilter,
   type AmenityFilter,
-  type CleanlinessFilter,
 } from './MapFilters';
 
 const Map = () => {
@@ -55,8 +54,6 @@ function MapInner({apiKey}: { apiKey: string }) {
   const [selectedStalls, setSelectedStalls] = useState<StallsFilter[]>([]);
   const [selectedAmenities, setSelectedAmenities] =
     useState<AmenityFilter[]>([]);
-  const [selectedCleanliness, setSelectedCleanliness] =
-    useState<CleanlinessFilter[]>([]);
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -313,22 +310,10 @@ function MapInner({apiKey}: { apiKey: string }) {
       return selectedGenders.some((opt) => !!g[genderKeys[opt]]);
     };
 
-    const selectedNums = new Set(
-        selectedCleanliness.map((v) => parseInt(v, 10)),
-    );
-
-    const cleanlinessMatch = (c?: number | string) => {
-      if (!selectedCleanliness.length) return true;
-      const cNum = typeof c === 'number' ? c : parseInt(String(c ?? ''), 10);
-      if (Number.isNaN(cNum)) return false;
-      return selectedNums.has(cNum);
-    };
-
     const matches = (b: Bathroom) =>
       genderMatch(b.gender) &&
       stallsMatch(b.num_stalls) &&
-      amenitiesMatch(b.amenities) &&
-      cleanlinessMatch((b as unknown as {cleanliness?: number}).cleanliness);
+      amenitiesMatch(b.amenities);
 
     return bathrooms.filter(matches);
   }, [
@@ -336,7 +321,6 @@ function MapInner({apiKey}: { apiKey: string }) {
     selectedGenders,
     selectedStalls,
     selectedAmenities,
-    selectedCleanliness,
   ]);
 
   // map loading errors
@@ -350,6 +334,12 @@ function MapInner({apiKey}: { apiKey: string }) {
           map={mapRef.current}
           bannerOpen={bannerOpen}
           onCancelBanner={cancelAddFlow}
+          selectedGenders={selectedGenders}
+          selectedStalls={selectedStalls}
+          selectedAmenities={selectedAmenities}
+          onGendersChange={setSelectedGenders}
+          onStallsChange={setSelectedStalls}
+          onAmenitiesChange={setSelectedAmenities}
         />
       }
       <GoogleMap
@@ -397,17 +387,6 @@ function MapInner({apiKey}: { apiKey: string }) {
       <InfoWindow
         bathroom={selected}
         setBathroom={setSelected}
-      />
-
-      <MapFilters
-        selectedGenders={selectedGenders}
-        selectedStalls={selectedStalls}
-        selectedAmenities={selectedAmenities}
-        selectedCleanliness={selectedCleanliness}
-        onGendersChange={setSelectedGenders}
-        onStallsChange={setSelectedStalls}
-        onAmenitiesChange={setSelectedAmenities}
-        onCleanlinessChange={setSelectedCleanliness}
       />
       {!addMode && !selected && (
         <AddBathroomButton onClick={handleAddButtonClick} />

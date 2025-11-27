@@ -7,7 +7,6 @@ INSERT INTO bathrooms (id, data) VALUES (
     "position": {"lat": 37.00076576303953, "lng": -122.05719563060227},
     "description": "more details",
     "num_stalls": 1,
-    "cleanliness": 4,
     "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true},
     "gender": {"female": true, "male": false, "gender_neutral": false}
   }'::jsonb
@@ -20,7 +19,6 @@ INSERT INTO bathrooms (id, data) VALUES (
     "position": {"lat": 37.00089593913641, "lng": -122.06296383018844},
     "description": "more details",
     "num_stalls": 1,
-    "cleanliness": 3,
     "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true},
     "gender": {"female": true, "male": false, "gender_neutral": true}
   }'::jsonb
@@ -33,7 +31,6 @@ INSERT INTO bathrooms (id, data) VALUES (
     "position": {"lat": 36.967136756404564, "lng": -122.03905636700443},
     "description": "more details",
     "num_stalls": 1,
-    "cleanliness": 2,
     "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true},
     "gender": {"female": true, "male": true, "gender_neutral": true}
   }'::jsonb
@@ -46,7 +43,6 @@ INSERT INTO bathrooms (id, data) VALUES (
     "position": {"lat": 33.811565237221046, "lng": -117.91814700205742},
     "description": "more details",
     "num_stalls": 1,
-    "cleanliness": 5,
     "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true},
     "gender": {"female": true, "male": true, "gender_neutral": false}
   }'::jsonb
@@ -59,7 +55,6 @@ INSERT INTO bathrooms (id, data) VALUES (
     "position": {"lat": 48.85406187463328, "lng": 2.333068483200026},
     "description": "more details",
     "num_stalls": 1,
-    "cleanliness": 1,
     "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true},
     "gender": {"female": false, "male": false, "gender_neutral": false}
   }'::jsonb
@@ -72,7 +67,6 @@ INSERT INTO bathrooms (id, data) VALUES (
     "position": {"lat": 66.32386502931023, "lng": -179.1218123514762},
     "description": "more details",
     "num_stalls": 1,
-    "cleanliness": 4,
     "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true},
     "gender": {"female": true, "male": true, "gender_neutral": false}
   }'::jsonb
@@ -85,7 +79,6 @@ INSERT INTO bathrooms (id, data) VALUES (
     "position": {"lat": 66.32386502931023, "lng": 179.95655040405953},
     "description": "more details",
     "num_stalls": 1,
-    "cleanliness": 2,
     "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true},
     "gender": {"female": false, "male": false, "gender_neutral": false}
   }'::jsonb
@@ -98,7 +91,6 @@ INSERT INTO bathrooms (id, data) VALUES (
     "position": {"lat": -33.85692834407767, "lng": 151.21503341214125},
     "description": "more details",
     "num_stalls": 1,
-    "cleanliness": 3,
     "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true},
     "gender": {"female": true, "male": false, "gender_neutral": false}
   }'::jsonb
@@ -111,7 +103,6 @@ INSERT INTO bathrooms (id, data) VALUES (
     "position": {"lat": 48.854153437265325, "lng": 2.3326066198269526},
     "description": "more details",
     "num_stalls": 1,
-    "cleanliness": 1,
     "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true},
     "gender": {"female": true, "male": false, "gender_neutral": false}
   }'::jsonb

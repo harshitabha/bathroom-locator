@@ -33,12 +33,9 @@ export const AMENITIES_FILTER_OPTIONS = [
   'Hand Dryer',
 ] as const;
 
-export const CLEANLINESS_FILTER_OPTIONS = ['1', '2', '3', '4', '5'] as const;
-
 export type GenderFilter = (typeof GENDER_FILTER_OPTIONS)[number];
 export type StallsFilter = (typeof STALLS_FILTER_OPTIONS)[number];
 export type AmenityFilter = (typeof AMENITIES_FILTER_OPTIONS)[number];
-export type CleanlinessFilter = (typeof CLEANLINESS_FILTER_OPTIONS)[number];
 
 type FilterDropdownProps = {
   label: string;
@@ -48,7 +45,7 @@ type FilterDropdownProps = {
   isActive: boolean;
   onActivated: () => void;
   onRequestClose?: () => void;
-  'data-testid'?: string;
+  ariaLabel?: string;
 };
 
 const FilterDropdown: React.FC<FilterDropdownProps> = ({
@@ -59,7 +56,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
   isActive,
   onActivated,
   onRequestClose,
-  'data-testid': dataTestId,
+  ariaLabel,
 }) => {
   const theme = useTheme();
   const hoverBg = darken(theme.palette.background.paper, 0.06);
@@ -111,7 +108,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
         disableRipple
         disableElevation
         onClick={handleButtonClick}
-        data-testid={dataTestId}
+        aria-label={ariaLabel ?? `${label} filter`}
         endIcon={open ? (
           <ExpandLessIcon fontSize='small' />
         ) : (
@@ -119,9 +116,10 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
         )}
         sx={{
           'textTransform': 'none',
-          'borderRadius': 3,
-          'px': 1,
-          'py': 0.25,
+          'borderRadius': 1.5,
+          'px': 1.5,
+          'py': 0.7,
+          'minHeight': 28,
           'mr': 0.75,
           'bgcolor': 'background.paper',
           'color': 'text.primary',
@@ -214,25 +212,21 @@ type MapFiltersProps = {
   selectedGenders: GenderFilter[];
   selectedStalls: StallsFilter[];
   selectedAmenities: AmenityFilter[];
-  selectedCleanliness: CleanlinessFilter[];
   onGendersChange: (next: GenderFilter[]) => void;
   onStallsChange: (next: StallsFilter[]) => void;
   onAmenitiesChange: (next: AmenityFilter[]) => void;
-  onCleanlinessChange: (next: CleanlinessFilter[]) => void;
 };
 
 const MapFilters: React.FC<MapFiltersProps> = ({
   selectedGenders,
   selectedStalls,
   selectedAmenities,
-  selectedCleanliness,
   onGendersChange,
   onStallsChange,
   onAmenitiesChange,
-  onCleanlinessChange,
 }: MapFiltersProps) => {
   const [activeFilter, setActiveFilter] = useState<
-    'gender' | 'stalls' | 'amenities' | 'cleanliness' | null
+    'gender' | 'stalls' | 'amenities' | null
   >(null);
   return (
     <Box
@@ -241,7 +235,7 @@ const MapFilters: React.FC<MapFiltersProps> = ({
         left: 8,
         right: 8,
         top: 55,
-        zIndex: 90,
+        zIndex: 60,
         display: 'flex',
         justifyContent: 'flex-start',
         pointerEvents: 'none',
@@ -268,7 +262,7 @@ const MapFilters: React.FC<MapFiltersProps> = ({
           isActive={activeFilter === 'gender'}
           onActivated={() => setActiveFilter('gender')}
           onRequestClose={() => setActiveFilter(null)}
-          data-testid='filter-gender'
+          ariaLabel='Gender filter'
         />
         <FilterDropdown
           label='Stalls'
@@ -278,7 +272,7 @@ const MapFilters: React.FC<MapFiltersProps> = ({
           isActive={activeFilter === 'stalls'}
           onActivated={() => setActiveFilter('stalls')}
           onRequestClose={() => setActiveFilter(null)}
-          data-testid='filter-stalls'
+          ariaLabel='Stalls filter'
         />
         <FilterDropdown
           label='Amenities'
@@ -288,17 +282,7 @@ const MapFilters: React.FC<MapFiltersProps> = ({
           isActive={activeFilter === 'amenities'}
           onActivated={() => setActiveFilter('amenities')}
           onRequestClose={() => setActiveFilter(null)}
-          data-testid='filter-amenities'
-        />
-        <FilterDropdown
-          label='Cleanliness'
-          options={CLEANLINESS_FILTER_OPTIONS}
-          selected={selectedCleanliness}
-          onChange={(next) => onCleanlinessChange(next as CleanlinessFilter[])}
-          isActive={activeFilter === 'cleanliness'}
-          onActivated={() => setActiveFilter('cleanliness')}
-          onRequestClose={() => setActiveFilter(null)}
-          data-testid='filter-cleanliness'
+          ariaLabel='Amenities filter'
         />
       </Box>
     </Box>

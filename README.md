@@ -10,7 +10,7 @@ Have you been in a new place, and have no idea where to find a restroom? Or mayb
 
 - **Additional information for individual bathroom pins**
 
-    After clicking on a bathroom pin learn more about the information the user has provided about the bathroom. Some examples include: is it a gendered or gender neutral bathroom, availability of menstrual products, cleanliness level.
+    After clicking on a bathroom pin learn more about the information the user has provided about the bathroom. Some examples include: is it a gendered or gender neutral bathroom and availability of menstrual products.
 
 - **Navigation to bathrooms**
 
