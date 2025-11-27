@@ -21,9 +21,8 @@ const theme = createTheme({
     },
     secondary: {main: '#845416'},
     error: {main: '#904A43'},
-    background: {default: '#FBFAED', paper: '#FBFAED'},
+    background: {default: '#FBFAED'},
     text: {primary: '#000000', secondary: '#76786B'},
-    custom: {searchPaper: '#FFFFFF'},
   },
   components: {
     MuiButton: {
