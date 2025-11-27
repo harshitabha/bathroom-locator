@@ -20,8 +20,6 @@ import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
 import {
   type GenderFilter,
-  type StallsFilter,
-  type AmenityFilter,
 } from './MapFilters';
 
 const Map = () => {
@@ -51,9 +49,6 @@ function MapInner({apiKey}: { apiKey: string }) {
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [selectedGenders, setSelectedGenders] = useState<GenderFilter[]>([]);
-  const [selectedStalls, setSelectedStalls] = useState<StallsFilter[]>([]);
-  const [selectedAmenities, setSelectedAmenities] =
-    useState<AmenityFilter[]>([]);
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -279,31 +274,6 @@ function MapInner({apiKey}: { apiKey: string }) {
       'Gender Neutral': 'gender_neutral',
     };
 
-    const stallsMatch = (s?: number) => {
-      if (!selectedStalls.length) return true;
-      if (!s && s !== 0) return false;
-      const options = new Set(selectedStalls);
-      if (options.has('Private') && s === 1) return true;
-      if (options.has('2') && s === 2) return true;
-      if (options.has('3') && s === 3) return true;
-      if (options.has('4+') && s >= 4) return true;
-      return false;
-    };
-
-    const amenitiesMatch = (a?: Bathroom['amenities']) => {
-      if (!selectedAmenities.length) return true;
-      if (!a) return false;
-      const need: Record<AmenityFilter, boolean> = {
-        'Soap': !!a.soap,
-        'Tissues': !!a.paper_towel,
-        'Menstrual Products': !!a.menstrual_products,
-        'Mirror': !!a.mirror,
-        'Toilet Paper': !!a.toilet_paper,
-        'Hand Dryer': !!a.hand_dryer,
-      };
-      return selectedAmenities.every((k) => need[k]);
-    };
-
     const genderMatch = (g?: Bathroom['gender']) => {
       if (!selectedGenders.length) return true;
       if (!g) return false;
@@ -311,16 +281,12 @@ function MapInner({apiKey}: { apiKey: string }) {
     };
 
     const matches = (b: Bathroom) =>
-      genderMatch(b.gender) &&
-      stallsMatch(b.num_stalls) &&
-      amenitiesMatch(b.amenities);
+      genderMatch(b.gender);
 
     return bathrooms.filter(matches);
   }, [
     bathrooms,
     selectedGenders,
-    selectedStalls,
-    selectedAmenities,
   ]);
 
   // map loading errors
@@ -335,11 +301,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           bannerOpen={bannerOpen}
           onCancelBanner={cancelAddFlow}
           selectedGenders={selectedGenders}
-          selectedStalls={selectedStalls}
-          selectedAmenities={selectedAmenities}
           onGendersChange={setSelectedGenders}
-          onStallsChange={setSelectedStalls}
-          onAmenitiesChange={setSelectedAmenities}
         />
       }
       <GoogleMap

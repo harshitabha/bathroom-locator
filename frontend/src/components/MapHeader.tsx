@@ -5,8 +5,6 @@ import SearchBar from './SearchBar';
 import AddBathroomBanner from './AddBathroomBanner';
 import MapFilters, {
   type GenderFilter,
-  type StallsFilter,
-  type AmenityFilter,
 } from './MapFilters';
 import AppContext from '../context/AppContext';
 import {supabase} from '../lib/supabaseClient';
@@ -16,11 +14,7 @@ type Props = {
   bannerOpen: boolean;
   onCancelBanner: () => void;
   selectedGenders: GenderFilter[];
-  selectedStalls: StallsFilter[];
-  selectedAmenities: AmenityFilter[];
   onGendersChange: (next: GenderFilter[]) => void;
-  onStallsChange: (next: StallsFilter[]) => void;
-  onAmenitiesChange: (next: AmenityFilter[]) => void;
 };
 
 const MapHeader = ({
@@ -28,11 +22,7 @@ const MapHeader = ({
   bannerOpen,
   onCancelBanner,
   selectedGenders,
-  selectedStalls,
-  selectedAmenities,
   onGendersChange,
-  onStallsChange,
-  onAmenitiesChange,
 }: Props) => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>('');
@@ -129,11 +119,7 @@ const MapHeader = ({
       {/* row 3, filters */}
       <MapFilters
         selectedGenders={selectedGenders}
-        selectedStalls={selectedStalls}
-        selectedAmenities={selectedAmenities}
         onGendersChange={onGendersChange}
-        onStallsChange={onStallsChange}
-        onAmenitiesChange={onAmenitiesChange}
       />
     </Box>
   );
