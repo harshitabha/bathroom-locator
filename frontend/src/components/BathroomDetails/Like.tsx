@@ -1,16 +1,14 @@
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useContext} from 'react';
 import './Like.css';
 import {Typography} from '@mui/material';
 import type {Bathroom} from '../../types';
 import React from 'react';
+import BathroomContext from '../../context/BathroomContext';
 
 interface LikeProps {
-  bathroom: Bathroom;
   userId: string | null;
-  likes: number;
-  setLikes: React.Dispatch<React.SetStateAction<number>>;
 }
 /**
  * gets users liked bathrooms
@@ -33,19 +31,22 @@ async function getLikedBathrooms(userId: string | null) {
 /**
  * removes the user's like from the bathroom
  * @param {string} userId user id
- * @param {Bathroom} bathroom selected bathroom
+ * @param {Bathroom | null | undefined} bathroom selected bathroom
+ * @param {React.Dispatch<React.SetStateAction<Bathroom | null>>
+ * | undefined} setBathroom selected bathroom setter
+ * @param {React.Dispatch<
+ * React.SetStateAction<Bathroom []>> | undefined} setBathrooms bathroom setter
  * @param {React.Dispatch<React.SetStateAction<boolean>>} setLiked liked setter
- * @param {React.Dispatch<React.SetStateAction<number>>} setLikes likes setter
- * @param {number} likes number of likes
  */
 async function unlikeBathroom(
     userId: string | null,
-    bathroom: Bathroom,
+    bathroom: Bathroom | null | undefined,
+    setBathroom:
+      React.Dispatch<React.SetStateAction<Bathroom | null>> | undefined,
+    setBathrooms: React.Dispatch<React.SetStateAction<Bathroom []>> | undefined,
     setLiked: React.Dispatch<React.SetStateAction<boolean>>,
-    setLikes: React.Dispatch<React.SetStateAction<number>>,
-    likes: number,
 ) {
-  const bathroomId = bathroom.id;
+  const bathroomId = bathroom?.id;
   const res = await fetch('http://localhost:3000/user/likes', {
     method: 'delete',
     headers: {'Content-Type': 'application/json'},
@@ -57,8 +58,17 @@ async function unlikeBathroom(
 
   if (res.ok) {
     setLiked(false);
-    setLikes(likes - 1);
-    bathroom.likes -= 1;
+    if (bathroom && setBathroom && setBathrooms) {
+      setBathroom({...bathroom, likes: bathroom.likes - 1});
+      setBathrooms((bathrooms) =>
+        (bathrooms.map(
+            (b) => (
+              b.id === bathroomId ?
+                {...b, likes: b.likes - 1} :
+                b
+            ),
+        )));
+    }
   } else {
     console.error('Error deleting like: ', res.statusText);
   }
@@ -69,19 +79,22 @@ async function unlikeBathroom(
 /**
  * adds like to the bathroom
  * @param {string} userId user id
- * @param {Bathroom} bathroom selected bathroom
+ * @param {Bathroom | null | undefined} bathroom selected bathroom
+ * @param {React.Dispatch<React.SetStateAction<Bathroom | null>>
+ * | undefined} setBathroom selected bathroom setter
+ * @param {React.Dispatch<
+ * React.SetStateAction<Bathroom []>> | undefined} setBathrooms bathroom setter
  * @param {React.Dispatch<React.SetStateAction<boolean>>} setLiked liked setter
- * @param {React.Dispatch<React.SetStateAction<number>>} setLikes likes setter
- * @param {number} likes number of likes
  */
 async function likeBathroom(
     userId: string | null,
-    bathroom: Bathroom,
+    bathroom: Bathroom | null | undefined,
+    setBathroom:
+      React.Dispatch<React.SetStateAction<Bathroom | null>> | undefined,
+    setBathrooms: React.Dispatch<React.SetStateAction<Bathroom []>> | undefined,
     setLiked: React.Dispatch<React.SetStateAction<boolean>>,
-    setLikes: React.Dispatch<React.SetStateAction<number>>,
-    likes: number,
 ) {
-  const bathroomId = bathroom.id;
+  const bathroomId = bathroom?.id;
   const res = await fetch('http://localhost:3000/user/likes', {
     method: 'post',
     headers: {'Content-Type': 'application/json'},
@@ -93,8 +106,17 @@ async function likeBathroom(
 
   if (res.ok) {
     setLiked(true);
-    setLikes(likes + 1);
-    bathroom.likes += 1;
+    if (bathroom && setBathroom && setBathrooms) {
+      setBathroom({...bathroom, likes: bathroom.likes + 1});
+      setBathrooms((bathrooms) =>
+        (bathrooms.map(
+            (b) => (
+              b.id === bathroomId ?
+                {...b, likes: b.likes + 1} :
+                b
+            ),
+        )));
+    }
   } else {
     console.error('Error adding like: ', res.statusText);
   }
@@ -102,21 +124,26 @@ async function likeBathroom(
   return;
 }
 
-const Like = ({bathroom, userId, likes, setLikes}: LikeProps) => {
+const Like = ({userId}: LikeProps) => {
   const [liked, setLiked] = useState(false);
+  const bathroomContext = useContext(BathroomContext);
+  const bathroom = bathroomContext?.selected;
+  const setBathroom = bathroomContext?.setSelected;
+  const setBathrooms = bathroomContext?.setBathrooms;
+  const bathroomId = bathroom?.id;
   useEffect(() => {
     /**
      * checks if user has liked the current bathroom
      */
     async function isLiked() {
       const likedBathrooms = await getLikedBathrooms(userId);
-      setLiked(likedBathrooms.includes(bathroom.id));
+      setLiked(likedBathrooms.includes(bathroomId ? bathroomId : ''));
     }
 
     if (userId) {
       isLiked();
     };
-  }, [userId, bathroom.id]);
+  }, [userId, bathroomId]);
 
   const handleToggle = async () => {
     // update likes table
@@ -124,17 +151,17 @@ const Like = ({bathroom, userId, likes, setLikes}: LikeProps) => {
       await unlikeBathroom(
           userId,
           bathroom,
+          setBathroom,
+          setBathrooms,
           setLiked,
-          setLikes,
-          likes,
       );
     } else {
       await likeBathroom(
           userId,
           bathroom,
+          setBathroom,
+          setBathrooms,
           setLiked,
-          setLikes,
-          likes,
       );
     }
   };
@@ -144,10 +171,10 @@ const Like = ({bathroom, userId, likes, setLikes}: LikeProps) => {
     <div className='like-button'
       aria-label='like-button' onClick = {handleToggle}>
       {liked ?
-        <FavoriteIcon color="error" aria-label={`Unlike ${bathroom.name}`}/> :
-        <FavoriteBorderIcon aria-label={`Like ${bathroom.name}`}/>}
+        <FavoriteIcon color="error" aria-label={`Unlike ${bathroom?.name}`}/> :
+        <FavoriteBorderIcon aria-label={`Like ${bathroom?.name}`}/>}
       <Typography color="textSecondary" className="like-number">
-        {likes > 0 ? likes : null}
+        {bathroom && bathroom?.likes > 0 ? bathroom.likes : null}
       </Typography>
     </div> :
     null

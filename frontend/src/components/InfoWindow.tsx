@@ -1,25 +1,14 @@
 import BathroomDetails from './BathroomDetails/BathroomDetails';
-import type {Bathroom} from '../types';
+import {useContext} from 'react';
+import BathroomContext from '../context/BathroomContext';
 
-import type {Dispatch, SetStateAction} from 'react';
-
-interface bathroomProps {
-  bathroom: Bathroom | null,
-  setBathroom: Dispatch<SetStateAction<Bathroom | null>>;
-};
-
-const InfoWindow = (props: bathroomProps) => {
-  const {
-    bathroom,
-    setBathroom,
-  } = props;
+const InfoWindow = () => {
+  const bathroomContext = useContext(BathroomContext);
+  const bathroom = bathroomContext?.selected;
   return (
     <>
       {bathroom && (
-        <BathroomDetails
-          bathroom={bathroom}
-          setBathroom={setBathroom}
-        />
+        <BathroomDetails/>
       )}
     </>
   );
