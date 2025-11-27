@@ -1,13 +1,29 @@
 import {createTheme} from '@mui/material/styles';
 
+declare module '@mui/material/styles' {
+  interface Palette {
+    custom?: {
+      searchPaper: string;
+    };
+  }
+  interface PaletteOptions {
+    custom?: {
+      searchPaper?: string;
+    };
+  }
+}
+
 const theme = createTheme({
   palette: {
-    primary: {main: '#576421', dark: '#6B7A29'},
+    primary: {
+      main: '#576421',
+      light: '#DAEA98',
+    },
     secondary: {main: '#845416'},
-    error: {main: '#F44336'},
+    error: {main: '#904A43'},
     background: {default: '#FBFAED', paper: '#FBFAED'},
-    text: {primary: '#000000'},
-    action: {disabled: 'rgba(0, 0, 0, 0.38)', hover: 'rgba(0, 0, 0, 0.04)'},
+    text: {primary: '#000000', secondary: '#76786B'},
+    custom: {searchPaper: '#FFFFFF'},
   },
   components: {
     MuiButton: {
