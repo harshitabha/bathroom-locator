@@ -38,10 +38,8 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
 
   const theme = useTheme();
 
-  const [userId, setUserId] = useState<string | null>('');
   const [likes, setLikes] = useState(bathroom.likes);
   const appContext = useContext(AppContext);
-  appContext?.getCurrentUserId().then(setUserId);
 
   return (
     <SwipeableDrawer
@@ -85,7 +83,7 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
           {bathroom.name}
           <Like
             bathroom={bathroom}
-            userId={userId}
+            userId={appContext?.userId ?? null}
             likes={likes}
             setLikes={setLikes}
           />
