@@ -98,6 +98,7 @@ export default function AddBathroomForm(props: Props) {
       description: description?.trim() || '',
       position,
       gender: additionalDetails.gender,
+      amenities: additionalDetails.amenities,
     };
 
     try {

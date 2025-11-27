@@ -208,7 +208,7 @@ describe('Selecting additional details', async () => {
 
   it('Can create a bathroom with amenity info selected', async () => {
     mockServer(204);
-    const chip = screen.getByLabelText('Select Toliet Paper');
+    const chip = screen.getByLabelText('Select Toilet Paper');
     fireEvent.click(chip);
     fireEvent.click(screen.getByText('Save'));
     await waitFor(() =>
@@ -218,10 +218,10 @@ describe('Selecting additional details', async () => {
 
   it('Can select multiple amenity options', async () => {
     await clickOn('Select Mirror');
-    await clickOn('Select Toliet Paper');
+    await clickOn('Select Toilet Paper');
     const mirrorChip = screen.queryByLabelText('Unselect Mirror');
     const tolietPaperChip = screen
-        .queryByLabelText('Unselect Toliet Paper');
+        .queryByLabelText('Unselect Toilet Paper');
     expect(mirrorChip && tolietPaperChip).toBeTruthy();
   });
 });
