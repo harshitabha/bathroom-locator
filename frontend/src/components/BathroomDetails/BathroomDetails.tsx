@@ -6,10 +6,12 @@ import {
   useTheme,
 } from '@mui/material';
 import NearMeIcon from '@mui/icons-material/NearMe';
-import type {Dispatch, SetStateAction} from 'react';
+import {useState, useContext, type Dispatch, type SetStateAction} from 'react';
 
 import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
+import AppContext from '../../context/AppContext';
+import Like from './Like';
 import type {AmenityOptions, GenderOptions, Bathroom} from '../../types';
 import Detail from './Detail';
 
@@ -35,6 +37,11 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
       }) : [];
 
   const theme = useTheme();
+
+  const [userId, setUserId] = useState<string | null>('');
+  const [likes, setLikes] = useState(bathroom.likes);
+  const appContext = useContext(AppContext);
+  appContext?.getCurrentUserId().then(setUserId);
 
   return (
     <SwipeableDrawer
@@ -70,16 +77,30 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
         <Typography
           variant="h5"
           fontWeight={600}
-          sx={{pb: '8px'}}
+          sx={{pb: '8px',
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
         >
           {bathroom.name}
+          <Like
+            bathroom={bathroom}
+            userId={userId}
+            likes={likes}
+            setLikes={setLikes}
+          />
         </Typography>
         <Box
           sx={{
             ml: '-2px',
             display: 'flex',
+            gap: '8px',
           }}
         >
+          {likes >= 5 ?
+            <Chip label="Verified Bathroom" variant="outlined"
+              color="primary"/> :
+            null}
           <Chip
             label={
               <Box sx={{display: 'flex', alignItems: 'center', gap: '3px'}}>
@@ -95,7 +116,6 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             )}
           />
         </Box>
-
         <Typography variant="h6" className="details-subheader">
             Description
         </Typography>
