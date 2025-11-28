@@ -15,6 +15,7 @@ import {setupServer} from 'msw/node';
 import {http, HttpResponse} from 'msw';
 import type {Bathroom} from '../types';
 import {basicBathroom, bathroomWith4Likes} from './constants';
+import BathroomContext from '../context/BathroomContext';
 
 const userId = '6697fe75-586e-4f24-9c56-243d15d1d9f0';
 
@@ -52,20 +53,24 @@ function setupHttpRequests(
 /**
  * like component rendering
  * @param {Bathroom} bathroom selected bathroom
+ * @param {string | null} userId user id
  */
-function renderLikeComponent(bathroom: Bathroom) {
-  let likes : number = bathroom.likes;
-  const setLikesMock = vi.fn((newLikes) => {
-    likes = newLikes;
+function renderLikeComponent(bathroom: Bathroom, userId: string | null) {
+  let bathrooms : Bathroom [] = [bathroom];
+  const setBathrooms = vi.fn((newBathrooms) => {
+    bathrooms = newBathrooms;
+  });
+  let selected : Bathroom = bathroom;
+  const setSelected = vi.fn((newSelected) => {
+    selected = newSelected;
   });
 
   render(
-      <Like
-        bathroom={bathroom}
-        userId={userId}
-        likes={likes}
-        setLikes={setLikesMock}
-      />,
+      <BathroomContext value={{bathrooms, setBathrooms, selected, setSelected}}>
+        <Like
+          userId={userId}
+        />
+      </BathroomContext>,
   );
 }
 
@@ -85,7 +90,7 @@ it('renders bathroom as unliked when get request fails', () => {
   const deleteResponse = HttpResponse.json({status: 200});
   setupHttpRequests(getReponse, postResponse, deleteResponse);
 
-  renderLikeComponent(bathroomWith4Likes);
+  renderLikeComponent(bathroomWith4Likes, userId);
 
   screen.getByLabelText(`Like ${bathroomWith4Likes.name}`);
 });
@@ -100,7 +105,7 @@ describe('Like component when post request fails', () => {
     const deleteResponse = HttpResponse.json({status: 200});
     setupHttpRequests(getReponse, postResponse, deleteResponse);
 
-    renderLikeComponent(bathroomWith4Likes);
+    renderLikeComponent(bathroomWith4Likes, userId);
   });
 
   it('keeps unliked state', async () => {
@@ -134,7 +139,7 @@ describe('Like component when delete request fails', () => {
 
     setupHttpRequests(getReponse, postResponse, deleteResponse);
 
-    renderLikeComponent(bathroomWith4Likes);
+    renderLikeComponent(bathroomWith4Likes, userId);
   });
 
   it('keeps liked state', async () => {
@@ -159,25 +164,13 @@ describe('Like component when delete request fails', () => {
 });
 
 describe('Like component when user not logged in', async () => {
-  let likes: number = basicBathroom.likes;
   beforeEach(() => {
     const getResponse = HttpResponse.json([], {status: 200});
     const postResponse = HttpResponse.json({status: 201});
     const deleteResponse = HttpResponse.json({status: 200});
     setupHttpRequests(getResponse, postResponse, deleteResponse);
 
-    const setLikesMock = vi.fn((newLikes) => {
-      likes = newLikes;
-    });
-
-    render(
-        <Like
-          bathroom={basicBathroom}
-          userId={null}
-          likes={likes}
-          setLikes={setLikesMock}
-        />,
-    );
+    renderLikeComponent(basicBathroom, null);
   });
 
   it('doesn\'t render like button', async () => {
@@ -186,25 +179,13 @@ describe('Like component when user not logged in', async () => {
 });
 
 describe('Like component when user logged in', async () => {
-  let likes: number = basicBathroom.likes;
   beforeEach(() => {
     const getResponse = HttpResponse.json([], {status: 200});
     const postResponse = HttpResponse.json({status: 201});
     const deleteResponse = HttpResponse.json({status: 200});
     setupHttpRequests(getResponse, postResponse, deleteResponse);
 
-    const setLikesMock = vi.fn((newLikes) => {
-      likes = newLikes;
-    });
-
-    render(
-        <Like
-          bathroom={basicBathroom}
-          userId={userId}
-          likes={likes}
-          setLikes={setLikesMock}
-        />,
-    );
+    renderLikeComponent(basicBathroom, userId);
   });
 
   it('renders like button', async () => {
@@ -226,35 +207,16 @@ describe('Like component when user logged in', async () => {
 
 
 describe('Already liked bathroom', async () => {
-  let likes: number = bathroomWith4Likes.likes;
   beforeEach(() => {
-    server.use(
-        // get user's likes
-        http.get(URL + '*', async () => {
-          return HttpResponse.json([bathroomWith4Likes.id], {status: 200});
-        }),
-        // add user like
-        http.post(URL, async () => {
-          return HttpResponse.json({status: 201});
-        }),
-        // remove user like
-        http.delete(URL, async () => {
-          return HttpResponse.json({status: 200});
-        }),
+    const getResponse = HttpResponse.json(
+        [bathroomWith4Likes.id],
+        {status: 200},
     );
+    const postResponse = HttpResponse.json({status: 201});
+    const deleteResponse = HttpResponse.json({status: 200});
+    setupHttpRequests(getResponse, postResponse, deleteResponse);
 
-    const setLikesMock = vi.fn((newLikes) => {
-      likes = newLikes;
-    });
-
-    render(
-        <Like
-          bathroom={bathroomWith4Likes}
-          userId={userId}
-          likes={likes}
-          setLikes={setLikesMock}
-        />,
-    );
+    renderLikeComponent(bathroomWith4Likes, userId);
   });
 
   it('renders liked button', async () => {
