@@ -4,7 +4,7 @@ import BathroomContext from '../context/BathroomContext';
 
 const InfoWindow = () => {
   const bathroomContext = useContext(BathroomContext);
-  const bathroom = bathroomContext?.selected;
+  const bathroom = bathroomContext.selected;
   return (
     <>
       {bathroom && (

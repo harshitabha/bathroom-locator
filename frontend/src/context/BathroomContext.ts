@@ -2,7 +2,7 @@ import {createContext} from 'react';
 import {type Bathroom} from '../types';
 
 
-interface BathroomContextType {
+export interface BathroomContextType {
     bathrooms: Bathroom[] | [],
     setBathrooms: React.Dispatch<React.SetStateAction<Bathroom []>>,
     selected: Bathroom | null,
@@ -10,5 +10,5 @@ interface BathroomContextType {
 };
 
 const BathroomContext =
-    createContext<BathroomContextType | null>(null);
+    createContext<BathroomContextType>({} as BathroomContextType);
 export default BathroomContext;

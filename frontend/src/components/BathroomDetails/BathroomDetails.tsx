@@ -18,15 +18,16 @@ import BathroomContext from '../../context/BathroomContext';
 
 const BathroomDetails = () => {
   const bathroomContext = useContext(BathroomContext);
-  const bathroom = bathroomContext?.selected;
-  const setBathroom = bathroomContext?.setSelected;
-  const gender = bathroom?.gender ? Object.keys(bathroom.gender)
-      .filter((val) => bathroom.gender![val as GenderOptions] == true)
+  const bathroom = bathroomContext.selected;
+  const setBathroom = bathroomContext.setSelected;
+
+  const gender = bathroom!.gender ? Object.keys(bathroom!.gender)
+      .filter((val) => bathroom!.gender![val as GenderOptions] == true)
       .map((key) => {
         return {name: key, selected: true};
       }) : [];
-  const amenities = bathroom?.amenities ? Object.keys(bathroom.amenities)
-      .filter((val) => bathroom.amenities![val as AmenityOptions] == true)
+  const amenities = bathroom!.amenities ? Object.keys(bathroom!.amenities)
+      .filter((val) => bathroom!.amenities![val as AmenityOptions] == true)
       .map((key) => {
         return {name: key, selected: true};
       }) : [];
@@ -38,7 +39,7 @@ const BathroomDetails = () => {
     <SwipeableDrawer
       anchor="bottom"
       open={bathroom !== null}
-      onClose={() => setBathroom ? setBathroom(null) : null}
+      onClose={() => setBathroom(null)}
       onOpen={() => {}}
       disableDiscovery
       disableSwipeToOpen
@@ -73,7 +74,7 @@ const BathroomDetails = () => {
             justifyContent: 'space-between',
           }}
         >
-          {bathroom?.name}
+          {bathroom!.name}
           <Like
             userId={appContext?.userId ?? null}
           />
@@ -85,7 +86,7 @@ const BathroomDetails = () => {
             gap: '8px',
           }}
         >
-          {bathroom && bathroom?.likes >= 5 ?
+          {bathroom!.likes >= 5 ?
             <Chip label="Verified Bathroom" variant="outlined"
               color="primary"/> :
             null}
@@ -98,9 +99,9 @@ const BathroomDetails = () => {
             }
             variant="outlined"
             color="secondary"
-            onClick={() => bathroom && openWalkingDirections(
-                bathroom.position.lat,
-                bathroom.position.lng,
+            onClick={() => openWalkingDirections(
+                bathroom!.position.lat,
+                bathroom!.position.lng,
             )}
           />
         </Box>
@@ -108,7 +109,7 @@ const BathroomDetails = () => {
             Description
         </Typography>
         <Typography variant="body1">
-          {bathroom?.description}
+          {bathroom!.description}
         </Typography>
 
         {
