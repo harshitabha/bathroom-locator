@@ -14,13 +14,13 @@ import {
 
 import './Map.css';
 import MapHeader from './MapHeader';
-import InfoWindow from './InfoWindow';
 import type {Bathroom} from '../types';
 import AddBathroomButton from './AddBathroomButton';
 import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
 import AppContext from '../context/AppContext';
+import BathroomDetails from './BathroomDetails/BathroomDetails';
 
 const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -315,17 +315,15 @@ function MapInner({apiKey}: { apiKey: string }) {
           />
         )}
 
-        <InfoWindow
-          bathroom={selected}
-          setBathroom={setSelected}
-        />
       </GoogleMap>
 
       {/* bathroom details */}
-      <InfoWindow
-        bathroom={selected}
-        setBathroom={setSelected}
-      />
+      {selected && (
+        <BathroomDetails
+          bathroom={selected}
+          setBathroom={setSelected}
+        />
+      )}
 
       {!addMode && !selected && appContext?.userId &&(
         <AddBathroomButton onClick={handleAddButtonClick} />
