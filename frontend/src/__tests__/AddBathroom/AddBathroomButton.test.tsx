@@ -4,7 +4,7 @@ import {render, screen, cleanup, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import AddBathroomButton from '../../components/AddBathroom/AddBathroomButton';
 import AddBathroomBanner from '../../components/AddBathroom/AddBathroomBanner';
-import AppContext from '../context/AppContext';
+import AppContext from '../../context/AppContext';
 
 /**
  * @param {object} root0 props
