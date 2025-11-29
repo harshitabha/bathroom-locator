@@ -1,6 +1,6 @@
 import {Box, Button, Avatar, Menu, MenuItem} from '@mui/material';
 import {useNavigate} from 'react-router-dom';
-import {useState, useEffect, useContext} from 'react';
+import {useState, useContext} from 'react';
 import SearchBar from './SearchBar';
 import AddBathroomBanner from './AddBathroomBanner';
 import MapFilters, {
@@ -25,7 +25,6 @@ const MapHeader = ({
   onGendersChange,
 }: Props) => {
   const navigate = useNavigate();
-  const [userId, setUserId] = useState<string | null>('');
   const appContext = useContext(AppContext);
 
   // handling dropdown menu
@@ -36,10 +35,6 @@ const MapHeader = ({
   };
   const handleClose = () => setAnchorEl(null);
 
-  useEffect(() => {
-    appContext?.getCurrentUserId().then(setUserId);
-  }, []);
-
   /**
    * signs out current user
    */
@@ -49,10 +44,9 @@ const MapHeader = ({
     if (error) {
       console.error('Error signing out:', error.message);
     } else {
-      setUserId(null);
+      appContext?.setUserId(null);
     }
   }
-
 
   return (
     <Box sx={{
@@ -78,7 +72,7 @@ const MapHeader = ({
         <Box sx={{flex: 1, mr: 1}}>
           <SearchBar map={map} />
         </Box>
-        {userId ? (
+        {appContext?.userId ? (
         <>
           <Avatar
             sx={{
@@ -94,7 +88,13 @@ const MapHeader = ({
             onClose={handleClose}
             sx={{marginTop: 1}}
           >
-            <MenuItem onClick={signOutUser} sx={{paddingY: 0}}>
+            <MenuItem
+              onClick={() => {
+                signOutUser();
+                onCancelBanner();
+              }}
+              sx={{paddingY: 0}}
+            >
               Logout
             </MenuItem>
           </Menu>

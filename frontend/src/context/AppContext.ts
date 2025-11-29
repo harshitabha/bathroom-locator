@@ -1,7 +1,9 @@
 import {createContext} from 'react';
 
 interface AppContextType {
-    getCurrentUserId: () => Promise<string | null>
+    userId: string | null;
+    setUserId: React.Dispatch<React.SetStateAction<string | null>>;
+    getCurrentUserId: () => Promise<void>
 };
 
 const AppContext = createContext<AppContextType | null>(null);

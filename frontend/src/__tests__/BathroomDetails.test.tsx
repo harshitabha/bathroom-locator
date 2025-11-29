@@ -1,12 +1,75 @@
 import {describe, it, beforeEach, afterEach, expect, vi} from 'vitest';
-import {render, screen, cleanup, fireEvent} from '@testing-library/react';
+import {
+  render,
+  screen,
+  cleanup,
+  fireEvent,
+} from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 
 import * as navigation from '../utils/navigation';
 import BathroomDetails from '../components/BathroomDetails/BathroomDetails';
 import InfoWindow from '../components/InfoWindow';
-import {basicBathroom} from './constants';
+import {basicBathroom, bathroomWith5Likes} from './constants';
 import type {Bathroom} from '../types';
+
+import {supabase} from '../lib/supabaseClient';
+import {AuthError, type User, type UserResponse} from '@supabase/supabase-js';
+import AppContext from '../context/AppContext';
+
+// mock supabase
+vi.mock('../lib/supabaseClient', () => {
+  return {
+    supabase: {
+      auth: {
+        getUser: vi.fn(),
+        signOut: vi.fn(),
+      },
+    },
+  };
+});
+
+/**
+ * Mocks supabase get user id
+ * @param {string | null} userId user id
+ * @param {string | null} error error message
+ */
+function mockGetUserId(userId: string | null, error: string | null) {
+  const user : User | null = userId ? {
+    id: userId,
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString()} :
+    null;
+
+  const mockGetUser = vi.mocked(supabase.auth.getUser);
+  mockGetUser.mockResolvedValueOnce({
+    data: {user: user},
+    error: error ? new AuthError(error) : null,
+  } as UserResponse);
+}
+
+/**
+ * renders bathroom details component with context
+ * @param {Bathroom} bathroom selected bathroom
+ */
+function verifyBathroomRender(bathroom: Bathroom) {
+  render(
+      <AppContext
+        value={{
+          userId: null,
+          setUserId: async () => {},
+          getCurrentUserId: async () => {},
+        }}
+      >
+        <BathroomDetails
+          bathroom={bathroom}
+          setBathroom={() => {}}
+        />,
+      </AppContext>,
+  );
+}
 
 afterEach(() => {
   cleanup();
@@ -42,17 +105,8 @@ describe('Bathroom Details visibility', () => {
 
 describe('Bathroom Details component content', () => {
   beforeEach(() => {
-    render(
-        <BathroomDetails
-          bathroom={basicBathroom}
-          setBathroom={() => {}}
-        />,
-    );
-  });
-
-  afterEach(() => {
-    cleanup();
-    vi.resetAllMocks();
+    mockGetUserId(null, null);
+    verifyBathroomRender(basicBathroom);
   });
 
   it('renders the bathroom name and description', () => {
@@ -78,6 +132,25 @@ describe('Bathroom Details component content', () => {
 
     expect(openWalkingDirectionsMock)
         .toHaveBeenCalledWith(37.00076576303953, -122.05719563060227);
+  });
+});
+
+it('doesn\'t render verified bathroom with <5 likes', async () => {
+  mockGetUserId(null, null);
+  verifyBathroomRender(basicBathroom);
+
+  expect(screen.queryByLabelText('Verified Bathroom')).toBeNull();
+});
+
+
+describe('Bathroom Details component when bathroom has >= 5 likes', () => {
+  beforeEach(() => {
+    mockGetUserId('123', null);
+    verifyBathroomRender(bathroomWith5Likes);
+  });
+
+  it('renders verified bathroom', async () => {
+    screen.findByLabelText('Verified Bathroom');
   });
 });
 

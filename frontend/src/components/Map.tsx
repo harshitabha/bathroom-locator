@@ -3,7 +3,9 @@ import {
   useMemo,
   useState,
   useCallback,
-  useRef} from 'react';
+  useRef,
+  useContext,
+} from 'react';
 import {
   GoogleMap,
   Marker,
@@ -18,9 +20,8 @@ import AddBathroomButton from './AddBathroomButton';
 import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
-import {
-  type GenderFilter,
-} from './MapFilters';
+import {type GenderFilter} from './MapFilters';
+import AppContext from '../context/AppContext';
 
 const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -49,6 +50,11 @@ function MapInner({apiKey}: { apiKey: string }) {
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [selectedGenders, setSelectedGenders] = useState<GenderFilter[]>([]);
+  const appContext = useContext(AppContext);
+
+  useEffect(() => {
+    appContext?.getCurrentUserId();
+  }, []);
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -350,7 +356,8 @@ function MapInner({apiKey}: { apiKey: string }) {
         bathroom={selected}
         setBathroom={setSelected}
       />
-      {!addMode && !selected && (
+
+      {!addMode && !selected && appContext?.userId &&(
         <AddBathroomButton onClick={handleAddButtonClick} />
       )}
 
