@@ -5,7 +5,6 @@ export interface Bathroom {
   description: string;
   likes: number;
   amenities?: Amenities,
-  amenities?: Amenities,
   num_stalls?: number,
   gender?: Gender,
 };
