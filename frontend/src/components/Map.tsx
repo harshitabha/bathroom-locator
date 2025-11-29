@@ -14,7 +14,6 @@ import {
 
 import './Map.css';
 import MapHeader from './MapHeader';
-import InfoWindow from './InfoWindow';
 import type {Bathroom} from '../types';
 import AddBathroomButton from './AddBathroomButton';
 import AddBathroomPeekCard from './AddBathroomPeekCard';
@@ -22,6 +21,7 @@ import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
 import RecenterButton from './RecenterButton';
 import AppContext from '../context/AppContext';
+import BathroomDetails from './BathroomDetails/BathroomDetails';
 
 const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -363,10 +363,12 @@ function MapInner({apiKey}: { apiKey: string }) {
       </GoogleMap>
 
       {/* bathroom details */}
-      <InfoWindow
-        bathroom={selected}
-        setBathroom={setSelected}
-      />
+      {selected && (
+        <BathroomDetails
+          bathroom={selected}
+          setBathroom={setSelected}
+        />
+      )}
 
       {!addMode && !selected && userLocation && (
         <RecenterButton onClick={handleRecenter} />
