@@ -3,14 +3,16 @@ import {supabase} from '../lib/supabaseClient';
 import AuthHeader from './AuthHeader';
 
 import {Stack, TextField, Button, Alert, Typography} from '@mui/material';
-import {useState} from 'react';
+import {useContext, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
+import AppContext from '../context/AppContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
+  const appContext = useContext(AppContext);
 
   /**
    * Try to sign in the user with the given email
@@ -22,6 +24,7 @@ const Login = () => {
     if (error) {
       setErrorMessage(error.message);
     } else {
+      appContext?.getCurrentUserId();
       setErrorMessage('');
       navigate('/');
     }

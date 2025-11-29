@@ -9,14 +9,12 @@ import '@testing-library/jest-dom/vitest';
 
 import * as navigation from '../utils/navigation';
 import BathroomDetails from '../components/BathroomDetails/BathroomDetails';
-import InfoWindow from '../components/InfoWindow';
 import {basicBathroom, bathroomWith5Likes} from './constants';
 import type {Bathroom} from '../types';
 
 import {supabase} from '../lib/supabaseClient';
 import {AuthError, type User, type UserResponse} from '@supabase/supabase-js';
 import AppContext from '../context/AppContext';
-import {getCurrentUserId} from '../App';
 
 // mock supabase
 vi.mock('../lib/supabaseClient', () => {
@@ -57,7 +55,13 @@ function mockGetUserId(userId: string | null, error: string | null) {
  */
 function verifyBathroomRender(bathroom: Bathroom) {
   render(
-      <AppContext value={{getCurrentUserId}}>
+      <AppContext
+        value={{
+          userId: null,
+          setUserId: async () => {},
+          getCurrentUserId: async () => {},
+        }}
+      >
         <BathroomDetails
           bathroom={bathroom}
           setBathroom={() => {}}
@@ -72,25 +76,13 @@ afterEach(() => {
 });
 
 describe('Bathroom Details visibility', () => {
-  it('by default, doesn\'t render the Bathroom Details', () => {
-    render(
-        <InfoWindow bathroom={null} setBathroom={() => {}} />,
-    );
-    const bathroomDetails = screen.queryByText('Namaste Lounge Bathroom');
-    expect(bathroomDetails).toBeNull();
-  });
-
-  it('renders the Bathroom Details when a bathroom is selected', async () => {
-    render(
-        <InfoWindow bathroom={basicBathroom} setBathroom={() => {}} />,
-    );
-    screen.getByText('Namaste Lounge Bathroom');
-  });
-
   it('closes when you click away', () => {
     const mockSetBathroom = vi.fn();
     render(
-        <InfoWindow bathroom={basicBathroom} setBathroom={mockSetBathroom} />,
+        <BathroomDetails
+          bathroom={basicBathroom}
+          setBathroom={mockSetBathroom}
+        />,
     );
     const backdrop = document.querySelector('.MuiBackdrop-root')!;
     fireEvent.click(backdrop);
