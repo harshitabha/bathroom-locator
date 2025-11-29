@@ -19,6 +19,7 @@ import AddBathroomButton from './AddBathroomButton';
 import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
+import {type StallsFilter} from './MapFilters';
 import AppContext from '../context/AppContext';
 import BathroomDetails from './BathroomDetails/BathroomDetails';
 
@@ -48,6 +49,7 @@ function MapInner({apiKey}: { apiKey: string }) {
   const idleTimer = useRef<number | null>(null);
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const [selectedStalls, setSelectedStalls] = useState<StallsFilter[]>([]);
   const appContext = useContext(AppContext);
 
   useEffect(() => {
@@ -163,7 +165,8 @@ function MapInner({apiKey}: { apiKey: string }) {
 
     try {
       const res = await fetch(
-          `http://localhost:3000/bathroom?minLng=${minLng}&minLat=${minLat}&maxLng=${maxLng}&maxLat=${maxLat}`,
+          `http://localhost:3000/bathroom?minLng=${minLng}` +
+          `&minLat=${minLat}&maxLng=${maxLng}&maxLat=${maxLat}`,
       );
 
       if (res.ok) {
@@ -267,6 +270,26 @@ function MapInner({apiKey}: { apiKey: string }) {
     };
   }, []);
 
+  const filteredBathrooms = useMemo(() => {
+    const stallsMatch = (s?: number) => {
+      if (!selectedStalls.length) return true;
+      if (!s && s !== 0) return false;
+      const options = new Set(selectedStalls);
+      if (options.has('Private') && s === 1) return true;
+      if (options.has('2') && s === 2) return true;
+      if (options.has('3') && s === 3) return true;
+      if (options.has('4+') && s >= 4) return true;
+      return false;
+    };
+
+    const matches = (b: Bathroom) => stallsMatch(b.num_stalls);
+
+    return bathrooms.filter(matches);
+  }, [
+    bathrooms,
+    selectedStalls,
+  ]);
+
   // map loading errors
   if (loadError) return <p>Failed to load Google Maps.</p>;
   if (!isLoaded) return <p>Loading map…</p>;
@@ -274,11 +297,13 @@ function MapInner({apiKey}: { apiKey: string }) {
   return (
     <div className="map-align-center">
       {isLoaded &&
-        <MapHeader
-          map={mapRef.current}
-          bannerOpen={bannerOpen}
-          onCancelBanner={cancelAddFlow}
-        />
+          <MapHeader
+            map={mapRef.current}
+            bannerOpen={bannerOpen}
+            onCancelBanner={cancelAddFlow}
+            selectedStalls={selectedStalls}
+            onStallsChange={setSelectedStalls}
+          />
       }
       <GoogleMap
         onLoad={onMapLoad}
@@ -296,7 +321,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           disableDefaultUI: true,
         }}
       >
-        {bathrooms.map((p) => (
+        {filteredBathrooms.map((p) => (
           <Marker
             key={p.id}
             position={p.position} // position of pin

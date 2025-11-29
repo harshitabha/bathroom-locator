@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import {useState, useContext} from 'react';
 import SearchBar from './SearchBar';
 import AddBathroomBanner from './AddBathroomBanner';
+import MapFilters, {type StallsFilter} from './MapFilters';
 import AppContext from '../context/AppContext';
 import {supabase} from '../lib/supabaseClient';
 
@@ -10,9 +11,17 @@ type Props = {
   map: google.maps.Map | null;
   bannerOpen: boolean;
   onCancelBanner: () => void;
+  selectedStalls: StallsFilter[];
+  onStallsChange: (next: StallsFilter[]) => void;
 };
 
-const MapHeader = ({map, bannerOpen, onCancelBanner}: Props) => {
+const MapHeader = ({
+  map,
+  bannerOpen,
+  onCancelBanner,
+  selectedStalls,
+  onStallsChange,
+}: Props) => {
   const navigate = useNavigate();
   const appContext = useContext(AppContext);
 
@@ -105,6 +114,11 @@ const MapHeader = ({map, bannerOpen, onCancelBanner}: Props) => {
       </Box>
       {/* row 2, bathroom banner */}
       <AddBathroomBanner bannerOpen={bannerOpen} onCancel={onCancelBanner} />
+      {/* row 3, filters */}
+      <MapFilters
+        selectedStalls={selectedStalls}
+        onStallsChange={onStallsChange}
+      />
     </Box>
   );
 };

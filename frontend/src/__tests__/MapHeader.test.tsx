@@ -1,4 +1,7 @@
 import MapHeader from '../components/MapHeader';
+import {
+  type StallsFilter,
+} from '../components/MapFilters';
 import {supabase} from '../lib/supabaseClient';
 import {
   describe,
@@ -97,6 +100,8 @@ function ContextWrapper({initUserId}: {
   initUserId: string | null;
 }) {
   const [userId, setUserId] = useState<string | null>(initUserId);
+  const [selectedStalls, setSelectedStalls] =
+    useState<StallsFilter[]>([]);
   const getCurrentUserId = async () => {};
 
   return (
@@ -106,6 +111,8 @@ function ContextWrapper({initUserId}: {
           map={null}
           bannerOpen={false}
           onCancelBanner={() => {}}
+          selectedStalls={selectedStalls}
+          onStallsChange={setSelectedStalls}
         />
       </AppContext>
     </MemoryRouter>
