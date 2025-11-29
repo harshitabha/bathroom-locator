@@ -21,17 +21,16 @@ import {
 } from '@testing-library/react';
 import {MemoryRouter} from 'react-router-dom';
 import '@testing-library/jest-dom/vitest';
-import {AuthError, type User, type UserResponse} from '@supabase/supabase-js';
+import {AuthError} from '@supabase/supabase-js';
 import AppContext from '../context/AppContext';
-import {getCurrentUserId} from '../App';
 import userEvent from '@testing-library/user-event';
+import {useState} from 'react';
 
 // mock supabase
 vi.mock('../lib/supabaseClient', () => {
   return {
     supabase: {
       auth: {
-        getUser: vi.fn(),
         signOut: vi.fn(),
       },
     },
@@ -53,27 +52,6 @@ MockedFunction<() => Promise<{ error: AuthError | null }>> {
   return mockLogout;
 }
 
-/**
- * Mocks supabase get user id
- * @param {string | null} userId user id
- * @param {string | null} error error message
- */
-function mockGetUserId(userId: string | null, error: string | null) {
-  const user : User | null = userId ? {
-    id: userId,
-    app_metadata: {},
-    user_metadata: {},
-    aud: 'authenticated',
-    created_at: new Date().toISOString()} :
-    null;
-
-  const mockGetUser = vi.mocked(supabase.auth.getUser);
-  mockGetUser.mockResolvedValueOnce({
-    data: {user: user},
-    error: error ? new AuthError(error) : null,
-  } as UserResponse);
-}
-
 // mock useNavigate
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -92,6 +70,55 @@ type GoogleWithMaps = {
 };
 const importLibraryMock = vi.fn<GoogleWithMaps['maps']['importLibrary']>();
 
+/**
+ * Sets up google.maps mock
+ */
+function setupGoogleMapsMock() {
+  (globalThis as unknown as { google: GoogleWithMaps }).google = {
+    maps: {
+      importLibrary: importLibraryMock,
+    },
+  };
+
+  importLibraryMock.mockResolvedValue({
+    AutocompleteSessionToken: vi.fn(),
+    AutocompleteSuggestion: {
+      fetchAutocompleteSuggestions: vi
+          .fn()
+          .mockResolvedValue({suggestions: []}),
+    },
+  });
+}
+
+/**
+ *
+ * @param {object} root0 props
+ * @param {string | null} root0.initUserId userid
+ * @returns {object} Mapheader + AppContext
+ */
+function ContextWrapper({initUserId}: {
+  initUserId: string | null;
+}) {
+  const [userId, setUserId] = useState<string | null>(initUserId);
+  const [selectedAmenities, setSelectedAmenities] =
+    useState<AmenityFilter[]>([]);
+  const getCurrentUserId = async () => {};
+
+  return (
+    <MemoryRouter>
+      <AppContext value={{userId, setUserId, getCurrentUserId}}>
+        <MapHeader
+          map={null}
+          bannerOpen={false}
+          onCancelBanner={() => {}}
+          selectedAmenities={selectedAmenities}
+          onAmenitiesChange={setSelectedAmenities}
+        />
+      </AppContext>
+    </MemoryRouter>
+  );
+}
+
 afterEach(() => {
   cleanup();
   vi.resetAllMocks();
@@ -99,36 +126,9 @@ afterEach(() => {
 
 describe('Map Header component when not logged in', () => {
   beforeEach(() => {
-    const userId = null;
-    const error = null;
-    (globalThis as unknown as { google: GoogleWithMaps }).google = {
-      maps: {
-        importLibrary: importLibraryMock,
-      },
-    };
-
-    importLibraryMock.mockResolvedValue({
-      AutocompleteSessionToken: vi.fn(),
-      AutocompleteSuggestion: {
-        fetchAutocompleteSuggestions: vi
-            .fn()
-            .mockResolvedValue({suggestions: []}),
-      },
-    });
-
-    mockGetUserId(userId, error);
-
+    setupGoogleMapsMock();
     render(
-        <MemoryRouter>
-          <AppContext value={{getCurrentUserId}}>
-            <MapHeader
-              map={null}
-              bannerOpen={false}
-              onCancelBanner={() => {}}
-              {...baseFilterProps}
-            />
-          </AppContext>
-        </MemoryRouter>,
+        <ContextWrapper initUserId={null}/>,
     );
   });
 
@@ -151,36 +151,9 @@ describe('Map Header component when not logged in', () => {
 
 describe('Map Header component when logged in', () => {
   beforeEach(() => {
-    const userId = '123';
-    const error = null;
-    (globalThis as unknown as { google: GoogleWithMaps }).google = {
-      maps: {
-        importLibrary: importLibraryMock,
-      },
-    };
-
-    importLibraryMock.mockResolvedValue({
-      AutocompleteSessionToken: vi.fn(),
-      AutocompleteSuggestion: {
-        fetchAutocompleteSuggestions: vi
-            .fn()
-            .mockResolvedValue({suggestions: []}),
-      },
-    });
-
-    mockGetUserId(userId, error);
-
+    setupGoogleMapsMock();
     render(
-        <MemoryRouter>
-          <AppContext value={{getCurrentUserId}}>
-            <MapHeader
-              map={null}
-              bannerOpen={false}
-              onCancelBanner={() => {}}
-              {...baseFilterProps}
-            />
-          </AppContext>
-        </MemoryRouter>,
+        <ContextWrapper initUserId={'123'}/>,
     );
   });
 
@@ -240,38 +213,10 @@ describe('Map Header component when logged in', () => {
 
 describe('Map Header component on sign out failure', async () => {
   beforeEach(() => {
-    const userId = '123';
-    const error = null;
-    (globalThis as unknown as { google: GoogleWithMaps }).google = {
-      maps: {
-        importLibrary: importLibraryMock,
-      },
-    };
-
-    importLibraryMock.mockResolvedValue({
-      AutocompleteSessionToken: vi.fn(),
-      AutocompleteSuggestion: {
-        fetchAutocompleteSuggestions: vi
-            .fn()
-            .mockResolvedValue({suggestions: []}),
-      },
-    });
-
-    mockGetUserId(userId, error);
-
+    setupGoogleMapsMock();
     mockSignOut('Error signing user out');
-
     render(
-        <MemoryRouter>
-          <AppContext value={{getCurrentUserId}}>
-            <MapHeader
-              map={null}
-              bannerOpen={false}
-              onCancelBanner={() => {}}
-              {...baseFilterProps}
-            />
-          </AppContext>
-        </MemoryRouter>,
+        <ContextWrapper initUserId={'123'}/>,
     );
   });
 
@@ -308,36 +253,9 @@ describe('Map Header component on sign out failure', async () => {
 
 describe('Map Header component when getting current user fails', () => {
   beforeEach(() => {
-    const userId = null;
-    const error = null;
-    (globalThis as unknown as { google: GoogleWithMaps }).google = {
-      maps: {
-        importLibrary: importLibraryMock,
-      },
-    };
-
-    importLibraryMock.mockResolvedValue({
-      AutocompleteSessionToken: vi.fn(),
-      AutocompleteSuggestion: {
-        fetchAutocompleteSuggestions: vi
-            .fn()
-            .mockResolvedValue({suggestions: []}),
-      },
-    });
-
-    mockGetUserId(userId, error);
-
+    setupGoogleMapsMock();
     render(
-        <MemoryRouter>
-          <AppContext value={{getCurrentUserId}}>
-            <MapHeader
-              map={null}
-              bannerOpen={false}
-              onCancelBanner={() => {}}
-              {...baseFilterProps}
-            />
-          </AppContext>
-        </MemoryRouter>,
+        <ContextWrapper initUserId={null}/>,
     );
   });
 
@@ -345,10 +263,3 @@ describe('Map Header component when getting current user fails', () => {
     screen.getByText('Login');
   });
 });
-const baseFilterProps: {
-  selectedAmenities: AmenityFilter[];
-  onAmenitiesChange: (next: AmenityFilter[]) => void;
-} = {
-  selectedAmenities: [],
-  onAmenitiesChange: () => {},
-};
