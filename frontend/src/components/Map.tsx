@@ -4,6 +4,7 @@ import {
   useState,
   useCallback,
   useRef,
+  useContext,
 } from 'react';
 import {
   GoogleMap,
@@ -20,6 +21,7 @@ import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
 import RecenterButton from './RecenterButton';
+import AppContext from '../context/AppContext';
 
 const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -47,6 +49,11 @@ function MapInner({apiKey}: { apiKey: string }) {
   const idleTimer = useRef<number | null>(null);
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const appContext = useContext(AppContext);
+
+  useEffect(() => {
+    appContext?.getCurrentUserId();
+  }, []);
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -365,7 +372,7 @@ function MapInner({apiKey}: { apiKey: string }) {
         <RecenterButton onClick={handleRecenter} />
       )}
 
-      {!addMode && !selected && (
+      {!addMode && !selected && appContext?.userId &&(
         <AddBathroomButton onClick={handleAddButtonClick} />
       )}
 

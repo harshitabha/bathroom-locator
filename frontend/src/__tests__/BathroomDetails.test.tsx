@@ -16,7 +16,6 @@ import type {Bathroom} from '../types';
 import {supabase} from '../lib/supabaseClient';
 import {AuthError, type User, type UserResponse} from '@supabase/supabase-js';
 import AppContext from '../context/AppContext';
-import {getCurrentUserId} from '../App';
 
 // mock supabase
 vi.mock('../lib/supabaseClient', () => {
@@ -57,7 +56,13 @@ function mockGetUserId(userId: string | null, error: string | null) {
  */
 function verifyBathroomRender(bathroom: Bathroom) {
   render(
-      <AppContext value={{getCurrentUserId}}>
+      <AppContext
+        value={{
+          userId: null,
+          setUserId: async () => {},
+          getCurrentUserId: async () => {},
+        }}
+      >
         <BathroomDetails
           bathroom={bathroom}
           setBathroom={() => {}}
