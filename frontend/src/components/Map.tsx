@@ -22,6 +22,7 @@ import {usePinIcon} from '../utils/usePinIcon';
 import RecenterButton from './RecenterButton';
 import AppContext from '../context/AppContext';
 import BathroomDetails from './BathroomDetails/BathroomDetails';
+import BathroomContext from '../context/BathroomContext';
 
 const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -360,10 +361,13 @@ function MapInner({apiKey}: { apiKey: string }) {
 
       {/* bathroom details */}
       {selected && (
-        <BathroomDetails
-          bathroom={selected}
-          setBathroom={setSelected}
-        />
+        <BathroomContext value = {{
+          bathrooms,
+          setBathrooms,
+          selected,
+          setSelected}}>
+          <BathroomDetails/>
+        </BathroomContext>
       )}
 
       {!addMode && !selected && userLocation && (

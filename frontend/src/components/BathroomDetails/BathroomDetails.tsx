@@ -6,39 +6,33 @@ import {
   useTheme,
 } from '@mui/material';
 import NearMeIcon from '@mui/icons-material/NearMe';
-import {useState, useContext, type Dispatch, type SetStateAction} from 'react';
+import {useContext} from 'react';
 
 import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
 import AppContext from '../../context/AppContext';
 import Like from './Like';
-import type {AmenityOptions, GenderOptions, Bathroom} from '../../types';
+import type {AmenityOptions, GenderOptions} from '../../types';
 import Detail from './Detail';
+import BathroomContext from '../../context/BathroomContext';
 
-interface bathroomDetailsProps {
-  bathroom: Bathroom,
-  setBathroom: Dispatch<SetStateAction<Bathroom | null>>;
-};
+const BathroomDetails = () => {
+  const bathroomContext = useContext(BathroomContext);
+  const bathroom = bathroomContext.selected;
+  const setBathroom = bathroomContext.setSelected;
 
-const BathroomDetails = (props: bathroomDetailsProps) => {
-  const {
-    bathroom,
-    setBathroom,
-  } = props;
-  const gender = bathroom.gender ? Object.keys(bathroom.gender)
-      .filter((val) => bathroom.gender![val as GenderOptions] == true)
+  const gender = bathroom!.gender ? Object.keys(bathroom!.gender)
+      .filter((val) => bathroom!.gender![val as GenderOptions] == true)
       .map((key) => {
         return {name: key, selected: true};
       }) : [];
-  const amenities = bathroom.amenities ? Object.keys(bathroom.amenities)
-      .filter((val) => bathroom.amenities![val as AmenityOptions] == true)
+  const amenities = bathroom!.amenities ? Object.keys(bathroom!.amenities)
+      .filter((val) => bathroom!.amenities![val as AmenityOptions] == true)
       .map((key) => {
         return {name: key, selected: true};
       }) : [];
 
   const theme = useTheme();
-
-  const [likes, setLikes] = useState(bathroom.likes);
   const appContext = useContext(AppContext);
 
   return (
@@ -80,12 +74,9 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             justifyContent: 'space-between',
           }}
         >
-          {bathroom.name}
+          {bathroom!.name}
           <Like
-            bathroom={bathroom}
             userId={appContext?.userId ?? null}
-            likes={likes}
-            setLikes={setLikes}
           />
         </Typography>
         <Box
@@ -95,7 +86,7 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             gap: '8px',
           }}
         >
-          {likes >= 5 ?
+          {bathroom!.likes >= 5 ?
             <Chip label="Verified Bathroom" variant="outlined"
               color="primary"/> :
             null}
@@ -109,8 +100,8 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             variant="outlined"
             color="secondary"
             onClick={() => openWalkingDirections(
-                bathroom.position.lat,
-                bathroom.position.lng,
+                bathroom!.position.lat,
+                bathroom!.position.lng,
             )}
           />
         </Box>
@@ -118,7 +109,7 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             Description
         </Typography>
         <Typography variant="body1">
-          {bathroom.description}
+          {bathroom!.description}
         </Typography>
 
         {

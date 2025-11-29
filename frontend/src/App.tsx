@@ -20,7 +20,6 @@ const App = () => {
     const {data: {user}, error} = await supabase.auth.getUser();
 
     if (!user || error) {
-      if (error) console.error('Error getting current user: ', error.message);
       setUserId(null);
       return;
     }

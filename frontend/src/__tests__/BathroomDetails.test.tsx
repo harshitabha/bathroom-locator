@@ -15,6 +15,7 @@ import type {Bathroom} from '../types';
 import {supabase} from '../lib/supabaseClient';
 import {AuthError, type User, type UserResponse} from '@supabase/supabase-js';
 import AppContext from '../context/AppContext';
+import BathroomContext from '../context/BathroomContext';
 
 // mock supabase
 vi.mock('../lib/supabaseClient', () => {
@@ -54,6 +55,10 @@ function mockGetUserId(userId: string | null, error: string | null) {
  * @param {Bathroom} bathroom selected bathroom
  */
 function verifyBathroomRender(bathroom: Bathroom) {
+  const selected = bathroom;
+  const mockSetSelected = () => {};
+  const bathrooms : Bathroom [] = [];
+  const mockSetBathrooms = () => {};
   render(
       <AppContext
         value={{
@@ -62,10 +67,13 @@ function verifyBathroomRender(bathroom: Bathroom) {
           getCurrentUserId: async () => {},
         }}
       >
-        <BathroomDetails
-          bathroom={bathroom}
-          setBathroom={() => {}}
-        />,
+        <BathroomContext value={{
+          bathrooms,
+          setBathrooms: mockSetBathrooms,
+          selected,
+          setSelected: mockSetSelected}}>
+          <BathroomDetails/>,
+        </BathroomContext>
       </AppContext>,
   );
 }
@@ -77,16 +85,22 @@ afterEach(() => {
 
 describe('Bathroom Details visibility', () => {
   it('closes when you click away', () => {
-    const mockSetBathroom = vi.fn();
+    const selected = basicBathroom;
+    const mockSetSelected = vi.fn();
+    const bathrooms : Bathroom [] = [];
+    const mockSetBathrooms = () => {};
     render(
-        <BathroomDetails
-          bathroom={basicBathroom}
-          setBathroom={mockSetBathroom}
-        />,
+        <BathroomContext value={{
+          bathrooms,
+          setBathrooms: mockSetBathrooms,
+          selected,
+          setSelected: mockSetSelected}}>
+          <BathroomDetails/>
+        </BathroomContext>,
     );
     const backdrop = document.querySelector('.MuiBackdrop-root')!;
     fireEvent.click(backdrop);
-    expect(mockSetBathroom).toHaveBeenCalledWith(null);
+    expect(mockSetSelected).toHaveBeenCalledWith(null);
   });
 });
 
@@ -152,11 +166,19 @@ describe('Rendering Additional Details', async () => {
           gender_neutral: true,
         },
       };
+
+      const selected = bathroomWithGender;
+      const mockSetSelected = () => {};
+      const bathrooms : Bathroom [] = [];
+      const mockSetBathrooms = () => {};
       render(
-          <BathroomDetails
-            bathroom={bathroomWithGender}
-            setBathroom={() => {}}
-          />,
+          <BathroomContext value={{
+            bathrooms,
+            setBathrooms: mockSetBathrooms,
+            selected,
+            setSelected: mockSetSelected}}>
+            <BathroomDetails/>
+          </BathroomContext>,
       );
     });
 
@@ -188,11 +210,19 @@ describe('Rendering Additional Details', async () => {
           menstrual_products: false,
         },
       };
+
+      const selected = bathroomWithAmenities;
+      const mockSetSelected = () => {};
+      const bathrooms : Bathroom [] = [];
+      const mockSetBathrooms = () => {};
       render(
-          <BathroomDetails
-            bathroom={bathroomWithAmenities}
-            setBathroom={() => {}}
-          />,
+          <BathroomContext value={{
+            bathrooms,
+            setBathrooms: mockSetBathrooms,
+            selected,
+            setSelected: mockSetSelected}}>
+            <BathroomDetails/>,
+          </BathroomContext>,
       );
     });
 
