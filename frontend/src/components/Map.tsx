@@ -356,7 +356,6 @@ function MapInner({apiKey}: { apiKey: string }) {
             title="You are here"
           />
         )}
-
       </GoogleMap>
 
       {/* bathroom details */}
