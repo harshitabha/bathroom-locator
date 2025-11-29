@@ -343,7 +343,7 @@ function MapInner({apiKey}: { apiKey: string }) {
             icon={{
               url: '/userLocation.png',
               scaledSize: new window.google.maps.Size(30, 30),
-              anchor: new google.maps.Point(15,15),
+              anchor: new google.maps.Point(15, 15),
             }}
             title="You are here"
           />
