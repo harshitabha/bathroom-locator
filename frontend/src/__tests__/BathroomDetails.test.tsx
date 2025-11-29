@@ -56,9 +56,9 @@ function mockGetUserId(userId: string | null, error: string | null) {
  */
 function verifyBathroomRender(bathroom: Bathroom) {
   const selected = bathroom;
-  const setSelected = () => {};
+  const mockSetSelected = () => {};
   const bathrooms : Bathroom [] = [];
-  const setBathrooms = () => {};
+  const mockSetBathrooms = () => {};
   render(
       <AppContext
         value={{
@@ -69,9 +69,9 @@ function verifyBathroomRender(bathroom: Bathroom) {
       >
         <BathroomContext value={{
           bathrooms,
-          setBathrooms,
+          setBathrooms: mockSetBathrooms,
           selected,
-          setSelected}}>
+          setSelected: mockSetSelected}}>
           <BathroomDetails/>,
         </BathroomContext>
       </AppContext>,
@@ -86,21 +86,21 @@ afterEach(() => {
 describe('Bathroom Details visibility', () => {
   it('closes when you click away', () => {
     const selected = basicBathroom;
-    const setSelected = vi.fn();
+    const mockSetSelected = vi.fn();
     const bathrooms : Bathroom [] = [];
-    const setBathrooms = () => {};
+    const mockSetBathrooms = () => {};
     render(
         <BathroomContext value={{
           bathrooms,
-          setBathrooms,
+          setBathrooms: mockSetBathrooms,
           selected,
-          setSelected}}>
+          setSelected: mockSetSelected}}>
           <BathroomDetails/>
         </BathroomContext>,
     );
     const backdrop = document.querySelector('.MuiBackdrop-root')!;
     fireEvent.click(backdrop);
-    expect(setSelected).toHaveBeenCalledWith(null);
+    expect(mockSetSelected).toHaveBeenCalledWith(null);
   });
 });
 
@@ -168,15 +168,15 @@ describe('Rendering Additional Details', async () => {
       };
 
       const selected = bathroomWithGender;
-      const setSelected = () => {};
+      const mockSetSelected = () => {};
       const bathrooms : Bathroom [] = [];
-      const setBathrooms = () => {};
+      const mockSetBathrooms = () => {};
       render(
           <BathroomContext value={{
             bathrooms,
-            setBathrooms,
+            setBathrooms: mockSetBathrooms,
             selected,
-            setSelected}}>
+            setSelected: mockSetSelected}}>
             <BathroomDetails/>
           </BathroomContext>,
       );
@@ -212,15 +212,15 @@ describe('Rendering Additional Details', async () => {
       };
 
       const selected = bathroomWithAmenities;
-      const setSelected = () => {};
+      const mockSetSelected = () => {};
       const bathrooms : Bathroom [] = [];
-      const setBathrooms = () => {};
+      const mockSetBathrooms = () => {};
       render(
           <BathroomContext value={{
             bathrooms,
-            setBathrooms,
+            setBathrooms: mockSetBathrooms,
             selected,
-            setSelected}}>
+            setSelected: mockSetSelected}}>
             <BathroomDetails/>,
           </BathroomContext>,
       );

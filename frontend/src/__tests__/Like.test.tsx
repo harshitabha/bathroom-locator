@@ -57,16 +57,21 @@ function setupHttpRequests(
  */
 function renderLikeComponent(bathroom: Bathroom, userId: string | null) {
   let bathrooms : Bathroom [] = [bathroom];
-  const setBathrooms = vi.fn((newBathrooms) => {
+  const mockSetBathrooms = vi.fn((newBathrooms) => {
     bathrooms = newBathrooms;
   });
   let selected : Bathroom = bathroom;
-  const setSelected = vi.fn((newSelected) => {
+  const mockSetSelected = vi.fn((newSelected) => {
     selected = newSelected;
   });
 
   render(
-      <BathroomContext value={{bathrooms, setBathrooms, selected, setSelected}}>
+      <BathroomContext value={{
+        bathrooms,
+        setBathrooms: mockSetBathrooms,
+        selected,
+        setSelected: mockSetSelected,
+      }}>
         <Like
           userId={userId}
         />
