@@ -47,7 +47,6 @@ function MapInner({apiKey}: { apiKey: string }) {
   const idleTimer = useRef<number | null>(null);
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
-  const [hasCenteredOnce, setHasCenteredOnce] = useState(false);
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -121,17 +120,10 @@ function MapInner({apiKey}: { apiKey: string }) {
   // center map on user if location is given, else default on santa cruz
   const center = initialLocation ?? defaultCenter;
 
-  // Auto-center once on first load
-  useEffect(() => {
-    if (userLocation && mapRef.current && !hasCenteredOnce) {
-      mapRef.current.panTo(userLocation);
-      setHasCenteredOnce(true);
-    }
-  }, [userLocation, hasCenteredOnce]);
-
   const handleRecenter = () => {
     if (mapRef.current && userLocation) {
       mapRef.current.panTo(userLocation);
+      mapRef.current.setZoom(14);
     }
   };
 
@@ -350,7 +342,8 @@ function MapInner({apiKey}: { apiKey: string }) {
             position={userLocation}
             icon={{
               url: '/userLocation.png',
-              scaledSize: new window.google.maps.Size(40, 40),
+              scaledSize: new window.google.maps.Size(30, 30),
+              anchor: new google.maps.Point(15,15),
             }}
             title="You are here"
           />
