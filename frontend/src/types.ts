@@ -5,15 +5,14 @@ export interface Bathroom {
   description: string;
   likes: number;
   amenities?: Amenities,
-  amenities?: Amenities,
   num_stalls?: number,
   gender?: Gender,
 };
 
 export interface Gender {
-  'male': boolean,
-  'female': boolean,
-  'gender_neutral': boolean
+  male: boolean,
+  female: boolean,
+  gender_neutral: boolean
 };
 
 export interface Amenities {
