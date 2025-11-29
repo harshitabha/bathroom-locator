@@ -4,17 +4,25 @@ import {render, screen, cleanup, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import AddBathroomButton from '../../components/AddBathroom/AddBathroomButton';
 import AddBathroomBanner from '../../components/AddBathroom/AddBathroomBanner';
+import AppContext from '../../context/AppContext';
 
 /**
- * @returns {object} button + banner
+ * @param {object} root0 props
+ * @param {string | null} root0.initUserId logged in/out
+ * @returns {object} banner + button
  */
-function ButtonBannerWrapper() {
+function ButtonBannerWrapper({initUserId}: {
+  initUserId: string | null;
+}) {
   const [bannerOpen, setBannerOpen] = useState(false);
+  const [userId, setUserId] = useState<string | null>(initUserId);
+  const getCurrentUserId = async () => {};
+
   return (
-    <>
+    <AppContext value={{userId, setUserId, getCurrentUserId}}>
       <AddBathroomBanner bannerOpen={bannerOpen} onCancel={() => {}}/>
-      <AddBathroomButton onClick={() => setBannerOpen(true)} />
-    </>
+      {userId && <AddBathroomButton onClick={() => setBannerOpen(true)} />}
+    </AppContext>
   );
 }
 
@@ -23,20 +31,26 @@ afterEach(() => {
 });
 
 describe('AddBathroomButton', () => {
-  it('renders the button', () => {
-    render(<AddBathroomButton onClick={() => {}} />);
+  it('renders the button when logged in', () => {
+    render(<ButtonBannerWrapper initUserId={'123'} />);
 
     screen.getByLabelText('Add a bathroom');
   });
 
+  it('does not render the button when logged out', () => {
+    render(<ButtonBannerWrapper initUserId={null} />);
+
+    expect(screen.queryByLabelText('Add a bathroom')).toBeNull();
+  });
+
   it('no banner when not pressed', () => {
-    render(<ButtonBannerWrapper />);
+    render(<ButtonBannerWrapper initUserId={'123'} />);
 
     expect(screen.queryByText('Choose a location for the bathroom')).toBeNull();
   });
 
   it('opens banner when pressed', () => {
-    render(<ButtonBannerWrapper />);
+    render(<ButtonBannerWrapper initUserId={'123'} />);
 
     fireEvent.click(screen.getByLabelText('Add a bathroom'));
     screen.getByText('Choose a location for the bathroom');

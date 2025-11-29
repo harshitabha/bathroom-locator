@@ -4,6 +4,7 @@ import {
   useState,
   useCallback,
   useRef,
+  useContext,
 } from 'react';
 import {
   GoogleMap,
@@ -13,12 +14,13 @@ import {
 
 import './Map.css';
 import MapHeader from './MapHeader';
-import InfoWindow from './InfoWindow';
 import type {Bathroom} from '../types';
 import AddBathroomButton from './AddBathroom/AddBathroomButton';
 import AddBathroomPeekCard from './AddBathroom/AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroom/AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
+import AppContext from '../context/AppContext';
+import BathroomDetails from './BathroomDetails/BathroomDetails';
 
 const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -46,6 +48,11 @@ function MapInner({apiKey}: { apiKey: string }) {
   const idleTimer = useRef<number | null>(null);
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const appContext = useContext(AppContext);
+
+  useEffect(() => {
+    appContext?.getCurrentUserId();
+  }, []);
 
   // used to get map bounds
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -310,12 +317,14 @@ function MapInner({apiKey}: { apiKey: string }) {
       </GoogleMap>
 
       {/* bathroom details */}
-      <InfoWindow
-        bathroom={selected}
-        setBathroom={setSelected}
-      />
+      {selected && (
+        <BathroomDetails
+          bathroom={selected}
+          setBathroom={setSelected}
+        />
+      )}
 
-      {!addMode && !selected && (
+      {!addMode && !selected && appContext?.userId &&(
         <AddBathroomButton onClick={handleAddButtonClick} />
       )}
 
