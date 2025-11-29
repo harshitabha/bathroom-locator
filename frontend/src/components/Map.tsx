@@ -19,6 +19,7 @@ import AddBathroomButton from './AddBathroomButton';
 import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
+import RecenterButton from './RecenterButton';
 import AppContext from '../context/AppContext';
 import BathroomDetails from './BathroomDetails/BathroomDetails';
 
@@ -77,8 +78,11 @@ function MapInner({apiKey}: { apiKey: string }) {
   // store user location as LatLng
   const [userLocation, setUserLocation] =
     useState<google.maps.LatLngLiteral | null>(null);
+  // store initial user location for initial centering
+  const [initialLocation, setInitialLocation] =
+    useState<google.maps.LatLngLiteral | null>(null);
 
-  // ask for user location for centering map
+  // ask for initial user location for centering map
   useEffect(() => {
     if (!('geolocation' in navigator)) {
       console.error('Geolocation not supported by this browser.');
@@ -86,10 +90,12 @@ function MapInner({apiKey}: { apiKey: string }) {
     }
     navigator.geolocation.getCurrentPosition(
         (pos) => {
-          setUserLocation({
+          const loc = {
             lat: pos.coords.latitude,
             lng: pos.coords.longitude,
-          });
+          };
+          setInitialLocation(loc);
+          setUserLocation(loc);
         },
         (err) => {
           console.error('Geolocation error:', err.message);
@@ -102,8 +108,31 @@ function MapInner({apiKey}: { apiKey: string }) {
     );
   }, []);
 
+  // watch user location for updating marker (does not recenter)
+  useEffect(() => {
+    if (!('geolocation' in navigator)) return;
+    const watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          setUserLocation({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
+        },
+        (err) => console.error('Geolocation error:', err.message),
+        {enableHighAccuracy: true, timeout: 10_000, maximumAge: 10_000},
+    );
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
+
   // center map on user if location is given, else default on santa cruz
-  const center = userLocation ?? defaultCenter;
+  const center = initialLocation ?? defaultCenter;
+
+  const handleRecenter = () => {
+    if (mapRef.current && userLocation) {
+      mapRef.current.panTo(userLocation);
+      mapRef.current.setZoom(14);
+    }
+  };
 
   const handleAddButtonClick = useCallback(() => {
     setAddMode(true);
@@ -315,6 +344,18 @@ function MapInner({apiKey}: { apiKey: string }) {
           />
         )}
 
+        {userLocation && (
+          <Marker
+            position={userLocation}
+            icon={{
+              url: '/userLocation.png',
+              scaledSize: new window.google.maps.Size(30, 30),
+              anchor: new google.maps.Point(15, 15),
+            }}
+            title="You are here"
+          />
+        )}
+
       </GoogleMap>
 
       {/* bathroom details */}
@@ -323,6 +364,10 @@ function MapInner({apiKey}: { apiKey: string }) {
           bathroom={selected}
           setBathroom={setSelected}
         />
+      )}
+
+      {!addMode && !selected && userLocation && (
+        <RecenterButton onClick={handleRecenter} />
       )}
 
       {!addMode && !selected && appContext?.userId &&(
