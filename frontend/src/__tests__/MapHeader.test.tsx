@@ -1,4 +1,7 @@
 import MapHeader from '../components/MapHeader';
+import {
+  type AmenityFilter,
+} from '../components/MapFilters';
 import {supabase} from '../lib/supabaseClient';
 import {
   describe,
@@ -97,6 +100,8 @@ function ContextWrapper({initUserId}: {
   initUserId: string | null;
 }) {
   const [userId, setUserId] = useState<string | null>(initUserId);
+  const [selectedAmenities, setSelectedAmenities] =
+    useState<AmenityFilter[]>([]);
   const getCurrentUserId = async () => {};
 
   return (
@@ -106,6 +111,8 @@ function ContextWrapper({initUserId}: {
           map={null}
           bannerOpen={false}
           onCancelBanner={() => {}}
+          selectedAmenities={selectedAmenities}
+          onAmenitiesChange={setSelectedAmenities}
         />
       </AppContext>
     </MemoryRouter>

@@ -19,6 +19,7 @@ import AddBathroomButton from './AddBathroomButton';
 import AddBathroomPeekCard from './AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
+import {type AmenityFilter} from './MapFilters';
 import AppContext from '../context/AppContext';
 import BathroomDetails from './BathroomDetails/BathroomDetails';
 
@@ -48,6 +49,8 @@ function MapInner({apiKey}: { apiKey: string }) {
   const idleTimer = useRef<number | null>(null);
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const [selectedAmenities, setSelectedAmenities] =
+    useState<AmenityFilter[]>([]);
   const appContext = useContext(AppContext);
 
   useEffect(() => {
@@ -163,7 +166,8 @@ function MapInner({apiKey}: { apiKey: string }) {
 
     try {
       const res = await fetch(
-          `http://localhost:3000/bathroom?minLng=${minLng}&minLat=${minLat}&maxLng=${maxLng}&maxLat=${maxLat}`,
+          `http://localhost:3000/bathroom?minLng=${minLng}` +
+          `&minLat=${minLat}&maxLng=${maxLng}&maxLat=${maxLat}`,
       );
 
       if (res.ok) {
@@ -267,6 +271,27 @@ function MapInner({apiKey}: { apiKey: string }) {
     };
   }, []);
 
+  const filteredBathrooms = useMemo(() => {
+    const amenitiesMatch = (a?: Bathroom['amenities']) => {
+      if (!selectedAmenities.length) return true;
+      if (!a) return false;
+      const need: Record<AmenityFilter, boolean> = {
+        'Soap': !!a.soap,
+        'Tissues': !!a.paper_towel,
+        'Menstrual Products': !!a.menstrual_products,
+        'Mirror': !!a.mirror,
+        'Toilet Paper': !!a.toilet_paper,
+        'Hand Dryer': !!a.hand_dryer,
+      };
+      return selectedAmenities.every((k) => need[k]);
+    };
+
+    return bathrooms.filter((b) => amenitiesMatch(b.amenities));
+  }, [
+    bathrooms,
+    selectedAmenities,
+  ]);
+
   // map loading errors
   if (loadError) return <p>Failed to load Google Maps.</p>;
   if (!isLoaded) return <p>Loading map…</p>;
@@ -278,6 +303,8 @@ function MapInner({apiKey}: { apiKey: string }) {
           map={mapRef.current}
           bannerOpen={bannerOpen}
           onCancelBanner={cancelAddFlow}
+          selectedAmenities={selectedAmenities}
+          onAmenitiesChange={setSelectedAmenities}
         />
       }
       <GoogleMap
@@ -296,7 +323,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           disableDefaultUI: true,
         }}
       >
-        {bathrooms.map((p) => (
+        {filteredBathrooms.map((p) => (
           <Marker
             key={p.id}
             position={p.position} // position of pin
