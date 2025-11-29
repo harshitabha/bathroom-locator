@@ -16,6 +16,7 @@ import type {Gender, Amenities, OptionalObj} from '../../types';
 import Detail from '../Detail';
 import BathroomContext from '../../context/BathroomContext';
 
+
 const BathroomDetails = () => {
   const bathroomContext = useContext(BathroomContext);
   const bathroom = bathroomContext.selected;
