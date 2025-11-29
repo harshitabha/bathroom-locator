@@ -10,9 +10,9 @@ export interface Bathroom {
 };
 
 export interface Gender {
-  'male': boolean,
-  'female': boolean,
-  'gender_neutral': boolean
+  male: boolean,
+  female: boolean,
+  gender_neutral: boolean
 };
 
 export interface Amenities {
