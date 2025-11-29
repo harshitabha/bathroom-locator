@@ -15,9 +15,9 @@ import {
 import './Map.css';
 import MapHeader from './MapHeader';
 import type {Bathroom} from '../types';
-import AddBathroomButton from './AddBathroomButton';
-import AddBathroomPeekCard from './AddBathroomPeekCard';
-import AddBathroomForm from './AddBathroomForm';
+import AddBathroomButton from './AddBathroom/AddBathroomButton';
+import AddBathroomPeekCard from './AddBathroom/AddBathroomPeekCard';
+import AddBathroomForm from './AddBathroom/AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
 import RecenterButton from './RecenterButton';
 import AppContext from '../context/AppContext';
@@ -356,7 +356,6 @@ function MapInner({apiKey}: { apiKey: string }) {
             title="You are here"
           />
         )}
-
       </GoogleMap>
 
       {/* bathroom details */}

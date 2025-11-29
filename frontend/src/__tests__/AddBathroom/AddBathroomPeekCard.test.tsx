@@ -2,8 +2,9 @@ import {useState} from 'react';
 import {describe, it, afterEach, expect} from 'vitest';
 import {render, screen, fireEvent, cleanup} from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
-import AddBathroomPeekCard from '../components/AddBathroomPeekCard';
-import AddBathroomPage from '../components/AddBathroomForm';
+import AddBathroomPeekCard from
+  '../../components/AddBathroom/AddBathroomPeekCard';
+import AddBathroomPage from '../../components/AddBathroom/AddBathroomForm';
 
 /**
  * @returns {object} peekcard + page

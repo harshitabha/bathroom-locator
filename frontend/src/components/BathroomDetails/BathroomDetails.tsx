@@ -12,8 +12,8 @@ import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
 import AppContext from '../../context/AppContext';
 import Like from './Like';
-import type {AmenityOptions, GenderOptions} from '../../types';
-import Detail from './Detail';
+import type {Gender, Amenities, OptionalObj} from '../../types';
+import Detail from '../Detail';
 import BathroomContext from '../../context/BathroomContext';
 
 const BathroomDetails = () => {
@@ -21,16 +21,10 @@ const BathroomDetails = () => {
   const bathroom = bathroomContext.selected;
   const setBathroom = bathroomContext.setSelected;
 
-  const gender = bathroom!.gender ? Object.keys(bathroom!.gender)
-      .filter((val) => bathroom!.gender![val as GenderOptions] == true)
-      .map((key) => {
-        return {name: key, selected: true};
-      }) : [];
-  const amenities = bathroom!.amenities ? Object.keys(bathroom!.amenities)
-      .filter((val) => bathroom!.amenities![val as AmenityOptions] == true)
-      .map((key) => {
-        return {name: key, selected: true};
-      }) : [];
+  const gender = getTrueKeys(bathroom?.gender);
+  const amenities = getTrueKeys(bathroom?.amenities);
+  const additionalDetailsExist = getNumKeysInObj(bathroom?.gender) > 0 ||
+    getNumKeysInObj(bathroom?.amenities) > 0;
 
   const theme = useTheme();
   const appContext = useContext(AppContext);
@@ -113,18 +107,24 @@ const BathroomDetails = () => {
         </Typography>
 
         {
-          gender.length > 0 || amenities.length > 0 ?
+          additionalDetailsExist ?
           <Box>
             <Typography variant="h6" className="details-subheader">
               Additional Details
             </Typography>
             {
-              gender.length > 0 ?
-              <Detail name='Gender' values={gender}/> : null
+              getNumKeysInObj(gender) > 0 ?
+              <Detail
+                name='Gender'
+                values={gender}
+                handleClick={() => {}}/> : null
             }
             {
-              amenities.length > 0 ?
-              <Detail name='Amenities' values={amenities}/> : null
+              getNumKeysInObj(amenities) > 0 ?
+              <Detail
+                name='Amenities'
+                values={amenities}
+                handleClick={() => {}}/> : null
             }
           </Box> : null
         }
@@ -134,5 +134,38 @@ const BathroomDetails = () => {
     </SwipeableDrawer>
   );
 };
+
+/**
+ * Get the object with only it's true keys
+ * @param {object | undefined} obj object to process
+ * @returns {object} object with only true keys
+ */
+function getTrueKeys(obj: Gender | Amenities | undefined) {
+  if (!obj) {
+    return {};
+  }
+
+  const filtered: {[key: string]: boolean} = Object.keys(obj)
+      .reduce((newObj, key) => {
+        const typedKey = key as keyof (Gender | Amenities);
+        if (obj[typedKey]) {
+          newObj[typedKey] = obj[typedKey];
+        }
+        return newObj;
+      }, {} as OptionalObj<Gender | Amenities>);
+  return filtered;
+}
+
+/**
+ * Gets the number of keys in an object
+ * @param {object | undefined} obj the object to check the number of keys of
+ * @returns {number} the number of keys in the object
+ */
+function getNumKeysInObj(obj: object | undefined) {
+  if (!obj) {
+    return 0;
+  }
+  return Object.keys(obj).length;
+}
 
 export default BathroomDetails;

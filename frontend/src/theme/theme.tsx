@@ -40,6 +40,7 @@ const theme = createTheme({
       ],
     },
   },
+  cssVariables: true,
 });
 
 export default theme;
