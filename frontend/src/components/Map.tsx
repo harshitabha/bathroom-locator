@@ -356,10 +356,6 @@ function MapInner({apiKey}: { apiKey: string }) {
           />
         )}
 
-        <InfoWindow
-          bathroom={selected}
-          setBathroom={setSelected}
-        />
       </GoogleMap>
 
       {/* bathroom details */}
