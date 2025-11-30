@@ -54,10 +54,10 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Bathroom"
+                  $ref: '#/components/schemas/Bathroom'
         400:
           description: Invalid parameters
-
+    
     post:
       description: Add a new bathroom
       requestBody:
@@ -66,17 +66,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NewBathroom"
+              $ref: '#/components/schemas/NewBathroom'
       responses:
         201:
           description: Bathroom successfully added
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Bathroom"
+                $ref: '#/components/schemas/Bathroom'
         400:
           description: Unexpected properties
-
+    
     put:
       description: Edit a bathroom
       requestBody:
@@ -85,7 +85,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Bathroom"
+              $ref: '#/components/schemas/Bathroom'
       responses:
         204:
           description: Bathroom successfully updated
@@ -106,7 +106,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Bathroom"
+                  $ref: '#/components/schemas/Bathroom'
   /user/likes:
     get:
       summary: Get a user's liked bathrooms
@@ -134,7 +134,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserLike"
+              $ref: '#/components/schemas/UserLike'
       responses:
         201:
           description: Like added successfully
@@ -148,13 +148,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserLike"
+              $ref: '#/components/schemas/UserLike'
       responses:
         200:
           description: Removed like successfully
         404:
           description: Bathroom not found
-
+      
 components:
   schemas:
     BathroomBase:
@@ -183,9 +183,9 @@ components:
         num_stalls:
           type: number
         gender:
-          $ref: "#/components/schemas/Gender"
+          $ref: '#/components/schemas/Gender'
         amenities:
-          $ref: "#/components/schemas/Amenities"
+          $ref: '#/components/schemas/Amenities'
         likes:
           type: integer
           default: 0
@@ -193,10 +193,10 @@ components:
         - name
         - position
         - description
-
+   
     NewBathroom:
       allOf:
-        - $ref: "#/components/schemas/BathroomBase"
+        - $ref: '#/components/schemas/BathroomBase'
       description: "Schema for creating a new bathroom (no id)."
 
     Bathroom:
@@ -212,9 +212,9 @@ components:
             - gender
             - amenities
             - likes
-        - $ref: "#/components/schemas/BathroomBase"
+        - $ref: '#/components/schemas/BathroomBase'
       description: "Full bathroom resource returned by the API."
-
+    
     Gender:
       type: object
       properties:
@@ -247,9 +247,9 @@ components:
         - hand_dryer
         - menstrual_products
         - mirror
-
+  
     UserLike:
-      type: object
+      type : object
       properties:
         userId:
           type: string
