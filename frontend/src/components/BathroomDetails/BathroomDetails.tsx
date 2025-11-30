@@ -6,7 +6,7 @@ import {
   useTheme,
 } from '@mui/material';
 import NearMeIcon from '@mui/icons-material/NearMe';
-import {useContext} from 'react';
+import {useContext, useEffect} from 'react';
 
 import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
@@ -21,6 +21,7 @@ const BathroomDetails = () => {
   const bathroomContext = useContext(BathroomContext);
   const bathroom = bathroomContext.selected;
   const setBathroom = bathroomContext.setSelected;
+  const bathrooms = bathroomContext.bathrooms;
 
   const gender = getTrueKeys(bathroom?.gender);
   const amenities = getTrueKeys(bathroom?.amenities);
@@ -29,6 +30,18 @@ const BathroomDetails = () => {
 
   const theme = useTheme();
   const appContext = useContext(AppContext);
+
+  // for real time likes updates
+  useEffect(() => {
+    const newSelected = bathrooms.find((b) => {
+      if (b.id === bathroom!.id) {
+        return b;
+      }
+    });
+    if (newSelected) {
+      setBathroom(newSelected);
+    }
+  }, [bathrooms]);
 
   return (
     <SwipeableDrawer

@@ -137,7 +137,10 @@ export async function getUserLikes(req, res) {
  */
 export async function likeBathroom(req, res) {
   try {
-    await db.likeBathroom(req.body.userId, req.body.bathroomId);
+    const bathroomId = req.body.bathroomId;
+    await db.likeBathroom(req.body.userId, bathroomId);
+    const bathroom = await db.getBathroom(bathroomId);
+    notifyNewBathroom(bathroom);
     res.status(201).send();
   } catch (err) {
     console.error('Error in likeBathroom:', err);
@@ -152,7 +155,10 @@ export async function likeBathroom(req, res) {
  */
 export async function unlikeBathroom(req, res) {
   try {
-    await db.unlikeBathroom(req.body.userId, req.body.bathroomId);
+    const bathroomId = req.body.bathroomId;
+    await db.unlikeBathroom(req.body.userId, bathroomId);
+    const bathroom = await db.getBathroom(bathroomId);
+    notifyNewBathroom(bathroom);
     res.status(200).send();
   } catch (err) {
     console.error('Error in unlikeBathroom:', err);
