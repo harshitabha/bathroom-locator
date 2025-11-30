@@ -19,6 +19,8 @@ import AddBathroomButton from './AddBathroom/AddBathroomButton';
 import AddBathroomPeekCard from './AddBathroom/AddBathroomPeekCard';
 import AddBathroomForm from './AddBathroom/AddBathroomForm';
 import {usePinIcon} from '../utils/usePinIcon';
+import {filterBathroomsByGender} from '../utils/filterBathrooms';
+import {type GenderFilter} from './MapFilters';
 import RecenterButton from './RecenterButton';
 import AppContext from '../context/AppContext';
 import BathroomDetails from './BathroomDetails/BathroomDetails';
@@ -50,6 +52,7 @@ function MapInner({apiKey}: { apiKey: string }) {
   const idleTimer = useRef<number | null>(null);
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const [selectedGenders, setSelectedGenders] = useState<GenderFilter[]>([]);
   const appContext = useContext(AppContext);
 
   useEffect(() => {
@@ -193,7 +196,8 @@ function MapInner({apiKey}: { apiKey: string }) {
 
     try {
       const res = await fetch(
-          `http://localhost:3000/bathroom?minLng=${minLng}&minLat=${minLat}&maxLng=${maxLng}&maxLat=${maxLat}`,
+          `http://localhost:3000/bathroom?minLng=${minLng}` +
+          `&minLat=${minLat}&maxLng=${maxLng}&maxLat=${maxLat}`,
       );
 
       if (res.ok) {
@@ -290,6 +294,11 @@ function MapInner({apiKey}: { apiKey: string }) {
     };
   }, []);
 
+  const filteredBathrooms = useMemo(
+      () => filterBathroomsByGender(bathrooms, selectedGenders),
+      [bathrooms, selectedGenders],
+  );
+
   // map loading errors
   if (loadError) return <p>Failed to load Google Maps.</p>;
   if (!isLoaded) return <p>Loading map…</p>;
@@ -301,6 +310,8 @@ function MapInner({apiKey}: { apiKey: string }) {
           map={mapRef.current}
           bannerOpen={bannerOpen}
           onCancelBanner={cancelAddFlow}
+          selectedGenders={selectedGenders}
+          onGendersChange={setSelectedGenders}
         />
       }
       <GoogleMap
@@ -319,7 +330,7 @@ function MapInner({apiKey}: { apiKey: string }) {
           disableDefaultUI: true,
         }}
       >
-        {bathrooms.map((p) => (
+        {filteredBathrooms.map((p) => (
           <Marker
             key={p.id}
             position={p.position} // position of pin

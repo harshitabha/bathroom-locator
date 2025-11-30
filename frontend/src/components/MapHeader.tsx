@@ -2,6 +2,7 @@ import {Box, Button, Avatar, Menu, MenuItem} from '@mui/material';
 import {useNavigate} from 'react-router-dom';
 import {useState, useContext} from 'react';
 import SearchBar from './SearchBar';
+import MapFilters, {type GenderFilter} from './MapFilters';
 import AddBathroomBanner from './AddBathroom/AddBathroomBanner';
 import AppContext from '../context/AppContext';
 import {supabase} from '../lib/supabaseClient';
@@ -10,9 +11,17 @@ type Props = {
   map: google.maps.Map | null;
   bannerOpen: boolean;
   onCancelBanner: () => void;
+  selectedGenders: GenderFilter[];
+  onGendersChange: (next: GenderFilter[]) => void;
 };
 
-const MapHeader = ({map, bannerOpen, onCancelBanner}: Props) => {
+const MapHeader = ({
+  map,
+  bannerOpen,
+  onCancelBanner,
+  selectedGenders,
+  onGendersChange,
+}: Props) => {
   const navigate = useNavigate();
   const appContext = useContext(AppContext);
 
@@ -105,6 +114,11 @@ const MapHeader = ({map, bannerOpen, onCancelBanner}: Props) => {
       </Box>
       {/* row 2, bathroom banner */}
       <AddBathroomBanner bannerOpen={bannerOpen} onCancel={onCancelBanner} />
+      {/* row 3, filters */}
+      <MapFilters
+        selectedGenders={selectedGenders}
+        onGendersChange={onGendersChange}
+      />
     </Box>
   );
 };

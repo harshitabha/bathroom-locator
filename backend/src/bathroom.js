@@ -1,6 +1,4 @@
 import * as db from './db.js';
-
-
 export let clients = [];
 // use shorter timeout for tests
 const LONG_POLL_TIMEOUT = process.env.NODE_ENV === 'test' ? 1000 : 30000;
@@ -57,34 +55,43 @@ export async function notifyNewBathroom(newBathroom) {
  */
 export async function getBathroomsInBounds(req, res) {
   const {minLng, minLat, maxLng, maxLat, limit} = req.query;
+  const minLngNum = parseFloat(String(minLng));
+  const minLatNum = parseFloat(String(minLat));
+  const maxLngNum = parseFloat(String(maxLng));
+  const maxLatNum = parseFloat(String(maxLat));
 
   // limit # of bathrooms fetched, up to 200
   const lim = limit ?
-    Math.max(1, Math.min(parseInt(limit, 10), 200)) : 200;
+    Math.max(1, Math.min(parseInt(String(limit), 10), 200)) : 200;
 
   // bounds dont cross anti-meridian, return results normally
-  if (minLng <= maxLng) {
-    const bathrooms = await db.getBathroomsInBounds(
-        minLng,
-        minLat,
-        maxLng,
-        maxLat,
-        lim,
-    );
-    if (bathrooms.length > 0) {
-      return res.status(200).json(bathrooms);
-    } else {
-      return res.status(200).json([]);
+  try {
+    if (minLngNum <= maxLngNum) {
+      const bathrooms = await db.getBathroomsInBounds(
+          minLngNum,
+          minLatNum,
+          maxLngNum,
+          maxLatNum,
+          lim,
+      );
+      if (bathrooms.length > 0) {
+        return res.status(200).json(bathrooms);
+      } else {
+        return res.status(200).json([]);
+      }
     }
-  }
 
-  // bounds cross anti-meridian, split into two before returning results
-  const left =
-    await db.getBathroomsInBounds(minLng, minLat, 180, maxLat, lim);
-  const right =
-    await db.getBathroomsInBounds(-180, minLat, maxLng, maxLat, lim);
-  const bathroomsInBounds = [...left, ...right].slice(0, lim);
-  return res.status(200).json(bathroomsInBounds);
+    // bounds cross anti-meridian, split into two before returning results
+    const left =
+      await db.getBathroomsInBounds(minLngNum, minLatNum, 180, maxLatNum, lim);
+    const right =
+      await db.getBathroomsInBounds(-180, minLatNum, maxLngNum, maxLatNum, lim);
+    const bathroomsInBounds = [...left, ...right].slice(0, lim);
+    return res.status(200).json(bathroomsInBounds);
+  } catch (err) {
+    console.error('getBathroomsInBounds error:', err);
+    return res.status(500).send();
+  }
 }
 
 /**
