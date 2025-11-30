@@ -15,6 +15,7 @@ import {
 } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import SearchBar from '../components/SearchBar';
+import userEvent from '@testing-library/user-event';
 
 // mocks & types
 
@@ -83,7 +84,7 @@ describe('SearchBar', () => {
     render(<SearchBar map={null} />);
 
     expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
-    expect(screen.getByLabelText('search')).toBeInTheDocument();
+    expect(screen.getByLabelText('Search Button')).toBeInTheDocument();
   });
 
   it('loads the Places library', async () => {
@@ -112,7 +113,7 @@ describe('SearchBar', () => {
     render(<SearchBar map={null} />);
 
     const input = screen.getByPlaceholderText('Search');
-    const button = screen.getByLabelText('search');
+    const button = screen.getByLabelText('Search Button');
 
     fireEvent.change(input, {target: {value: 'bathroom'}});
     fireEvent.click(button);
@@ -152,7 +153,7 @@ describe('SearchBar', () => {
   it('does not call Places when search is empty', () => {
     render(<SearchBar map={null} />);
 
-    const button = screen.getByLabelText('search');
+    const button = screen.getByLabelText('Search Button');
 
     fireEvent.click(button);
 
@@ -209,7 +210,7 @@ describe('SearchBar', () => {
     render(<SearchBar map={map} />);
 
     const input = screen.getByPlaceholderText('Search');
-    const button = screen.getByLabelText('search');
+    const button = screen.getByLabelText('Search Button');
 
     fireEvent.change(input, {target: {value: 'bathroom'}});
     fireEvent.click(button);
@@ -251,7 +252,7 @@ describe('SearchBar', () => {
     render(<SearchBar map={null} />);
 
     const input = screen.getByPlaceholderText('Search');
-    const button = screen.getByLabelText('search');
+    const button = screen.getByLabelText('Search Button');
 
     fireEvent.change(input, {target: {value: 'bathroom'}});
     fireEvent.click(button);
@@ -280,15 +281,15 @@ describe('SearchBar', () => {
 
     const input = screen.getByPlaceholderText('Search');
     fireEvent.change(input, {target: {value: 'bathroom'}});
-    fireEvent.click(screen.getByLabelText('search'));
-    fireEvent.keyDown(input, {key: 'Escape'});
+    fireEvent.click(screen.getByLabelText('Search Button'));
+    userEvent.keyboard('{Escape}');
 
     await waitFor(() => {
       expect(screen.queryByText('test')).toBeNull();
     });
   });
 
-  it('reopens same suggestion list after closing', async () => {
+  it('blurs searchbar input when pressing Escape', async () => {
     fetchAutocompleteSuggestionsMock.mockResolvedValueOnce({
       suggestions: [{
         placePrediction: {
@@ -301,12 +302,12 @@ describe('SearchBar', () => {
     render(<SearchBar map={null} />);
 
     const input = screen.getByPlaceholderText('Search');
-    fireEvent.change(input, {target: {value: 'bathroom'}});
-    fireEvent.click(screen.getByLabelText('search'));
-    fireEvent.keyDown(input, {key: 'Escape'});
-    fireEvent.focus(input);
 
-    await screen.findByText('test');
+    input.focus();
+    fireEvent.click(input);
+    userEvent.keyboard('typing');
+    await userEvent.keyboard('{Escape}');
+    expect(input).not.toHaveFocus();
   });
 
   it('does not pan when place has no location', async () => {
@@ -340,9 +341,9 @@ describe('SearchBar', () => {
 
     const input = screen.getByPlaceholderText('Search');
     fireEvent.change(input, {target: {value: 'bathroom'}});
-    fireEvent.click(screen.getByLabelText('search'));
+    fireEvent.click(screen.getByLabelText('Search Button'));
 
-    await fireEvent.click(await screen.findByLabelText('No Location'));
+    await fireEvent.click(await screen.findByLabelText('Suggestion 1'));
 
     expect(panTo).not.toHaveBeenCalled();
   });
@@ -360,7 +361,7 @@ describe('SearchBar', () => {
     render(<SearchBar map={null} />);
 
     const input = screen.getByPlaceholderText('Search');
-    const searchButton = screen.getByLabelText('search');
+    const searchButton = screen.getByLabelText('Search Button');
 
     fireEvent.change(input, {target: {value: 'a'}});
     fireEvent.click(searchButton);
@@ -370,5 +371,57 @@ describe('SearchBar', () => {
     fireEvent.click(searchButton);
 
     expect(fetchAutocompleteSuggestionsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not search again if already searching', async () => {
+    render(<SearchBar map={null} />);
+
+    const input = screen.getByPlaceholderText('Search');
+    const searchButton = screen.getByLabelText('Search Button');
+
+    fireEvent.change(input, {target: {value: 'a'}});
+
+    // keep loading true
+    const pendingPromise: Promise<{ suggestions: MockSuggestion[] }> =
+      new Promise(() => {});
+
+    fetchAutocompleteSuggestionsMock.mockReturnValueOnce(pendingPromise);
+
+    await userEvent.click(searchButton);
+    await userEvent.click(searchButton);
+
+    expect(fetchAutocompleteSuggestionsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('applies suggestion divider to non-first suggestions', async () => {
+    fetchAutocompleteSuggestionsMock.mockResolvedValueOnce({
+      suggestions: [
+        {
+          placePrediction: {
+            placeId: 'id1',
+            text: {toString: () => 'First Suggestion'},
+            structuredFormat: {secondaryText: {toString: () => 'Addr1'}},
+          },
+        },
+        {
+          placePrediction: {
+            placeId: 'id2',
+            text: {toString: () => 'Second Suggestion'},
+            structuredFormat: {secondaryText: {toString: () => 'Addr2'}},
+          },
+        },
+      ],
+    });
+
+    render(<SearchBar map={null} />);
+
+    const input = screen.getByPlaceholderText('Search');
+    const searchButton = screen.getByLabelText('Search Button');
+
+    fireEvent.change(input, {target: {value: 'suggestion'}});
+    await userEvent.click(searchButton);
+
+    const secondSugg = await screen.findByLabelText('Suggestion 2');
+    expect(secondSugg).toHaveStyle('border-top: 1px solid rgba(0,0,0,0.08)');
   });
 });
