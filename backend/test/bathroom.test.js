@@ -116,6 +116,14 @@ describe('GET bathroom with anti-meridian bounds', async () => {
         .query(bounds)
         .expect(200);
   });
+
+  it('number of bathrooms returned', async () => {
+    await request.get('/bathroom')
+        .query(bounds)
+        .then((data) => {
+          expect(data.body.length).toBe(0);
+        });
+  });
 });
 
 describe('GET /bathroom/updates endpoint', async () => {
