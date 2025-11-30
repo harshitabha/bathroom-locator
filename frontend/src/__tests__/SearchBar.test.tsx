@@ -381,6 +381,8 @@ describe('SearchBar', () => {
 
     fireEvent.change(input, {target: {value: 'a'}});
 
+    fetchAutocompleteSuggestionsMock.mockClear();
+
     // keep loading true
     const pendingPromise: Promise<{ suggestions: MockSuggestion[] }> =
       new Promise(() => {});
