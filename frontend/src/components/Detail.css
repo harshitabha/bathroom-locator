@@ -1,0 +1,35 @@
+.flex {
+  display: flex;
+}
+
+.detail-container {
+  padding: 8px 0;
+}
+
+.chip-container {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+p.details-label {
+  font-weight: 500;
+  margin: 3px 8px 0 0;
+}
+
+.detail-container.column > .chip-container {
+  margin-top: 8px;
+}
+
+.chip-container > .detailChip {
+  background-color: white;
+  &:focus {
+    background-color: white;
+  }
+}
+
+.detailChip.selected {
+  background-color: var(--mui-palette-primary-light);
+  &:focus {
+    background-color: var(--mui-palette-primary-light);
+  }
+}

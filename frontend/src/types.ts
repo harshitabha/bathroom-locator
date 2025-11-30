@@ -15,8 +15,6 @@ export interface Gender {
   gender_neutral: boolean
 };
 
-export type GenderOptions = 'female' | 'male' | 'gender_neutral';
-
 export interface Amenities {
   soap: boolean;
   mirror: boolean;
@@ -26,5 +24,8 @@ export interface Amenities {
   menstrual_products: boolean;
 }
 
-export type AmenityOptions = 'soap' | 'mirror' | 'hand_dryer' |
-  'paper_towel' | 'toilet_paper' | 'menstrual_products';
+export type OptionalObj<T> = {
+  [K in keyof T]?: T[K]
+};
+
+export type IndexObject<T> = {[key: string]: T}

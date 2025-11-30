@@ -2,6 +2,10 @@ import MapFilters, {
   type AmenityFilter,
   AMENITIES_FILTER_OPTIONS,
 } from '../components/MapFilters';
+import {
+  filterBathroomsByAmenities,
+} from '../utils/filterBathrooms';
+import type {Bathroom} from '../types';
 import React from 'react';
 import {
   describe,
@@ -25,7 +29,6 @@ const AMENITIES_FILTER_LABEL = 'Amenities filter';
 const FiltersHarness: React.FC = () => {
   const [selectedAmenities, setSelectedAmenities] =
     React.useState<AmenityFilter[]>([]);
-
   return (
     <MapFilters
       selectedAmenities={selectedAmenities}
@@ -81,5 +84,76 @@ describe('MapFilters', () => {
     await waitFor(() => {
       expect(screen.getByText('2 Selected')).toBeInTheDocument();
     });
+  });
+});
+
+describe('filterBathroomsByAmenities helper', () => {
+  const sampleBathrooms: Bathroom[] = [
+    {
+      id: 'soap-mirror',
+      name: 'Soap + Mirror',
+      description: '',
+      position: {lat: 0, lng: 0},
+      likes: 0,
+      amenities: {
+        soap: true,
+        mirror: true,
+        paper_towel: false,
+        hand_dryer: false,
+        toilet_paper: false,
+        menstrual_products: false,
+      },
+    },
+    {
+      id: 'full',
+      name: 'All amenities',
+      description: '',
+      position: {lat: 0, lng: 0},
+      likes: 0,
+      amenities: {
+        soap: true,
+        mirror: true,
+        paper_towel: true,
+        hand_dryer: true,
+        toilet_paper: true,
+        menstrual_products: true,
+      },
+    },
+    {
+      id: 'none',
+      name: 'No amenities',
+      description: '',
+      position: {lat: 0, lng: 0},
+      likes: 0,
+    },
+  ];
+
+  it('returns all bathrooms when no amenities are selected', () => {
+    const result = filterBathroomsByAmenities(sampleBathrooms, []);
+    expect(result).toEqual(sampleBathrooms);
+  });
+
+  it('keeps bathrooms that include every selected amenity', () => {
+    const result = filterBathroomsByAmenities(sampleBathrooms, [
+      'Soap',
+      'Mirror',
+    ]);
+    expect(result.map((b) => b.id)).toEqual(['soap-mirror', 'full']);
+  });
+
+  it('excludes bathrooms without the requested amenities', () => {
+    const result = filterBathroomsByAmenities(sampleBathrooms, [
+      'Soap',
+      'Hand Dryer',
+    ]);
+    expect(result.map((b) => b.id)).toEqual(['full']);
+  });
+
+  it('filters out bathrooms with missing amenity info', () => {
+    const result = filterBathroomsByAmenities(sampleBathrooms, [
+      'Menstrual Products',
+    ]);
+    expect(result.some((b) => b.id === 'none')).toBe(false);
+    expect(result.some((b) => b.id === 'none')).toBe(false);
   });
 });

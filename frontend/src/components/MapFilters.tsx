@@ -207,9 +207,7 @@ const MapFilters: React.FC<MapFiltersProps> = ({
   selectedAmenities,
   onAmenitiesChange,
 }: MapFiltersProps) => {
-  const [activeFilter, setActiveFilter] = useState<
-    'amenities' | null
-  >(null);
+  const [activeFilter, setActiveFilter] = useState<'amenities' | null>(null);
   return (
     <Box
       sx={{
