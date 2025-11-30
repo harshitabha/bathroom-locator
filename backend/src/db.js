@@ -161,9 +161,17 @@ export async function likeBathroom(userId, bathroomId) {
 export async function getBathroom(bathroomId) {
   const {rows} = await pool.query({
     text: `
-      SELECT *
-      FROM bathrooms
-      WHERE id = $1
+      SELECT
+        b.id,
+        b.data->>'name' AS name,
+        b.data->>'description' AS description,
+        (data->'position') AS position,
+        (b.data->>'num_stalls')::int AS num_stalls,
+        (b.data->'amenities') AS amenities,
+        (b.data->'gender') AS gender,
+        COALESCE((b.data->>'likes')::int, 0) AS likes
+      FROM bathrooms b
+      WHERE b.id = $1;
     `,
     values: [bathroomId],
   });
