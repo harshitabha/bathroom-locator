@@ -262,26 +262,19 @@ function MapInner({apiKey}: { apiKey: string }) {
 
         const newBathrooms: Bathroom[] = await res.json();
 
-        if (newBathrooms.length > 0 && mapRef.current) {
-          const bounds = mapRef.current.getBounds();
-          if (bounds) {
-            // filter new bathrooms to only those within current map bounds
-            const visibleNewBathrooms = newBathrooms.filter((bathroom) => {
-              const pos = new google.maps.LatLng(
-                  bathroom.position.lat,
-                  bathroom.position.lng,
-              );
-              return bounds.contains(pos);
+        if (newBathrooms.length > 0) {
+          setBathrooms((prev) => {
+            const updated = prev.map((b) => {
+              const incoming = newBathrooms.find((nb) => nb.id === b.id);
+              return incoming ? incoming : b;
             });
-            if (visibleNewBathrooms.length > 0) {
-              setBathrooms((prevBathrooms) => [
-                ...prevBathrooms,
-                ...visibleNewBathrooms.filter((nb) =>
-                  !prevBathrooms.some((p) => p.id === nb.id),
-                ),
-              ]);
-            }
-          }
+
+            const newOnes = newBathrooms.filter(
+                (nb) => !prev.some((b) => b.id === nb.id),
+            );
+
+            return [...updated, ...newOnes];
+          });
         }
       } catch (err) {
         console.error('Polling error:', err);
