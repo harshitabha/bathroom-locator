@@ -32,18 +32,11 @@ async function getLikedBathrooms(userId: string | null) {
  * removes the user's like from the bathroom
  * @param {string} userId user id
  * @param {Bathroom | null} bathroom selected bathroom
- * @param {React.Dispatch<React.SetStateAction<Bathroom
- * | null>>} setBathroom selected bathroom setter
- * @param {React.Dispatch<
- * React.SetStateAction<Bathroom []>>} setBathrooms bathroom setter
  * @param {React.Dispatch<React.SetStateAction<boolean>>} setLiked liked setter
  */
 async function unlikeBathroom(
     userId: string | null,
     bathroom: Bathroom | null,
-    setBathroom:
-      React.Dispatch<React.SetStateAction<Bathroom | null>>,
-    setBathrooms: React.Dispatch<React.SetStateAction<Bathroom []>>,
     setLiked: React.Dispatch<React.SetStateAction<boolean>>,
 ) {
   const bathroomId = bathroom!.id;
@@ -58,15 +51,6 @@ async function unlikeBathroom(
 
   if (res.ok) {
     setLiked(false);
-    setBathroom({...bathroom!, likes: bathroom!.likes - 1});
-    setBathrooms((bathrooms) =>
-      (bathrooms.map(
-          (b) => (
-            b.id === bathroomId ?
-              {...b, likes: b.likes - 1} :
-              b
-          ),
-      )));
   } else {
     console.error('Error deleting like: ', res.statusText);
   }
@@ -78,18 +62,11 @@ async function unlikeBathroom(
  * adds like to the bathroom
  * @param {string} userId user id
  * @param {Bathroom | null} bathroom selected bathroom
- * @param {React.Dispatch<React.SetStateAction<Bathroom
- * | null>>} setBathroom selected bathroom setter
- * @param {React.Dispatch<
- * React.SetStateAction<Bathroom []>>} setBathrooms bathroom setter
  * @param {React.Dispatch<React.SetStateAction<boolean>>} setLiked liked setter
  */
 async function likeBathroom(
     userId: string | null,
     bathroom: Bathroom | null,
-    setBathroom:
-      React.Dispatch<React.SetStateAction<Bathroom | null>>,
-    setBathrooms: React.Dispatch<React.SetStateAction<Bathroom []>>,
     setLiked: React.Dispatch<React.SetStateAction<boolean>>,
 ) {
   const bathroomId = bathroom?.id;
@@ -104,15 +81,6 @@ async function likeBathroom(
 
   if (res.ok) {
     setLiked(true);
-    setBathroom({...bathroom!, likes: bathroom!.likes + 1});
-    setBathrooms((bathrooms) =>
-      (bathrooms.map(
-          (b) => (
-            b.id === bathroomId ?
-              {...b, likes: b.likes + 1} :
-              b
-          ),
-      )));
   } else {
     console.error('Error adding like: ', res.statusText);
   }
@@ -124,8 +92,6 @@ const Like = ({userId}: LikeProps) => {
   const [liked, setLiked] = useState(false);
   const bathroomContext = useContext(BathroomContext);
   const bathroom = bathroomContext.selected;
-  const setBathroom = bathroomContext.setSelected;
-  const setBathrooms = bathroomContext.setBathrooms;
   useEffect(() => {
     /**
      * checks if user has liked the current bathroom
@@ -146,16 +112,12 @@ const Like = ({userId}: LikeProps) => {
       await unlikeBathroom(
           userId,
           bathroom,
-          setBathroom,
-          setBathrooms,
           setLiked,
       );
     } else {
       await likeBathroom(
           userId,
           bathroom,
-          setBathroom,
-          setBathrooms,
           setLiked,
       );
     }
