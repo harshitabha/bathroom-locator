@@ -40,7 +40,6 @@ export async function getUpdates(req, res) {
  * @param {object} newBathroom - The new bathroom that was added.
  */
 export async function notifyNewBathroom(newBathroom) {
-  console.log('new bathroom: ', newBathroom);
   clients.forEach((client) => {
     if (!client.sent) {
       client.sent = true;
