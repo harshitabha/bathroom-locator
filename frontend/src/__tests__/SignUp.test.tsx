@@ -555,7 +555,7 @@ describe('Email is of the wrong format', async () => {
     email = 'badEmailFormat';
     password = 'password123';
     const confirmPassword = 'password123';
-    error = 'Invalid email format';
+    error = 'Unable to validate email address: invalid format';
     mockSignUp = mockUserSignUp(email, password, confirmPassword, error);
   });
 
@@ -571,10 +571,11 @@ describe('Email is of the wrong format', async () => {
   });
 
   it('shows an error', async () => {
+    const expectedError = 'Invalid email format';
     await waitFor(() => {
       // check for error message to appear
       const errorMessage = screen.queryByRole('alert');
-      expect(errorMessage?.textContent).toBe(error);
+      expect(errorMessage?.textContent).toBe(expectedError);
     });
   });
 
