@@ -265,4 +265,110 @@ describe('SearchBar', () => {
       expect(screen.queryByText('Bathroom One')).toBeNull();
     });
   });
+
+  it('closes suggestions when pressing Escape', async () => {
+    fetchAutocompleteSuggestionsMock.mockResolvedValueOnce({
+      suggestions: [{
+        placePrediction: {
+          placeId: 'esc',
+          text: {toString: () => 'test'},
+        },
+      }],
+    });
+
+    render(<SearchBar map={null} />);
+
+    const input = screen.getByPlaceholderText('Search');
+    fireEvent.change(input, {target: {value: 'bathroom'}});
+    fireEvent.click(screen.getByLabelText('search'));
+    fireEvent.keyDown(input, {key: 'Escape'});
+
+    await waitFor(() => {
+      expect(screen.queryByText('test')).toBeNull();
+    });
+  });
+
+  it('reopens same suggestion list after closing', async () => {
+    fetchAutocompleteSuggestionsMock.mockResolvedValueOnce({
+      suggestions: [{
+        placePrediction: {
+          placeId: 'esc',
+          text: {toString: () => 'test'},
+        },
+      }],
+    });
+
+    render(<SearchBar map={null} />);
+
+    const input = screen.getByPlaceholderText('Search');
+    fireEvent.change(input, {target: {value: 'bathroom'}});
+    fireEvent.click(screen.getByLabelText('search'));
+    fireEvent.keyDown(input, {key: 'Escape'});
+    fireEvent.focus(input);
+
+    await screen.findByText('test');
+  });
+
+  it('does not pan when place has no location', async () => {
+    const place = {
+      fetchFields: vi.fn().mockResolvedValue(undefined),
+      location: undefined,
+    };
+
+    fetchAutocompleteSuggestionsMock.mockResolvedValueOnce({
+      suggestions: [{
+        placePrediction: {
+          placeId: 'nl',
+          text: {toString: () => 'No Location'},
+          structuredFormat: {secondaryText: {toString: () => ''}},
+          toPlace: () => place,
+        },
+      }],
+    });
+
+    const panTo = vi.fn();
+
+    const map = {
+      panTo,
+      setZoom: () => {},
+      getBounds: () => ({
+        toJSON: () => ({}),
+      }),
+    } as unknown as google.maps.Map;
+
+    render(<SearchBar map={map} />);
+
+    const input = screen.getByPlaceholderText('Search');
+    fireEvent.change(input, {target: {value: 'bathroom'}});
+    fireEvent.click(screen.getByLabelText('search'));
+
+    await fireEvent.click(await screen.findByLabelText('No Location'));
+
+    expect(panTo).not.toHaveBeenCalled();
+  });
+
+  it('Only calls api once after searching twice with same input', async () => {
+    fetchAutocompleteSuggestionsMock.mockResolvedValueOnce({
+      suggestions: [{
+        placePrediction: {
+          placeId: 'x',
+          text: {toString: () => 'Test'},
+        },
+      }],
+    });
+
+    render(<SearchBar map={null} />);
+
+    const input = screen.getByPlaceholderText('Search');
+    const searchButton = screen.getByLabelText('search');
+
+    fireEvent.change(input, {target: {value: 'a'}});
+    fireEvent.click(searchButton);
+
+    await screen.findByText('Test');
+
+    fireEvent.click(searchButton);
+
+    expect(fetchAutocompleteSuggestionsMock).toHaveBeenCalledTimes(1);
+  });
 });

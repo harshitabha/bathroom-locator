@@ -202,6 +202,7 @@ const SearchBar = ({map}: Props) => {
                 return (
                   <ListItemButton
                     key={pred.placeId}
+                    aria-label={primary}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => void handlePick(s)}
                     sx={{
