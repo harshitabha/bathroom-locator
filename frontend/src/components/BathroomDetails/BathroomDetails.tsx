@@ -6,39 +6,28 @@ import {
   useTheme,
 } from '@mui/material';
 import NearMeIcon from '@mui/icons-material/NearMe';
-import {useState, useContext, type Dispatch, type SetStateAction} from 'react';
+import {useContext} from 'react';
 
 import './BathroomDetails.css';
 import {openWalkingDirections} from '../../utils/navigation';
 import AppContext from '../../context/AppContext';
 import Like from './Like';
-import type {AmenityOptions, GenderOptions, Bathroom} from '../../types';
-import Detail from './Detail';
+import type {Gender, Amenities, OptionalObj} from '../../types';
+import Detail from '../Detail';
+import BathroomContext from '../../context/BathroomContext';
 
-interface bathroomDetailsProps {
-  bathroom: Bathroom,
-  setBathroom: Dispatch<SetStateAction<Bathroom | null>>;
-};
 
-const BathroomDetails = (props: bathroomDetailsProps) => {
-  const {
-    bathroom,
-    setBathroom,
-  } = props;
-  const gender = bathroom.gender ? Object.keys(bathroom.gender)
-      .filter((val) => bathroom.gender![val as GenderOptions] == true)
-      .map((key) => {
-        return {name: key, selected: true};
-      }) : [];
-  const amenities = bathroom.amenities ? Object.keys(bathroom.amenities)
-      .filter((val) => bathroom.amenities![val as AmenityOptions] == true)
-      .map((key) => {
-        return {name: key, selected: true};
-      }) : [];
+const BathroomDetails = () => {
+  const bathroomContext = useContext(BathroomContext);
+  const bathroom = bathroomContext.selected;
+  const setBathroom = bathroomContext.setSelected;
+
+  const gender = getTrueKeys(bathroom?.gender);
+  const amenities = getTrueKeys(bathroom?.amenities);
+  const additionalDetailsExist = getNumKeysInObj(bathroom?.gender) > 0 ||
+    getNumKeysInObj(bathroom?.amenities) > 0;
 
   const theme = useTheme();
-
-  const [likes, setLikes] = useState(bathroom.likes);
   const appContext = useContext(AppContext);
 
   return (
@@ -80,12 +69,9 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             justifyContent: 'space-between',
           }}
         >
-          {bathroom.name}
+          {bathroom!.name}
           <Like
-            bathroom={bathroom}
             userId={appContext?.userId ?? null}
-            likes={likes}
-            setLikes={setLikes}
           />
         </Typography>
         <Box
@@ -95,7 +81,7 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             gap: '8px',
           }}
         >
-          {likes >= 5 ?
+          {bathroom!.likes >= 5 ?
             <Chip label="Verified Bathroom" variant="outlined"
               color="primary"/> :
             null}
@@ -109,8 +95,8 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             variant="outlined"
             color="secondary"
             onClick={() => openWalkingDirections(
-                bathroom.position.lat,
-                bathroom.position.lng,
+                bathroom!.position.lat,
+                bathroom!.position.lng,
             )}
           />
         </Box>
@@ -118,22 +104,28 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
             Description
         </Typography>
         <Typography variant="body1">
-          {bathroom.description}
+          {bathroom!.description}
         </Typography>
 
         {
-          gender.length > 0 || amenities.length > 0 ?
+          additionalDetailsExist ?
           <Box>
             <Typography variant="h6" className="details-subheader">
               Additional Details
             </Typography>
             {
-              gender.length > 0 ?
-              <Detail name='Gender' values={gender}/> : null
+              getNumKeysInObj(gender) > 0 ?
+              <Detail
+                name='Gender'
+                values={gender}
+                handleClick={() => {}}/> : null
             }
             {
-              amenities.length > 0 ?
-              <Detail name='Amenities' values={amenities}/> : null
+              getNumKeysInObj(amenities) > 0 ?
+              <Detail
+                name='Amenities'
+                values={amenities}
+                handleClick={() => {}}/> : null
             }
           </Box> : null
         }
@@ -143,5 +135,38 @@ const BathroomDetails = (props: bathroomDetailsProps) => {
     </SwipeableDrawer>
   );
 };
+
+/**
+ * Get the object with only it's true keys
+ * @param {object | undefined} obj object to process
+ * @returns {object} object with only true keys
+ */
+function getTrueKeys(obj: Gender | Amenities | undefined) {
+  if (!obj) {
+    return {};
+  }
+
+  const filtered: {[key: string]: boolean} = Object.keys(obj)
+      .reduce((newObj, key) => {
+        const typedKey = key as keyof (Gender | Amenities);
+        if (obj[typedKey]) {
+          newObj[typedKey] = obj[typedKey];
+        }
+        return newObj;
+      }, {} as OptionalObj<Gender | Amenities>);
+  return filtered;
+}
+
+/**
+ * Gets the number of keys in an object
+ * @param {object | undefined} obj the object to check the number of keys of
+ * @returns {number} the number of keys in the object
+ */
+function getNumKeysInObj(obj: object | undefined) {
+  if (!obj) {
+    return 0;
+  }
+  return Object.keys(obj).length;
+}
 
 export default BathroomDetails;

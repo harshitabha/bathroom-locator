@@ -2,6 +2,8 @@ import MapFilters, {
   type GenderFilter,
   GENDER_FILTER_OPTIONS,
 } from '../components/MapFilters';
+import {filterBathroomsByGender} from '../utils/filterBathrooms';
+import type {Bathroom} from '../types';
 import React from 'react';
 import {
   describe,
@@ -86,5 +88,62 @@ describe('MapFilters', () => {
     await waitFor(() => {
       expect(screen.getByText('2 Selected')).toBeInTheDocument();
     });
+  });
+});
+
+describe('filterBathroomsByGender helper', () => {
+  const makeBathroom = (
+      id: string,
+      gender?: Bathroom['gender'],
+  ): Bathroom => ({
+    id,
+    name: `Bathroom ${id}`,
+    description: 'Test bathroom',
+    position: {lat: 0, lng: 0},
+    likes: 0,
+    gender,
+  });
+
+  const sampleBathrooms: Bathroom[] = [
+    makeBathroom('male-only', {
+      male: true,
+      female: false,
+      gender_neutral: false,
+    }),
+    makeBathroom('female-only', {
+      male: false,
+      female: true,
+      gender_neutral: false,
+    }),
+    makeBathroom('gender-neutral', {
+      male: false,
+      female: false,
+      gender_neutral: true,
+    }),
+    makeBathroom('no-gender'),
+  ];
+
+  it('returns all bathrooms when no gender filters are selected', () => {
+    const result = filterBathroomsByGender(sampleBathrooms, []);
+    expect(result).toEqual(sampleBathrooms);
+  });
+
+  it('filters bathrooms so at least one selected gender matches', () => {
+    const selected: GenderFilter[] = ['Male', 'Female'];
+    const result = filterBathroomsByGender(sampleBathrooms, selected);
+    expect(result.map((b) => b.id)).toEqual(['male-only', 'female-only']);
+  });
+
+  it('returns only gender neutral bathrooms when filter is selected', () => {
+    const selected: GenderFilter[] = ['Gender Neutral'];
+    const result = filterBathroomsByGender(sampleBathrooms, selected);
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe('gender-neutral');
+  });
+
+  it('excludes bathrooms with no gender info when filters are active', () => {
+    const selected: GenderFilter[] = ['Female'];
+    const result = filterBathroomsByGender(sampleBathrooms, selected);
+    expect(result.some((b) => b.id === 'no-gender')).toBe(false);
   });
 });

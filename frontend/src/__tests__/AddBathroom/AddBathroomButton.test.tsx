@@ -2,9 +2,9 @@ import {useState} from 'react';
 import {describe, it, afterEach, expect} from 'vitest';
 import {render, screen, cleanup, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
-import AddBathroomButton from '../components/AddBathroomButton';
-import AddBathroomBanner from '../components/AddBathroomBanner';
-import AppContext from '../context/AppContext';
+import AddBathroomButton from '../../components/AddBathroom/AddBathroomButton';
+import AddBathroomBanner from '../../components/AddBathroom/AddBathroomBanner';
+import AppContext from '../../context/AppContext';
 
 /**
  * @param {object} root0 props
