@@ -114,7 +114,6 @@ export default function AddBathroomForm(props: Props) {
       await res.json();
       await onCreated();
     } catch (err) {
-      console.log('cathing');
       console.error('Error creating bathroom:', err);
     }
   };
