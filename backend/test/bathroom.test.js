@@ -316,11 +316,15 @@ describe('PUT Bathroom Endpoint', () => {
 });
 
 describe('getUpdates close event', () => {
-  it('triggers the close handler logic', async () => {
-    const req = {setTimeout() {}, on() {}};
+  let req;
+  let res;
+  let closeHandler;
+  let client;
 
-    let closeHandler;
-    const res = {
+  beforeEach(async () => {
+    req = {setTimeout() {}, on() {}};
+
+    res = {
       json() {},
       on(event, handler) {
         if (event === 'close') closeHandler = handler;
@@ -329,13 +333,23 @@ describe('getUpdates close event', () => {
 
     await getUpdates(req, res);
 
-    const client = clients[0];
-    expect(client.sent).toBe(false);
-
-    // simulate client disconnect
+    client = clients[0];
     closeHandler();
+  });
 
+  afterEach(() => {
+    clients.length = 0;
+  });
+
+  it('client.sent is initially false before close', () => {
     expect(client.sent).toBe(true);
+  });
+
+  it('marks client.sent as true on close', () => {
+    expect(client.sent).toBe(true);
+  });
+
+  it('removes client from clients array on close', () => {
     expect(clients.includes(client)).toBe(false);
   });
 });
