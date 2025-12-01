@@ -1,11 +1,12 @@
-import {describe, it, beforeAll, afterAll, expect, beforeEach} from 'vitest';
+import {describe, it, beforeAll, afterAll, expect, beforeEach, afterEach, vi}
+  from 'vitest';
 import supertest from 'supertest';
 import http from 'http';
 
 import * as db from './db.js';
 import app from '../src/app.js';
 
-import {notifyNewBathroom} from '../src/bathroom.js';
+import {notifyNewBathroom, getUpdates, clients} from '../src/bathroom.js';
 import {validBounds} from './consts.js';
 
 let server;
@@ -152,6 +153,15 @@ describe('GET /bathroom/updates endpoint', async () => {
     'likes': 0,
   };
   let res;
+
+  beforeEach(() => {
+    global.clientRegistered = vi.fn();
+  });
+
+  afterEach(() => {
+    delete global.clientRegistered;
+  });
+
   describe('Request doesn\'t timeout', async () => {
     beforeEach(async () => {
       const getUpdates = request.get('/bathroom/updates');
@@ -174,6 +184,10 @@ describe('GET /bathroom/updates endpoint', async () => {
     it('response should contain the new bathroom added', async () => {
       // Assertions
       expect(res.body[0]).toEqual(newBathroom);
+    });
+
+    it('clientRegistered was called', () => {
+      expect(global.clientRegistered).toHaveBeenCalled();
     });
   });
 
@@ -320,5 +334,45 @@ describe('PUT Bathroom Endpoint', () => {
     await request.put(`/bathroom`)
         .send(bathroom)
         .expect(404);
+  });
+});
+
+describe('getUpdates close event', () => {
+  let req;
+  let res;
+  let closeHandler;
+  let client;
+
+  beforeEach(async () => {
+    req = {setTimeout() {}, on() {}};
+
+    res = {
+      json() {},
+      on(event, handler) {
+        if (event === 'close') closeHandler = handler;
+      },
+    };
+
+    await getUpdates(req, res);
+
+    client = clients[0];
+  });
+
+  afterEach(() => {
+    clients.length = 0;
+  });
+
+  it('client.sent is initially false before close', () => {
+    expect(client.sent).toBe(false);
+  });
+
+  it('marks client.sent as true on close', () => {
+    closeHandler();
+    expect(client.sent).toBe(true);
+  });
+
+  it('removes client from clients array on close', () => {
+    closeHandler();
+    expect(clients.includes(client)).toBe(false);
   });
 });
