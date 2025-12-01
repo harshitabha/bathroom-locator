@@ -1,11 +1,12 @@
-import {describe, it, beforeAll, afterAll, expect, beforeEach} from 'vitest';
+import {describe, it, beforeAll, afterAll, expect, beforeEach, afterEach, vi}
+  from 'vitest';
 import supertest from 'supertest';
 import http from 'http';
 
 import * as db from './db.js';
 import app from '../src/app.js';
 
-import {notifyNewBathroom} from '../src/bathroom.js';
+import {notifyNewBathroom, getUpdates, clients} from '../src/bathroom.js';
 import {validBounds} from './consts.js';
 
 let server;
@@ -130,6 +131,15 @@ describe('GET /bathroom/updates endpoint', async () => {
     'likes': 0,
   };
   let res;
+
+  beforeEach(() => {
+    global.clientRegistered = vi.fn();
+  });
+
+  afterEach(() => {
+    delete global.clientRegistered;
+  });
+
   describe('Request doesn\'t timeout', async () => {
     beforeEach(async () => {
       const getUpdates = request.get('/bathroom/updates');
@@ -152,6 +162,10 @@ describe('GET /bathroom/updates endpoint', async () => {
     it('response should contain the new bathroom added', async () => {
       // Assertions
       expect(res.body[0]).toEqual(newBathroom);
+    });
+
+    it('clientRegistered was called', () => {
+      expect(global.clientRegistered).toHaveBeenCalled();
     });
   });
 
@@ -298,5 +312,30 @@ describe('PUT Bathroom Endpoint', () => {
     await request.put(`/bathroom`)
         .send(bathroom)
         .expect(404);
+  });
+});
+
+describe('getUpdates close event', () => {
+  it('triggers the close handler logic', async () => {
+    const req = {setTimeout() {}, on() {}};
+
+    let closeHandler;
+    const res = {
+      json() {},
+      on(event, handler) {
+        if (event === 'close') closeHandler = handler;
+      },
+    };
+
+    await getUpdates(req, res);
+
+    const client = clients[0];
+    expect(client.sent).toBe(false);
+
+    // simulate client disconnect
+    closeHandler();
+
+    expect(client.sent).toBe(true);
+    expect(clients.includes(client)).toBe(false);
   });
 });
