@@ -7,6 +7,8 @@ info:
 servers:
   - url: http://localhost:3000
     description: Local development server
+  - url: https://bathroom-locator-backend-production.up.railway.app
+    description: Production server
 
 paths:
   /bathroom:

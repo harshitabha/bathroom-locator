@@ -18,10 +18,11 @@ import {
 import '@testing-library/jest-dom/vitest';
 import {http, HttpResponse} from 'msw';
 import {setupServer} from 'msw/node';
+import { API_BASE_URL } from '../../utils/api';
 
 import AddBathroomPage from '../../components/AddBathroom/AddBathroomForm';
 
-const URL = 'http://localhost:3000/bathroom';
+const URL = API_BASE_URL + '/bathroom';
 
 const server = setupServer();
 
