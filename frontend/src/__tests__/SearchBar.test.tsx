@@ -83,8 +83,8 @@ describe('SearchBar', () => {
   it('renders the search input and button', () => {
     render(<SearchBar map={null} />);
 
-    expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
-    expect(screen.getByLabelText('Search Button')).toBeInTheDocument();
+    screen.getByPlaceholderText('Search');
+    screen.getByLabelText('Search Button');
   });
 
   it('loads the Places library', async () => {
@@ -127,7 +127,7 @@ describe('SearchBar', () => {
     expect(req).toMatchObject({input: 'bathroom'});
     expect(req.sessionToken).toBeDefined();
     expect(await screen.findByText('Bathroom One')).toBeInTheDocument();
-    expect(screen.getByText('123 Campus Rd')).toBeInTheDocument();
+    screen.getByText('123 Campus Rd');
   });
 
   it('debounces calls to getPredictions when typing', async () => {
