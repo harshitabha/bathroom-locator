@@ -52,7 +52,6 @@ const SearchBar = ({map}: Props) => {
     };
   }, []);
 
-  // i hate places api
   const getPredictions = useCallback( async (text: string) => {
     setLoading(true);
     try {
@@ -151,12 +150,11 @@ const SearchBar = ({map}: Props) => {
           onFocus={() => setOpenList(suggestions.length > 0)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
-              e.preventDefault();
               handleSearch();
               setOpenList(false);
             } else if (e.key === 'Escape') {
               setOpenList(false);
-              (e.currentTarget as HTMLInputElement).blur();
+              (e.target as HTMLInputElement).blur();
             }
           }}
           fullWidth
@@ -169,7 +167,7 @@ const SearchBar = ({map}: Props) => {
               disableUnderline: true,
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton aria-label="search" onClick={handleSearch}>
+                  <IconButton aria-label="Search Button" onClick={handleSearch}>
                     <SearchIcon />
                   </IconButton>
                 </InputAdornment>
@@ -202,7 +200,7 @@ const SearchBar = ({map}: Props) => {
                 return (
                   <ListItemButton
                     key={pred.placeId}
-                    onMouseDown={(e) => e.preventDefault()}
+                    aria-label={`Suggestion ${index + 1}`}
                     onClick={() => void handlePick(s)}
                     sx={{
                       px: 1.25,
