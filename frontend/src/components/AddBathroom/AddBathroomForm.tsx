@@ -9,7 +9,7 @@ import {
 import './AddBathroomForm.css';
 import Detail from '../Detail';
 import type {IndexObject} from '../../types';
-import { API_BASE_URL } from '../../utils/api';
+import {API_BASE_URL} from '../../utils/api';
 
 /**
  * Used to hide the add bathroom form by dragging down on desktop

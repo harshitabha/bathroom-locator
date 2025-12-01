@@ -23,7 +23,7 @@ import RecenterButton from './RecenterButton';
 import AppContext from '../context/AppContext';
 import BathroomDetails from './BathroomDetails/BathroomDetails';
 import BathroomContext from '../context/BathroomContext';
-import { API_BASE_URL } from '../utils/api';
+import {API_BASE_URL} from '../utils/api';
 
 const Map = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;

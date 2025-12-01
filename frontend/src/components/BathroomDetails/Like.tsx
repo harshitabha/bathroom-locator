@@ -6,7 +6,7 @@ import {Typography} from '@mui/material';
 import type {Bathroom} from '../../types';
 import React from 'react';
 import BathroomContext from '../../context/BathroomContext';
-import { API_BASE_URL } from '../../utils/api';
+import {API_BASE_URL} from '../../utils/api';
 
 interface LikeProps {
   userId: string | null;
