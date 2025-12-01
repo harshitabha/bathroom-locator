@@ -104,6 +104,28 @@ describe('GET bathroom with bounds', async () => {
   });
 });
 
+describe('GET bathroom with anti-meridian bounds', async () => {
+  const bounds = {
+    minLng: 1,
+    minLat: 0,
+    maxLng: 0.001,
+    maxLat: 0.001,
+  };
+  it('status code', async () => {
+    await request.get('/bathroom')
+        .query(bounds)
+        .expect(200);
+  });
+
+  it('number of bathrooms returned', async () => {
+    await request.get('/bathroom')
+        .query(bounds)
+        .then((data) => {
+          expect(data.body.length).toBe(0);
+        });
+  });
+});
+
 describe('GET /bathroom/updates endpoint', async () => {
   const newBathroom = {
     'id': 'cf0c26a5-fa2e-4685-8120-feafc76eb009',
