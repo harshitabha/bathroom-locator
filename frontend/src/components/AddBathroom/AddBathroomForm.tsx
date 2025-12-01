@@ -65,8 +65,8 @@ type Props = {
   onClose: () => void;
   onOpen?: () => void;
   position: { lat: number; lng: number } | null;
-  name?: string;
-  description?: string;
+  name: string;
+  description: string;
   onNameChange: (newName: string) => void;
   onDescriptionChange: (newDescription: string) => void;
   onCreated: () => Promise<void> | void;
@@ -94,8 +94,8 @@ export default function AddBathroomForm(props: Props) {
     if (!position || !name?.trim() || !description?.trim()) return;
 
     const newBathroom = {
-      name: name?.trim() || '',
-      description: description?.trim() || '',
+      name: name.trim(),
+      description: description.trim(),
       position,
       gender: additionalDetails.gender,
       amenities: additionalDetails.amenities,
@@ -107,17 +107,14 @@ export default function AddBathroomForm(props: Props) {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(newBathroom),
       });
-
       if (!res.ok) {
-        const errorBody = await res.text();
-        console.error('Failed to create bathroom:', res.status, errorBody);
-        return;
+        throw res;
       }
 
       await res.json();
-
       await onCreated();
     } catch (err) {
+      console.log('cathing');
       console.error('Error creating bathroom:', err);
     }
   };

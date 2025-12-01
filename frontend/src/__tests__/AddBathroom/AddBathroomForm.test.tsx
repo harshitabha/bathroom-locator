@@ -38,21 +38,21 @@ type PageWrapperProps = {
 function AddBathroomWrapper(props: PageWrapperProps) {
   const {
     open: initialOpen = true,
-    name = 'Valid Name',
-    description = 'Valid Description',
   } = props;
   const [open, setOpen] = useState(initialOpen);
+  const [bathroomName, setBathroomName] = useState('');
+  const [bathroomDesc, setBathroomDesc] = useState('');
   return (
     <AddBathroomPage
       open={open}
       onClose={() => setOpen(false)}
       onOpen={() => {}}
       onCreated={() => setOpen(false)}
-      name={name}
-      description={description}
+      name={bathroomName}
+      description={bathroomDesc}
       position={{lat: 36.123456, lng: -122.654321}}
-      onNameChange={() => {}}
-      onDescriptionChange={() => {}}
+      onNameChange={setBathroomName}
+      onDescriptionChange={setBathroomDesc}
     />
   );
 }
@@ -144,23 +144,42 @@ function mockServer(status: number) {
   );
 }
 
+/**
+ * Fill in the bathroom name and description with with given info
+ * @param {string} bathroomName name of new bathroom
+ * @param {string} bathroomDesc bathroom description
+ */
+function inputRequiredDetails(
+    bathroomName: string,
+    bathroomDesc: string,
+) {
+  // need to use get by label for MUI to get the right elem
+  // also doing a partial match here due to * messing up the exact match
+  const name = screen.getByLabelText(/Bathroom Name/);
+  fireEvent.change(name, {target: {value: bathroomName}});
+  const desc = screen.getByLabelText(/Bathroom Description/);
+  fireEvent.change(desc, {target: {value: bathroomDesc}});
+}
+
+it('does not create bathroom if there\'s and err with POST', async () => {
+  mockServer(404);
+  render(<AddBathroomWrapper />);
+
+  inputRequiredDetails('Test bathroom', 'Test description');
+  fireEvent.click(screen.getByText('Save'));
+  // form should still be open
+  screen.getByText('New Bathroom');
+});
+
 it('Basic Bathroom created successfully', async () => {
   mockServer(204);
   render(<AddBathroomWrapper />);
+  inputRequiredDetails('Test bathroom', 'Test description');
 
   fireEvent.click(screen.getByText('Save'));
   await waitFor(() =>
     expect(screen.queryByText('New Bathroom')).toBeNull(),
   );
-});
-
-it('does not call onCreated when error', async () => {
-  mockServer(404);
-  render(<AddBathroomWrapper />);
-
-  fireEvent.click(screen.getByText('Save'));
-  // form should still be open
-  screen.queryByText('New Bathroom');
 });
 
 /**
@@ -172,8 +191,12 @@ async function clickOn(label: string) {
   fireEvent.click(elem);
 }
 describe('Selecting additional details', async () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     render(<AddBathroomWrapper />);
+    inputRequiredDetails(
+        'Test bathroom',
+        'Test bathroom with additional details',
+    );
   });
 
   it('Changes label to unselect when chip is selected', async () => {
