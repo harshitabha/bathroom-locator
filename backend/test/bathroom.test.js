@@ -334,7 +334,6 @@ describe('getUpdates close event', () => {
     await getUpdates(req, res);
 
     client = clients[0];
-    closeHandler();
   });
 
   afterEach(() => {
@@ -342,14 +341,16 @@ describe('getUpdates close event', () => {
   });
 
   it('client.sent is initially false before close', () => {
-    expect(client.sent).toBe(true);
+    expect(client.sent).toBe(false);
   });
 
   it('marks client.sent as true on close', () => {
+    closeHandler();
     expect(client.sent).toBe(true);
   });
 
   it('removes client from clients array on close', () => {
+    closeHandler();
     expect(clients.includes(client)).toBe(false);
   });
 });
