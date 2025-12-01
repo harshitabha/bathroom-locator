@@ -370,30 +370,35 @@ function MapInner({apiKey}: { apiKey: string }) {
         <AddBathroomButton onClick={handleAddButtonClick} />
       )}
 
-      <AddBathroomPeekCard
-        showPeekCard={addMode && !addOpen && draftPosition !== null}
-        onExpand={() => {
-          setAddOpen(true);
-          setBannerOpen(false);
-        }}
-      />
+      {addMode ?
+        <>
+          <AddBathroomPeekCard
+            showPeekCard={!addOpen && draftPosition !== null}
+            onExpand={() => {
+              setAddOpen(true);
+              setBannerOpen(false);
+            }}
+          />
 
-      <AddBathroomForm
-        open={addOpen}
-        position={draftPosition}
-        name={formName}
-        description={formDescription}
-        onNameChange={setFormName}
-        onDescriptionChange={setFormDescription}
-        onOpen={() => {
-          setBannerOpen(false);
-        }}
-        onClose={handleFormCloseToPrompt}
-        onCreated={async () => {
-          await fetchVisiblePins();
-          cancelAddFlow();
-        }}
-      />
+          <AddBathroomForm
+            open={addOpen}
+            position={draftPosition}
+            name={formName}
+            description={formDescription}
+            onNameChange={setFormName}
+            onDescriptionChange={setFormDescription}
+            onOpen={() => {
+              setBannerOpen(false);
+            }}
+            onClose={handleFormCloseToPrompt}
+            onCreated={async () => {
+              await fetchVisiblePins();
+              cancelAddFlow();
+            }}
+          />
+        </> : null
+      }
+
     </div>
   );
 }

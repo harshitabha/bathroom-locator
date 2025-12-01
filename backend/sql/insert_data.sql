@@ -7,6 +7,7 @@ INSERT INTO bathrooms (id, data) VALUES (
     "position": {"lat": 37.00076576303953, "lng": -122.05719563060227},
     "description": "more details",
     "num_stalls": 1,
+    "likes": 10,
     "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true},
     "gender": {"female": true, "male": false, "gender_neutral": false}
   }'::jsonb
@@ -19,6 +20,7 @@ INSERT INTO bathrooms (id, data) VALUES (
     "position": {"lat": 37.00089593913641, "lng": -122.06296383018844},
     "description": "more details",
     "num_stalls": 1,
+    "likes": 4,
     "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true},
     "gender": {"female": true, "male": false, "gender_neutral": true}
   }'::jsonb
