@@ -6,6 +6,7 @@ import {Typography} from '@mui/material';
 import type {Bathroom} from '../../types';
 import React from 'react';
 import BathroomContext from '../../context/BathroomContext';
+import {API_BASE_URL} from '../../utils/api';
 
 interface LikeProps {
   userId: string | null;
@@ -18,7 +19,7 @@ interface LikeProps {
 async function getLikedBathrooms(userId: string | null) {
   let bathrooms : Array<string> = [];
 
-  const res = await fetch(`http://localhost:3000/user/likes?userId=${userId}`);
+  const res = await fetch(`${API_BASE_URL}/user/likes?userId=${userId}`);
   if (res.ok) {
     bathrooms = await res.json();
   } else {
@@ -40,7 +41,7 @@ async function unlikeBathroom(
     setLiked: React.Dispatch<React.SetStateAction<boolean>>,
 ) {
   const bathroomId = bathroom!.id;
-  const res = await fetch('http://localhost:3000/user/likes', {
+  const res = await fetch(`${API_BASE_URL}/user/likes`, {
     method: 'delete',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
@@ -70,7 +71,7 @@ async function likeBathroom(
     setLiked: React.Dispatch<React.SetStateAction<boolean>>,
 ) {
   const bathroomId = bathroom?.id;
-  const res = await fetch('http://localhost:3000/user/likes', {
+  const res = await fetch(`${API_BASE_URL}/user/likes`, {
     method: 'post',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({

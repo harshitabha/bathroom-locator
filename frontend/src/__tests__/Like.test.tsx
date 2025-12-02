@@ -16,10 +16,11 @@ import {http, HttpResponse} from 'msw';
 import type {Bathroom} from '../types';
 import {basicBathroom, bathroomWith4Likes} from './constants';
 import BathroomContext from '../context/BathroomContext';
+import {API_BASE_URL} from '../utils/api';
 
 const userId = '6697fe75-586e-4f24-9c56-243d15d1d9f0';
 
-const URL = 'http://localhost:3000/user/likes';
+const URL = API_BASE_URL + '/user/likes';
 
 const server = setupServer();
 

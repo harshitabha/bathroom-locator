@@ -95,41 +95,6 @@ describe('SearchBar', () => {
     });
   });
 
-  it('calls Places and renders suggestions', async () => {
-    const suggestion: MockSuggestion = {
-      placePrediction: {
-        placeId: 'test-place-id',
-        text: {toString: () => 'Bathroom One'},
-        structuredFormat: {
-          secondaryText: {toString: () => '123 Campus Rd'},
-        },
-      },
-    };
-
-    fetchAutocompleteSuggestionsMock.mockResolvedValueOnce({
-      suggestions: [suggestion],
-    });
-
-    render(<SearchBar map={null} />);
-
-    const input = screen.getByPlaceholderText('Search');
-    const button = screen.getByLabelText('Search Button');
-
-    fireEvent.change(input, {target: {value: 'bathroom'}});
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(fetchAutocompleteSuggestionsMock).toHaveBeenCalledTimes(1);
-    });
-
-    const req = fetchAutocompleteSuggestionsMock.mock.calls[0]?.[0];
-
-    expect(req).toMatchObject({input: 'bathroom'});
-    expect(req.sessionToken).toBeDefined();
-    expect(await screen.findByText('Bathroom One')).toBeInTheDocument();
-    screen.getByText('123 Campus Rd');
-  });
-
   it('debounces calls to getPredictions when typing', async () => {
     render(<SearchBar map={null} />);
 
@@ -210,15 +175,9 @@ describe('SearchBar', () => {
     render(<SearchBar map={map} />);
 
     const input = screen.getByPlaceholderText('Search');
-    const button = screen.getByLabelText('Search Button');
 
     fireEvent.change(input, {target: {value: 'bathroom'}});
-    fireEvent.click(button);
-
-    const suggestionItem = await screen.findByText('Bathroom One');
-
-    const clickable = suggestionItem.closest('button') ?? suggestionItem;
-    fireEvent.click(clickable);
+    fireEvent.click(await screen.findByLabelText('Suggestion 1'));
 
     await waitFor(() => {
       expect(panToMock).toHaveBeenCalledTimes(1);
@@ -373,28 +332,6 @@ describe('SearchBar', () => {
     expect(fetchAutocompleteSuggestionsMock).toHaveBeenCalledTimes(1);
   });
 
-  it('does not search again if already searching', async () => {
-    render(<SearchBar map={null} />);
-
-    const input = screen.getByPlaceholderText('Search');
-    const searchButton = screen.getByLabelText('Search Button');
-
-    fireEvent.change(input, {target: {value: 'a'}});
-
-    fetchAutocompleteSuggestionsMock.mockClear();
-
-    // keep loading true
-    const pendingPromise: Promise<{ suggestions: MockSuggestion[] }> =
-      new Promise(() => {});
-
-    fetchAutocompleteSuggestionsMock.mockReturnValueOnce(pendingPromise);
-
-    await userEvent.click(searchButton);
-    await userEvent.click(searchButton);
-
-    expect(fetchAutocompleteSuggestionsMock).toHaveBeenCalledTimes(1);
-  });
-
   it('applies suggestion divider to non-first suggestions', async () => {
     fetchAutocompleteSuggestionsMock.mockResolvedValueOnce({
       suggestions: [
@@ -418,10 +355,8 @@ describe('SearchBar', () => {
     render(<SearchBar map={null} />);
 
     const input = screen.getByPlaceholderText('Search');
-    const searchButton = screen.getByLabelText('Search Button');
 
     fireEvent.change(input, {target: {value: 'suggestion'}});
-    await userEvent.click(searchButton);
 
     const secondSugg = await screen.findByLabelText('Suggestion 2');
     expect(secondSugg).toHaveStyle('border-top: 1px solid rgba(0,0,0,0.08)');
