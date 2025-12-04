@@ -24,3 +24,10 @@ Have you been in a new place, and have no idea where to find a restroom? Or mayb
 - **Frontend:** React + MUI (components library)
 - **Server:** Node.js & Express.js
 - **Storage:** PostgreSQL
+- **Authentication:** Supabase
+
+## Instalation
+Please run the following scripts in the main directory to ensure all dependencies for the project are installed
+- To install project wide dependencies run `npm install`
+- To install frontend specific dependenciesrun `npm run install-frontend`
+- To install backend specific dependenciesrun `npm run install-backend`

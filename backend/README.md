@@ -1,6 +1,7 @@
 # Backend
 
 ## Initial Setup
+This step can be skipped if `npm run install-backend` was run in the head directory/
 ```
 npm install
 ```
