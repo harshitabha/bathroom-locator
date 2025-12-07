@@ -5,7 +5,7 @@ INSERT INTO bathrooms (id, data) VALUES (
   '{
     "name": "Namaste Lounge Bathroom",
     "position": {"lat": 37.00076576303953, "lng": -122.05719563060227},
-    "description": "more details",
+    "description": "The bathrooms are located in the back left corner",
     "num_stalls": 1,
     "likes": 10,
     "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true},
@@ -18,7 +18,7 @@ INSERT INTO bathrooms (id, data) VALUES (
   '{
     "name": "E2 Second Floor Bathroom",
     "position": {"lat": 37.00089593913641, "lng": -122.06296383018844},
-    "description": "more details",
+    "description": "Go to the second floor past the elevators, and the bathrooms should be to the left",
     "num_stalls": 1,
     "likes": 4,
     "amenities": {"toilet_paper": true, "soap": true, "paper_towel": true, "hand_dryer": false, "menstrual_products": true, "mirror": true},

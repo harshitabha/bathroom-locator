@@ -25,8 +25,8 @@ const BathroomDetails = () => {
 
   const gender = getTrueKeys(bathroom?.gender);
   const amenities = getTrueKeys(bathroom?.amenities);
-  const additionalDetailsExist = getNumKeysInObj(bathroom?.gender) > 0 ||
-    getNumKeysInObj(bathroom?.amenities) > 0;
+  const additionalDetailsExist = getNumKeysInObj(gender) > 0 ||
+    getNumKeysInObj(amenities) > 0;
 
   const theme = useTheme();
   const appContext = useContext(AppContext);
